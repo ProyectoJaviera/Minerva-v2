@@ -1,6 +1,6 @@
 """Fase 7: `scripts/docker_support.py`, el soporte para operar Minerva con el bot en Docker.
 
-Dos piezas: la MARCA de la mudanza (`data/MIGRADO_A_DOCKER.txt`, que protege la base nativa
+Dos piezas: la MARCA de la mudanza (`data/MIGRADO_A_DOCKER_V2.txt`, que protege la base nativa
 vieja de usarse por error) y `export_db_copy`, que saca del volumen una copia consistente y
 VERIFICADA. Todo contra un `docker` falso (tests/support/fake_docker.py) que ejecuta los scripts
 reales de respaldo sobre un "volumen" en una carpeta temporal: sin Docker, sin red y sin tocar
@@ -46,7 +46,7 @@ def seeded(fake: FakeDocker, tmp_path: Path, service: str, rows: dict[str, int] 
 def test_the_marker_lives_next_to_the_native_database_and_turns_docker_mode_on(tmp_path):
     db = tmp_path / "data" / "minerva_estabilidad.db"
     db.parent.mkdir()
-    assert docker_support.marker_path(db) == db.parent / "MIGRADO_A_DOCKER.txt"
+    assert docker_support.marker_path(db) == db.parent / "MIGRADO_A_DOCKER_V2.txt"
     assert docker_support.docker_mode_active(db) is False
 
     docker_support.marker_path(db).write_text("migrado", encoding="utf-8")

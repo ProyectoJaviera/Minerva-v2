@@ -42,18 +42,27 @@
     misma hora de creacion, para no confundir con un PID reciclado) y que el
     puerto quedo libre; si sobrevive alguno, sale con codigo 1.
 
-.EXAMPLE
-    .\scripts\stop_bot.ps1
-    Detiene el bot real (puerto 8000).
+    AISLAMIENTO DE LA v1: esta es la v2. El puerto 8000 es el del bot vivo de la v1 (en Docker, lo
+    sostiene el proxy de Docker Desktop): este script lo RECHAZA, y el valor por defecto es el 8001.
 
 .EXAMPLE
-    .\scripts\stop_bot.ps1 -Port 8001
-    Para probar el script en si (nunca el bot real).
+    .\scripts\stop_bot.ps1
+    Detiene el bot nativo de la v2 (puerto 8001).
+
+.EXAMPLE
+    .\scripts\stop_bot.ps1 -Port 8002
+    Detiene el de otro puerto (nunca el 8000).
 #>
 [CmdletBinding()]
 param(
-    [int]$Port = 8000
+    [int]$Port = 8001
 )
+
+if ($Port -eq 8000) {
+    Write-Output ("RECHAZADO: el puerto 8000 es el del bot vivo de la v1; esta v2 no lo detiene " +
+        "(detenerlo cortaria la medicion de la v1). Usa otro puerto.")
+    exit 1
+}
 
 $RepoRoot = Split-Path -Parent $PSScriptRoot
 $VenvPythonw = Join-Path $RepoRoot ".venv\Scripts\pythonw.exe"

@@ -1,11 +1,16 @@
-# Minerva -- Docker Compose (Fase 6 y Fase 7, docs/GUIA_INSTALACION.md y docs/MUDANZA_DOCKER.md).
+# Minerva v2 -- Docker Compose (docs/GUIA_INSTALACION.md y docs/MUDANZA_DOCKER.md).
 # PAPER TRADING: nunca ordenes reales.
 #
-# Este compose es la forma recomendada de correr el bot (instalacion nueva: docs/GUIA_INSTALACION.md; si ya
-# lo corrias de forma nativa con scripts/start_bot.ps1, la mudanza es scripts/migrate_to_docker.ps1). NO
-# levantes los dos a la vez (dos procesos con el mismo token de Telegram, la misma clave de Anthropic y datos
-# duplicados). El puerto 8000 publicado aqui choca a proposito con el bot nativo: si lo levantas por error,
-# Docker falla al enlazar el puerto ANTES de arrancar el proceso.
+# AISLAMIENTO DE LA v1: este compose es el de la v2 y NO comparte NINGUN nombre con el bot vivo de la v1
+# (proyecto `minerva`, contenedor `minerva-minerva-1`, imagen `minerva:local`, volumenes `minerva_data` y
+# `minerva_logs`, puerto 8000). Aqui todo lleva `minerva-v2`: el proyecto, la imagen, el contenedor, los
+# volumenes y la red estan FIJADOS por nombre, de modo que ni un `-p minerva` ni un COMPOSE_PROJECT_NAME
+# heredado del entorno pueden hacer que un comando de la v2 toque los recursos de la v1.
+#
+# Este compose es la forma recomendada de correr el bot (instalacion nueva: docs/GUIA_INSTALACION.md).
+# El puerto por defecto es el 8001 del host y MINERVA_REAL_BOT vale false por defecto: la v2 arranca SIN
+# etiquetado del LLM, Telegram, brazo ejecutado, noticias ni push (nunca gasta API ni compite por el token
+# de Telegram de la v1). Para encenderlos hay que decirlo a proposito: MINERVA_REAL_BOT=true.
 #
 # Uso (detalle en docs/USO.md):
 #   docker compose up -d               # UN comando: construye la imagen si falta y arranca el bot
@@ -13,26 +18,27 @@
 #   docker compose logs -f minerva
 #
 # Variables de este archivo (todas opcionales; se pueden poner en el entorno):
-#   MINERVA_PORT      puerto del host (127.0.0.1). Por defecto 8000.
-#   MINERVA_REAL_BOT  true (por defecto) = los mismos interruptores que start_bot.ps1 con -Port 8000.
-#                     false = los de un puerto de prueba: SIN etiquetado del LLM, Telegram, brazo
-#                     ejecutado, noticias ni push (una instancia de prueba nunca gasta API ni compite
-#                     por el token).
+#   MINERVA_PORT      puerto del host (127.0.0.1). Por defecto 8001. El 8000 es del bot de la v1.
+#   MINERVA_REAL_BOT  false (por defecto) = SIN etiquetado del LLM, Telegram, brazo ejecutado, noticias
+#                     ni push (una instancia de prueba nunca gasta API ni compite por el token).
+#                     true = los mismos interruptores que start_bot.ps1 con un bot real.
 #   MINERVA_RESTART   `unless-stopped` (por defecto: vuelve solo tras reiniciar Docker o el PC, salvo
 #                     que lo hayas detenido a mano) o `no` (instancias de prueba).
-#   MINERVA_ENV_FILE  archivo con las credenciales. Por defecto `.env` (fuera de la imagen).
-name: minerva
+#   MINERVA_ENV_FILE  archivo con las credenciales. Por defecto `.env` (fuera de la imagen). NUNCA copies
+#                     aqui el `.env` real de la v1.
+name: minerva-v2
 
 services:
   minerva:
     build:
       context: .
       dockerfile: Dockerfile
-    image: minerva:local
+    image: minerva-v2:local
+    container_name: minerva-v2-minerva-1
     init: true
     # Por defecto vuelve solo tras reiniciar Docker o el PC (Docker Desktop debe iniciar con Windows: ver
     # docs/MUDANZA_DOCKER.md). Una parada a mano (`docker compose stop`) NO se deshace sola. Docker no
-    # reinicia un contenedor "unhealthy" por si mismo: lo avisa la alerta externa (MinervaHealthAlert).
+    # reinicia un contenedor "unhealthy" por si mismo: lo avisa la alerta externa (MinervaV2HealthAlert).
     # Las instancias de prueba usan MINERVA_RESTART=no.
     restart: "${MINERVA_RESTART:-unless-stopped}"
     # Las MISMAS variables fijas que scripts/start_bot.ps1 (no dependen de lo que diga el `.env`;
@@ -48,17 +54,17 @@ services:
       LOG_DIR: /app/logs
       AUTO_OPEN_WITHOUT_LLM: "false"
       LOG_LEVEL: INFO
-      LLM_LIVE_LABELING_ENABLED: "${MINERVA_REAL_BOT:-true}"
-      TELEGRAM_COMMANDS_ENABLED: "${MINERVA_REAL_BOT:-true}"
-      PAPER_EXECUTION_ENABLED: "${MINERVA_REAL_BOT:-true}"
-      NEWS_COLLECTION_ENABLED: "${MINERVA_REAL_BOT:-true}"
+      LLM_LIVE_LABELING_ENABLED: "${MINERVA_REAL_BOT:-false}"
+      TELEGRAM_COMMANDS_ENABLED: "${MINERVA_REAL_BOT:-false}"
+      PAPER_EXECUTION_ENABLED: "${MINERVA_REAL_BOT:-false}"
+      NEWS_COLLECTION_ENABLED: "${MINERVA_REAL_BOT:-false}"
       LESSONS_MEMORY_ENABLED: "false"
-      TELEGRAM_PUSH_ENABLED: "${MINERVA_REAL_BOT:-true}"
+      TELEGRAM_PUSH_ENABLED: "${MINERVA_REAL_BOT:-false}"
     ports:
       # Publicado SOLO en loopback: la API nunca queda expuesta a la LAN ni a internet. Dentro del
       # contenedor el proceso escucha en 0.0.0.0 (asi funciona el port-forwarding de Docker); el
-      # aislamiento lo da este "127.0.0.1:" del lado del host.
-      - "127.0.0.1:${MINERVA_PORT:-8000}:8000"
+      # aislamiento lo da este "127.0.0.1:" del lado del host. El 8001 por defecto NO es el 8000 de la v1.
+      - "127.0.0.1:${MINERVA_PORT:-8001}:8000"
     volumes:
       # Volumenes con nombre, NO carpetas del host: SQLite en modo WAL no es fiable sobre el sistema
       # de archivos compartido de Docker Desktop, y asi este compose nunca abre la base real de data/.
@@ -96,6 +102,14 @@ services:
         max-size: "10m"
         max-file: "3"
 
+# Los nombres reales de volumenes y red estan FIJADOS (no dependen del nombre del proyecto): ninguno
+# puede coincidir con `minerva_data`, `minerva_logs` ni `minerva_default` de la v1.
 volumes:
   data:
+    name: minerva-v2_data
   logs:
+    name: minerva-v2_logs
+
+networks:
+  default:
+    name: minerva-v2_default

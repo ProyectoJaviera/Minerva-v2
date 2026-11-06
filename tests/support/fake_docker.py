@@ -114,7 +114,7 @@ def to_container(text: str, mounts: dict[str, str]) -> str:
 def ensure_volume(state: dict) -> None:
     (app_dir() / "data").mkdir(parents=True, exist_ok=True)
     (app_dir() / "logs").mkdir(parents=True, exist_ok=True)
-    project = state.get("project") or "minerva"
+    project = state.get("project") or "minerva-v2"
     for name in (f"{project}_data", f"{project}_logs"):
         if name not in state["volumes"]:
             state["volumes"].append(name)
@@ -183,7 +183,7 @@ def kill(pid: int | None) -> None:
 
 
 def start_service(state: dict) -> int:
-    port = int(os.environ.get("MINERVA_PORT", "8000"))
+    port = int(os.environ.get("MINERVA_PORT", "8001"))
     if state.get("server_pid") and port_in_use(state.get("port") or port):
         return 0  # ya corre
     if port_in_use(port):
@@ -249,7 +249,7 @@ def split_run_args(tokens: list[str]) -> tuple[dict[str, str], list[str], list[s
 
 
 def compose(argv: list[str], state: dict) -> int:
-    project = os.environ.get("COMPOSE_PROJECT_NAME") or "minerva"
+    project = os.environ.get("COMPOSE_PROJECT_NAME") or "minerva-v2"
     i = 0
     while i < len(argv) and argv[i] not in COMPOSE_SUBCOMMANDS:
         if argv[i] in ("-p", "--project-name") and i + 1 < len(argv):

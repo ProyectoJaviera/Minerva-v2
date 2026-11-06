@@ -345,10 +345,10 @@ def test_the_compose_healthcheck_runs_the_script_with_a_long_start_period():
     assert int(health["retries"]) >= 2
 
 
-def test_the_default_port_collides_with_the_real_bot_on_purpose():
-    # El 8000 por defecto es el del bot real de este PC: levantarlo por error falla al enlazar el
-    # puerto, ANTES de arrancar el proceso (no hay segundo bot).
-    assert "127.0.0.1:${MINERVA_PORT:-8000}:8000" in [str(p) for p in _service()["ports"]]
+def test_the_default_host_port_is_8001_never_the_8000_of_the_v1_bot():
+    # El 8000 es del bot vivo de la v1 de este PC: la v2 publica por defecto el 8001 (el interno
+    # de la imagen sigue siendo 8000, dentro del contenedor).
+    assert "127.0.0.1:${MINERVA_PORT:-8001}:8000" in [str(p) for p in _service()["ports"]]
 
 
 # --- Dockerfile ----------------------------------------------------------------------------------
@@ -792,18 +792,19 @@ def _compose_config(tmp_path: Path, **overrides: str) -> dict:
 
 
 @pytest.mark.skipif(not _compose_cli_available(), reason="falta el CLI de docker compose")
-def test_docker_compose_accepts_the_file_and_resolves_the_real_bot_defaults(tmp_path):
+def test_docker_compose_accepts_the_file_and_resolves_the_v2_defaults(tmp_path):
     service = _compose_config(tmp_path)["services"]["minerva"]
 
     assert service["ports"][0]["host_ip"] == "127.0.0.1"
-    assert service["ports"][0]["published"] == "8000" and service["ports"][0]["target"] == 8000
+    assert service["ports"][0]["published"] == "8001" and service["ports"][0]["target"] == 8000
     assert service["restart"] == "unless-stopped"
     env = service["environment"]
     # el .env FALSO no entra al entorno del contenedor: se monta y lo lee la aplicacion
     assert "TELEGRAM_BOT_TOKEN" not in env and "AUTH_PASSWORD_HASH" not in env
+    # v2: SIN LLM, Telegram, brazo ejecutado, noticias ni push salvo con MINERVA_REAL_BOT=true
     for name in ("LLM_LIVE_LABELING_ENABLED", "TELEGRAM_COMMANDS_ENABLED",
                  "PAPER_EXECUTION_ENABLED", "NEWS_COLLECTION_ENABLED", "TELEGRAM_PUSH_ENABLED"):
-        assert env[name] == "true", name
+        assert env[name] == "false", name
     assert env["LESSONS_MEMORY_ENABLED"] == "false" and env["AUTO_OPEN_WITHOUT_LLM"] == "false"
     binds = {b["target"]: b for b in service["volumes"] if b["type"] == "bind"}
     assert set(binds) == {"/app/docs", "/app/.env"}
@@ -812,14 +813,14 @@ def test_docker_compose_accepts_the_file_and_resolves_the_real_bot_defaults(tmp_
 
 
 @pytest.mark.skipif(not _compose_cli_available(), reason="falta el CLI de docker compose")
-def test_docker_compose_applies_the_test_instance_overrides(tmp_path):
+def test_docker_compose_applies_the_overrides_and_only_then_turns_the_switches_on(tmp_path):
     service = _compose_config(
-        tmp_path, MINERVA_REAL_BOT="false", MINERVA_PORT="8001", MINERVA_RESTART="no",
+        tmp_path, MINERVA_REAL_BOT="true", MINERVA_PORT="8002", MINERVA_RESTART="no",
     )["services"]["minerva"]
 
     port = service["ports"][0]
-    assert port["published"] == "8001" and port["host_ip"] == "127.0.0.1"
+    assert port["published"] == "8002" and port["host_ip"] == "127.0.0.1"
     assert service["restart"] == "no"
     for name in ("LLM_LIVE_LABELING_ENABLED", "TELEGRAM_COMMANDS_ENABLED",
                  "PAPER_EXECUTION_ENABLED", "NEWS_COLLECTION_ENABLED", "TELEGRAM_PUSH_ENABLED"):
-        assert service["environment"][name] == "false", name
+        assert service["environment"][name] == "true", name

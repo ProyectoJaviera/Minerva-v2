@@ -1,5 +1,5 @@
 """Red de seguridad: ninguna prueba debe llegar al Programador de tareas REAL de Windows
-(`MinervaStartBot`, `MinervaHealthAlert`, `MinervaDailySummary`, ...).
+(`MinervaV2StartBot`, `MinervaV2HealthAlert`, `MinervaV2DailySummary`, ... y las de la v1).
 
 Los scripts de la mudanza (`scripts/docker_common.ps1`) hablan con el Programador SOLO a traves
 de `$env:MINERVA_SCHTASKS_EXE` (por defecto, el `schtasks` real). `tests/conftest.py` apunta esa

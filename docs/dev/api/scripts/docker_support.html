@@ -38,6 +38,12 @@
                     <a class="variable" href="#SERVICE">SERVICE</a>
             </li>
             <li>
+                    <a class="variable" href="#PROJECT_NAME">PROJECT_NAME</a>
+            </li>
+            <li>
+                    <a class="variable" href="#V1_PROJECT_NAME">V1_PROJECT_NAME</a>
+            </li>
+            <li>
                     <a class="variable" href="#CONTAINER_BACKUP_DIR">CONTAINER_BACKUP_DIR</a>
             </li>
             <li>
@@ -114,7 +120,7 @@
 de ahi:</p>
 
 <ol>
-<li><strong>La marca de la mudanza</strong> (<code>data/MIGRADO_A_DOCKER.txt</code>, junto a la base nativa). La escribe
+<li><strong>La marca de la mudanza</strong> (<code>data/MIGRADO_A_DOCKER_V2.txt</code>, junto a la base nativa). La escribe
 <code>scripts/migrate_to_docker.ps1</code> y la borra <code>scripts/rollback_from_docker.ps1</code>. Mientras exista,
 <code>data/minerva_estabilidad.db</code> es una copia VIEJA: <code>start_bot.ps1</code> se niega a arrancar el bot
 nativo sobre ella y las herramientas que la usarian por defecto (respaldo, restauracion,
@@ -149,7 +155,7 @@ contenedor la marca nunca existe, asi que alli no cambia nada.</p>
                 <section id="MARKER_NAME">
                     <div class="attr variable">
             <span class="name">MARKER_NAME</span>        =
-<span class="default_value">&#39;MIGRADO_A_DOCKER.txt&#39;</span>
+<span class="default_value">&#39;MIGRADO_A_DOCKER_V2.txt&#39;</span>
 
         
     </div>
@@ -166,6 +172,30 @@ contenedor la marca nunca existe, asi que alli no cambia nada.</p>
         
     </div>
     <a class="headerlink" href="#SERVICE"></a>
+    
+    
+
+                </section>
+                <section id="PROJECT_NAME">
+                    <div class="attr variable">
+            <span class="name">PROJECT_NAME</span>        =
+<span class="default_value">&#39;minerva-v2&#39;</span>
+
+        
+    </div>
+    <a class="headerlink" href="#PROJECT_NAME"></a>
+    
+    
+
+                </section>
+                <section id="V1_PROJECT_NAME">
+                    <div class="attr variable">
+            <span class="name">V1_PROJECT_NAME</span>        =
+<span class="default_value">&#39;minerva&#39;</span>
+
+        
+    </div>
+    <a class="headerlink" href="#V1_PROJECT_NAME"></a>
     
     
 
@@ -254,7 +284,7 @@ contenedor la marca nunca existe, asi que alli no cambia nada.</p>
 <h6 id="returns">Returns:</h6>
 
 <blockquote>
-  <p>La ruta de <code>MIGRADO_A_DOCKER.txt</code>.</p>
+  <p>La ruta de <code>MIGRADO_A_DOCKER_V2.txt</code>.</p>
 </blockquote>
 </div>
 
@@ -395,7 +425,9 @@ contenedor la marca nunca existe, asi que alli no cambia nada.</p>
     
             <div class="docstring"><p><code>docker compose</code> sobre el compose del repo, sin interpolar el <code>.env</code> real.</p>
 
-<p><code>COMPOSE_PROJECT_NAME</code> (si esta) elige el proyecto.</p>
+<p><code>COMPOSE_PROJECT_NAME</code> (si esta) elige el proyecto; sin el, <code><a href="#PROJECT_NAME">PROJECT_NAME</a></code> (<code>minerva-v2</code>). El
+proyecto se pasa SIEMPRE con <code>-p</code>, y el de la v1 (<code>minerva</code>) se rechaza: ningun comando de esta
+v2 puede tocar los volumenes ni el contenedor del bot vivo de la v1.</p>
 
 <h6 id="arguments">Arguments:</h6>
 
@@ -413,7 +445,7 @@ contenedor la marca nunca existe, asi que alli no cambia nada.</p>
 <h6 id="raises">Raises:</h6>
 
 <ul>
-<li><strong>DockerError:</strong>  ver <code><a href="#run_docker">run_docker</a></code>.</li>
+<li><strong>DockerError:</strong>  si el proyecto elegido es el de la v1; ver tambien <code><a href="#run_docker">run_docker</a></code>.</li>
 </ul>
 
 <h6 id="efectos">Efectos:</h6>

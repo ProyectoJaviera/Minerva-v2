@@ -1,5 +1,6 @@
-"""Ninguna prueba toca el Programador de tareas REAL de Windows (`MinervaStartBot`,
-`MinervaHealthAlert`, `MinervaDailySummary`, `MinervaBackup`): todo pasa por una puerta unica y
+"""Ninguna prueba toca el Programador de tareas REAL de Windows (las de la v1: `MinervaStartBot`,
+`MinervaHealthAlert`, `MinervaDailySummary`, `MinervaBackup`; las de esta v2 llevan el prefijo
+`MinervaV2`): todo pasa por una puerta unica y
 esa puerta, en las pruebas, es siempre un falso o una trampa.
 
 La unica via del repositorio al Programador es `scripts/docker_common.ps1`, y lo hace SOLO por
@@ -29,7 +30,11 @@ from tests.support.sourcecheck import embedded_strings, powershell_code
 from tests.support.winproc import NO_WINDOW
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-REAL_TASKS = ("MinervaStartBot", "MinervaHealthAlert", "MinervaDailySummary", "MinervaBackup")
+# Las tareas de la v1 (las del bot vivo) y las de esta v2 (prefijo MinervaV2): ningun falso las usa.
+REAL_TASKS = (
+    "MinervaStartBot", "MinervaHealthAlert", "MinervaDailySummary", "MinervaBackup",
+    "MinervaV2StartBot", "MinervaV2HealthAlert", "MinervaV2DailySummary", "MinervaV2Backup",
+)
 # Cualquier forma de hablar con el Programador de tareas.
 SCHEDULER = re.compile(r"schtasks|ScheduledTask|Schedule\.Service|ScheduledJob|Taskschd", re.I)
 # Los cmdlets y el COM del Programador (el `schtasks` de `docker_common.ps1` se trata aparte).

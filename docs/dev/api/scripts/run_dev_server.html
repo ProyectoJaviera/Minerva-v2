@@ -53,7 +53,8 @@
 
                         <div class="docstring"><p>Servidor de desarrollo en el puerto 8001 contra una copia temporal de una
 base real (pre-Fase 5, seccion 6 del plan aprobado 2026-10-14) -- NUNCA toca
-el bot real del puerto 8000 ni su base de trabajo. Reemplaza el
+el bot vivo de la v1 (puerto 8000) ni su base de trabajo. OJO: el 8001 es tambien el puerto por
+defecto del contenedor de la v2 (docker-compose.yml): no corras los dos a la vez. Reemplaza el
 procedimiento manual que se rehacia a mano en TAREA B/TAREA D (ver
 docs/historial/PROGRESS.md y docs/FASE3_6_LLM.md) por un script reusable.</p>
 
@@ -146,7 +147,7 @@ noticias y la memoria de lecciones quedan apagados.</p>
 <blockquote>
   <p>Crea un directorio temporal con la copia de la base y su carpeta de logs, fija
   <code>DATABASE_PATH</code>, <code>LOG_DIR</code> y las variables de apagado en <code>os.environ</code> y arranca uvicorn
-  (bloquea hasta Ctrl+C). El bot real del puerto 8000 y su base no se tocan.</p>
+  (bloquea hasta Ctrl+C). El bot vivo de la v1 (puerto 8000) y su base no se tocan.</p>
 </blockquote>
 </div>
 

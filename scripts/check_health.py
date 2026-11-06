@@ -2,7 +2,7 @@
 (incidente de estabilidad 2026-10-11) -- pensado para un cron/Task Scheduler
 EXTERNO al propio bot, que no puede avisar si el bot entero se congelo.
 
-    python scripts/check_health.py --port 8000
+    python scripts/check_health.py --port 8001
 """
 
 from __future__ import annotations
@@ -69,7 +69,7 @@ def main(host: str, port: int, timeout: float) -> int:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     parser.add_argument("--host", default="127.0.0.1")
-    parser.add_argument("--port", type=int, default=8000)
+    parser.add_argument("--port", type=int, default=8001)
     parser.add_argument("--timeout", type=float, default=10.0)
     args = parser.parse_args()
     sys.exit(main(args.host, args.port, args.timeout))

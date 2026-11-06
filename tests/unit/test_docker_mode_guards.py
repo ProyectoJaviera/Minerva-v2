@@ -1,4 +1,4 @@
-"""Fase 7: tras la mudanza a Docker existe la marca `data/MIGRADO_A_DOCKER.txt` y la base nativa
+"""Fase 7: tras la mudanza a Docker existe la marca `data/MIGRADO_A_DOCKER_V2.txt` y la base nativa
 es una copia VIEJA. Las herramientas que la usarian POR DEFECTO se niegan a tocarla en silencio
 (darian por respaldado o por arreglado algo que no es la base viva), y el resumen diario saca su
 copia del contenedor. Pasar `--db` explicito esquiva la proteccion a proposito."""
@@ -23,7 +23,7 @@ T0 = datetime(2026, 10, 18, 12, 0, 0, tzinfo=UTC)
 def migrated(tmp_path, monkeypatch):
     """Un directorio de trabajo con `data/` y la marca de la mudanza (como tras migrar)."""
     (tmp_path / "data").mkdir()
-    (tmp_path / "data" / "MIGRADO_A_DOCKER.txt").write_text("migrado", encoding="utf-8")
+    (tmp_path / "data" / "MIGRADO_A_DOCKER_V2.txt").write_text("migrado", encoding="utf-8")
     monkeypatch.chdir(tmp_path)
     return tmp_path
 

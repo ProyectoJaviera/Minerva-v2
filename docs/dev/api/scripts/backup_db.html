@@ -92,7 +92,7 @@ python scripts/backup_db.py --db otra.db --out-dir respaldos --keep 14
 <p><code>--keep N</code> (N &gt; 0) borra los respaldos MAS ANTIGUOS de esa carpeta con el mismo prefijo hasta dejar
 N; no toca ningun otro archivo. Por defecto (<code>--keep 0</code>) no borra nada.</p>
 
-<p>En Docker corre dentro del contenedor (la base y los respaldos viven en el volumen <code>minerva_data</code>):</p>
+<p>En Docker corre dentro del contenedor (base y respaldos viven en el volumen <code>minerva-v2_data</code>):</p>
 
 <pre><code>docker compose exec minerva python scripts/backup_db.py
 </code></pre>

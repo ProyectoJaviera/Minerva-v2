@@ -1,4 +1,4 @@
-r"""Resumen diario por Telegram del bot real (puerto 8000) y de la medicion en vivo
+r"""Resumen diario por Telegram del bot de la v2 (puerto 8001 por defecto) y de la medicion en vivo
 (subfase 3.6). Hermano de `scripts/telegram_alert.py` (que avisa de caidas en un
 CAMBIO de estado); este manda UN mensaje al dia, siempre, para ver de un vistazo
 que todo sigue andando. Proceso COMPLETAMENTE separado del bot: si el bot no
@@ -25,7 +25,7 @@ si el bot responde ahora.
 `.env` puede apuntar a otra base (el default de `app/config.py` es `data/minerva.db`,
 que ya no se escribe) y el resumen informaria una medicion que no es la real.
 
-**Con el bot en Docker (Fase 7).** Tras la mudanza existe la marca `data/MIGRADO_A_DOCKER.txt` y
+**Con el bot en Docker (Fase 7).** Tras la mudanza existe la marca `data/MIGRADO_A_DOCKER_V2.txt` y
 `data/minerva_estabilidad.db` es una copia VIEJA: sin `--db` explicito, la copia de solo lectura se
 saca DEL CONTENEDOR (`scripts/docker_support.py::export_db_copy`: API de backup dentro del
 contenedor, `docker compose cp` y SHA-256). Asi la tarea programada de siempre
@@ -38,7 +38,7 @@ se imprimen ni se loguean. Probalo primero a mano, sin enviar nada:
 
     python scripts/telegram_daily.py --dry-run
 
-Tarea de Windows "MinervaDailySummary" a la hora local que elijas (p. ej. 09:15): comando
+Tarea de Windows "MinervaV2DailySummary" a la hora local que elijas (p. ej. 09:15): comando
 exacto (Register-ScheduledTask, con la hora fija en LOCAL) en docs/USO.md ("Tareas programadas").
 El script fija su propio directorio de trabajo, asi que funciona igual desde donde lo
 dispare el Programador de tareas.
@@ -319,7 +319,7 @@ def _db_lines(snap: DbSnapshot | None, db_error: str | None, tz: ZoneInfo) -> li
 
 def build_message(
     *, health: dict | None, health_error: str | None, snapshot: DbSnapshot | None,
-    db_error: str | None, now: datetime, port: int = 8000,
+    db_error: str | None, now: datetime, port: int = 8001,
     tz_name: str = "America/Santiago",
 ) -> str:
     """El texto del resumen diario: estado del bot, ultimas 24 h y avance de la medicion.
@@ -415,7 +415,7 @@ if __name__ == "__main__":
         sys.stdout.reconfigure(errors="replace")
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     parser.add_argument("--host", default="127.0.0.1")
-    parser.add_argument("--port", type=int, default=8000)
+    parser.add_argument("--port", type=int, default=8001)
     parser.add_argument("--timeout", type=float, default=10.0)
     parser.add_argument(
         "--db", default=None,

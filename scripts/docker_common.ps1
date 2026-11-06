@@ -19,9 +19,33 @@ $script:ComposeFile = Join-Path $script:RepoRoot "docker-compose.yml"
 $script:ComposeVars = Join-Path $script:RepoRoot "docker\compose.vars"
 # OJO: NO llamar a esta variable ProjectName: en el ambito del script seria LA MISMA que el parametro
 # -ProjectName de migrate/rollback (este archivo se carga con punto) y lo pisaria.
-$script:ComposeProject = "minerva"
-$script:MarkerName = "MIGRADO_A_DOCKER.txt"
+$script:ComposeProject = "minerva-v2"
+$script:MarkerName = "MIGRADO_A_DOCKER_V2.txt"
 $script:FourHourCloseHours = @(0, 4, 8, 12, 16, 20)
+
+# --- aislamiento de la v1 ----------------------------------------------------------------------------
+# Esta es la v2: los nombres y el puerto del bot vivo de la v1 estan PROHIBIDOS para cualquier script.
+$script:V1ProjectName = "minerva"
+$script:V1Port = 8000
+$script:V1TaskNames = @("MinervaStartBot", "MinervaHealthAlert", "MinervaDailySummary", "MinervaBackup")
+
+# Rechaza (con una excepcion) un proyecto de Compose, un puerto o una tarea programada que sean de la v1.
+# Los scripts que paran, arrancan o mudan un bot la llaman ANTES de hacer nada.
+function Assert-NotV1Resources([string]$Project = "", [int[]]$Ports = @(), [string]$Task = "") {
+    $problems = @()
+    if ($Project -and $Project -eq $script:V1ProjectName) {
+        $problems += "el proyecto de Compose '$Project' es el del bot vivo de la v1"
+    }
+    foreach ($port in $Ports) {
+        if ($port -eq $script:V1Port) { $problems += "el puerto $port es el del bot vivo de la v1" }
+    }
+    if ($Task -and ($script:V1TaskNames -contains $Task)) {
+        $problems += "la tarea programada '$Task' es de la v1 (la v2 usa el prefijo MinervaV2)"
+    }
+    if ($problems.Count -gt 0) {
+        throw ("RECHAZADO: " + ($problems -join "; ") + ". Esta v2 no puede tocar la v1.")
+    }
+}
 
 
 # --- registro ------------------------------------------------------------------------------------
@@ -391,7 +415,7 @@ function Read-Marker([string]$Path) {
 
 function Write-Marker([string]$Path, [hashtable]$Fields) {
     $lines = @(
-        "Minerva: la medicion corre en Docker (marca escrita por scripts\migrate_to_docker.ps1).",
+        "Minerva v2: el bot corre en Docker (marca escrita por scripts\migrate_to_docker.ps1).",
         "La base VIVA esta en el volumen de Docker, NO en este directorio: la de aqui es una copia",
         "VIEJA, conservada solo como respaldo. start_bot.ps1 se niega a arrancar el bot nativo sobre",
         "ella y los scripts de respaldo/restauracion rechazan la base por defecto.",

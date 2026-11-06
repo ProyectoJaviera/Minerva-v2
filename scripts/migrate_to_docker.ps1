@@ -15,7 +15,7 @@
         6. copia ese respaldo al volumen de Docker con la API de backup (restore_db.py)
         7. verifica el volumen: PRAGMA integrity_check y las MISMAS filas en TODAS las tablas
            (shadow_trades, llm_logs, paper_execution_log y el resto) antes y despues
-        8. escribe la marca data\MIGRADO_A_DOCKER.txt (start_bot.ps1 se niega a arrancar el nativo)
+        8. escribe la marca data\MIGRADO_A_DOCKER_V2.txt (start_bot.ps1 se niega a arrancar el nativo)
         9. levanta docker compose en 127.0.0.1:<DockerPort> con los mismos interruptores que
            start_bot.ps1 y restart: unless-stopped
        10. espera /health y comprueba status ok, frozen_hash_ok true y paused false
@@ -27,7 +27,7 @@
     Ventana segura: se niega a correr fuera de los minutos :10-:40 de una hora UTC que no sea de
     cierre de vela de 4 h (00, 04, 08, 12, 16, 20 UTC): ahi las filas de la medicion ya no estan en
     vuelo. Durante la mudanza la medicion se detiene unos 2 a 4 minutos, y recibiras el aviso de caida
-    y el de recuperacion de MinervaHealthAlert.
+    y el de recuperacion de MinervaV2HealthAlert.
 
     Codigos de salida: 0 mudanza completa; 1 no se cambio nada (comprobaciones, confirmacion o fallo
     antes del paso 3); 2 fallo y la vuelta atras al bot nativo se completo; 3 fallo y la vuelta atras
@@ -36,9 +36,12 @@
     Registro: logs\mudanza_docker.log.
 
     Parametros SOLO para ensayar sin tocar el bot real: -NativePort, -DockerPort, -DatabasePath,
-    -LogDir, -BackupDir, -ProjectName, -EnvFile y -TaskName. Con un -DockerPort distinto de 8000 el
+    -LogDir, -BackupDir, -ProjectName, -EnvFile y -TaskName. AISLAMIENTO DE LA v1: esta es la v2, y el
+    script RECHAZA el proyecto `minerva`, el puerto 8000 y las tareas MinervaStartBot, MinervaHealthAlert,
+    MinervaDailySummary y MinervaBackup (todos del bot vivo de la v1). Los valores por defecto son los de
+    la v2: proyecto minerva-v2, puertos 8001 y tarea MinervaV2StartBot. Con cualquier puerto permitido el
     contenedor arranca como instancia de PRUEBA (sin etiquetado del LLM, Telegram, brazo, noticias ni
-    push, y sin reinicio automatico), igual que start_bot.ps1 con un puerto distinto de 8000.
+    push, y sin reinicio automatico): el interruptor "bot real" solo existia para el puerto 8000.
 
 .EXAMPLE
     powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\migrate_to_docker.ps1 -DryRun
@@ -50,14 +53,14 @@
 #>
 [CmdletBinding()]
 param(
-    [int]$NativePort = 8000,
-    [int]$DockerPort = 8000,
+    [int]$NativePort = 8001,
+    [int]$DockerPort = 8001,
     [string]$DatabasePath = "data/minerva_estabilidad.db",
     [string]$LogDir = "logs",
     [string]$BackupDir = "",
-    [string]$ProjectName = "minerva",
+    [string]$ProjectName = "minerva-v2",
     [string]$EnvFile = ".env",
-    [string]$TaskName = "MinervaStartBot",
+    [string]$TaskName = "MinervaV2StartBot",
     [int]$HealthTimeoutSeconds = 300,
     [switch]$DryRun,
     [switch]$ReplaceVolume,
@@ -66,6 +69,10 @@ param(
 
 $ErrorActionPreference = "Stop"
 . (Join-Path $PSScriptRoot "docker_common.ps1")
+# Aislamiento de la v1 (esta es la v2): se rechaza el proyecto, los puertos y la tarea del bot vivo de la
+# v1 ANTES de hacer nada. El puerto 8000 nunca llega a ser "bot real" aqui: la v2 arranca como instancia
+# de prueba (sin LLM, Telegram, brazo, noticias ni push) salvo que se cambie a proposito.
+Assert-NotV1Resources -Project $ProjectName -Ports @($NativePort, $DockerPort) -Task $TaskName
 Set-Location $script:RepoRoot
 $script:ComposeProject = $ProjectName
 

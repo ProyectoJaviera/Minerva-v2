@@ -1,6 +1,7 @@
 """Servidor de desarrollo en el puerto 8001 contra una copia temporal de una
 base real (pre-Fase 5, seccion 6 del plan aprobado 2026-10-14) -- NUNCA toca
-el bot real del puerto 8000 ni su base de trabajo. Reemplaza el
+el bot vivo de la v1 (puerto 8000) ni su base de trabajo. OJO: el 8001 es tambien el puerto por
+defecto del contenedor de la v2 (docker-compose.yml): no corras los dos a la vez. Reemplaza el
 procedimiento manual que se rehacia a mano en TAREA B/TAREA D (ver
 docs/historial/PROGRESS.md y docs/FASE3_6_LLM.md) por un script reusable.
 
@@ -89,7 +90,7 @@ def main(source_db: str, port: int) -> None:
     Efectos:
         Crea un directorio temporal con la copia de la base y su carpeta de logs, fija
         `DATABASE_PATH`, `LOG_DIR` y las variables de apagado en `os.environ` y arranca uvicorn
-        (bloquea hasta Ctrl+C). El bot real del puerto 8000 y su base no se tocan.
+        (bloquea hasta Ctrl+C). El bot vivo de la v1 (puerto 8000) y su base no se tocan.
     """
     source_path = Path(source_db).resolve()
     if not source_path.exists():
@@ -129,7 +130,7 @@ def main(source_db: str, port: int) -> None:
     import uvicorn
 
     print(f"Arrancando en http://127.0.0.1:{port} (Ctrl+C para detener)...")
-    print("El bot real del puerto 8000 y su base de trabajo no se tocan.")
+    print("El bot vivo de la v1 (puerto 8000) y su base no se tocan.")
     uvicorn.run("app.main:app", host="127.0.0.1", port=port)
 
 

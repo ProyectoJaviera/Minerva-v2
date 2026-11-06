@@ -572,12 +572,12 @@ def test_compose_names_match_the_documentation():
 
     compose = yaml.safe_load(read("docker-compose.yml"))
 
-    assert compose["name"] == "minerva"
-    assert compose["services"]["minerva"]["image"] == "minerva:local"
-    assert "minerva:local" in read("docs/GUIA_INSTALACION.md")
-    assert "minerva:local" in read("README.md")
+    assert compose["name"] == "minerva-v2"
+    assert compose["services"]["minerva"]["image"] == "minerva-v2:local"
+    assert "minerva-v2:local" in read("docs/GUIA_INSTALACION.md")
+    assert "minerva-v2:local" in read("README.md")
     assert set(compose["volumes"]) == {"data", "logs"}
-    for name in ("minerva_data", "minerva_logs"):
+    for name in ("minerva-v2_data", "minerva-v2_logs"):
         assert name in read("docs/USO.md")
 
 

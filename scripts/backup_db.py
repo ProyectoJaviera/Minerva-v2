@@ -14,7 +14,7 @@ Imprime la ruta, el tamano y el resultado de la verificacion. NUNCA resultados d
 `--keep N` (N > 0) borra los respaldos MAS ANTIGUOS de esa carpeta con el mismo prefijo hasta dejar
 N; no toca ningun otro archivo. Por defecto (`--keep 0`) no borra nada.
 
-En Docker corre dentro del contenedor (la base y los respaldos viven en el volumen `minerva_data`):
+En Docker corre dentro del contenedor (base y respaldos viven en el volumen `minerva-v2_data`):
 
     docker compose exec minerva python scripts/backup_db.py
 

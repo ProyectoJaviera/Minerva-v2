@@ -99,7 +99,7 @@
                     <h1 class="modulename">
 <a href="./../scripts.html">scripts</a><wbr>.telegram_daily    </h1>
 
-                        <div class="docstring"><p>Resumen diario por Telegram del bot real (puerto 8000) y de la medicion en vivo
+                        <div class="docstring"><p>Resumen diario por Telegram del bot de la v2 (puerto 8001 por defecto) y de la medicion en vivo
 (subfase 3.6). Hermano de <code>scripts/telegram_alert.py</code> (que avisa de caidas en un
 CAMBIO de estado); este manda UN mensaje al dia, siempre, para ver de un vistazo
 que todo sigue andando. Proceso COMPLETAMENTE separado del bot: si el bot no
@@ -126,7 +126,7 @@ si el bot responde ahora.</p>
 <code>.env</code> puede apuntar a otra base (el default de <code>app/config.py</code> es <code>data/minerva.db</code>,
 que ya no se escribe) y el resumen informaria una medicion que no es la real.</p>
 
-<p><strong>Con el bot en Docker (Fase 7).</strong> Tras la mudanza existe la marca <code>data/MIGRADO_A_DOCKER.txt</code> y
+<p><strong>Con el bot en Docker (Fase 7).</strong> Tras la mudanza existe la marca <code>data/MIGRADO_A_DOCKER_V2.txt</code> y
 <code>data/minerva_estabilidad.db</code> es una copia VIEJA: sin <code>--db</code> explicito, la copia de solo lectura se
 saca DEL CONTENEDOR (<code>scripts/docker_support.py::export_db_copy</code>: API de backup dentro del
 contenedor, <code>docker compose cp</code> y SHA-256). Asi la tarea programada de siempre
@@ -140,7 +140,7 @@ se imprimen ni se loguean. Probalo primero a mano, sin enviar nada:</p>
 <pre><code>python scripts/telegram_daily.py --dry-run
 </code></pre>
 
-<p>Tarea de Windows "MinervaDailySummary" a la hora local que elijas (p. ej. 09:15): comando
+<p>Tarea de Windows "MinervaV2DailySummary" a la hora local que elijas (p. ej. 09:15): comando
 exacto (Register-ScheduledTask, con la hora fija en LOCAL) en docs/USO.md ("Tareas programadas").
 El script fija su propio directorio de trabajo, asi que funciona igual desde donde lo
 dispare el Programador de tareas.</p>
@@ -447,7 +447,7 @@ Si Docker falla, la excepcion llega a <code><a href="#run">run</a></code>, que l
                     <div class="attr function">
             
         <span class="def">def</span>
-        <span class="name">build_message</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="o">*</span>,</span><span class="param">	<span class="n">health</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span>,</span><span class="param">	<span class="n">health_error</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span>,</span><span class="param">	<span class="n">snapshot</span><span class="p">:</span> <span class="n"><a href="#DbSnapshot">DbSnapshot</a></span> <span class="o">|</span> <span class="kc">None</span>,</span><span class="param">	<span class="n">db_error</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span>,</span><span class="param">	<span class="n">now</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span>,</span><span class="param">	<span class="n">port</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">8000</span>,</span><span class="param">	<span class="n">tz_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">'America/Santiago'</span></span><span class="return-annotation">) -> <span class="nb">str</span>:</span></span>
+        <span class="name">build_message</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="o">*</span>,</span><span class="param">	<span class="n">health</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span>,</span><span class="param">	<span class="n">health_error</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span>,</span><span class="param">	<span class="n">snapshot</span><span class="p">:</span> <span class="n"><a href="#DbSnapshot">DbSnapshot</a></span> <span class="o">|</span> <span class="kc">None</span>,</span><span class="param">	<span class="n">db_error</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span>,</span><span class="param">	<span class="n">now</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span>,</span><span class="param">	<span class="n">port</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">8001</span>,</span><span class="param">	<span class="n">tz_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">'America/Santiago'</span></span><span class="return-annotation">) -> <span class="nb">str</span>:</span></span>
 
         
     </div>

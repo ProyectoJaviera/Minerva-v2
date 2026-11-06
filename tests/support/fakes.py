@@ -116,7 +116,7 @@ class FakeDocker:
     def volume_db(self) -> Path:
         return self.volume_dir / "minerva_estabilidad.db"
 
-    def seed_volume(self, db: Path, project: str = "minerva") -> None:
+    def seed_volume(self, db: Path, project: str = "minerva-v2") -> None:
         """Deja una base ya en el "volumen" (como si el bot corriera en Docker)."""
         self.volume_dir.mkdir(parents=True, exist_ok=True)
         (self.state_dir / "app" / "logs").mkdir(parents=True, exist_ok=True)
@@ -295,7 +295,7 @@ class MigrationWorld:
 
     @property
     def marker(self) -> Path:
-        return self.data / "MIGRADO_A_DOCKER.txt"
+        return self.data / "MIGRADO_A_DOCKER_V2.txt"
 
     def simulate_migrated(self, extra_rows: dict[str, int] | None = None) -> None:
         """Deja el sistema COMO TRAS una mudanza hecha (sin repetirla): la base en el volumen, el

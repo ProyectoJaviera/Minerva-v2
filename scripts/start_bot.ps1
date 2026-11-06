@@ -38,18 +38,24 @@
             solo lee la base. Necesita TELEGRAM_BOT_TOKEN y TELEGRAM_CHAT_ID de `.env`.
             Para dejarlas apagadas tambien en el bot real, cambia la linea de $telegramPush.)
 
-    -Port/-DatabasePath/-LogDir son parametros SOLO para poder probar este
-    script contra el puerto 8001 y una base/carpeta de log temporales
-    (nunca el bot real ni su base) -- el uso real, sin argumentos, apunta
-    exactamente a lo pedido: puerto 8000, data\minerva_estabilidad.db,
-    logs\.
+    AISLAMIENTO DE LA v1: esta es la v2. El puerto 8000 es el del bot vivo de la
+    v1 y este script lo RECHAZA; el valor por defecto es el 8001. Como el unico
+    puerto que activaba los interruptores "reales" (arriba, "SOLO con -Port 8000")
+    es el 8000, el arranque nativo de la v2 SIEMPRE los deja en false: sin
+    etiquetado del LLM, Telegram, brazo ejecutado, noticias ni push. (Los
+    interruptores se conservan tal cual para que, si algun dia la v2 tiene su
+    propio bot real, se decida a proposito y no por heredar el de la v1.)
+
+    -Port/-DatabasePath/-LogDir: el uso sin argumentos apunta a
+    puerto 8001, data\minerva_estabilidad.db (la de ESTA carpeta, no la de la
+    v1) y logs\.
 
     REHUSA arrancar si ya hay algo escuchando en -Port: dos procesos
     escribiendo la MISMA base SQLite a la vez es exactamente lo que este
     script existe para evitar.
 
     REHUSA tambien arrancar si junto a la base existe la marca
-    MIGRADO_A_DOCKER.txt (Fase 7): el bot corre en Docker y esa base es una
+    MIGRADO_A_DOCKER_V2.txt (Fase 7): el bot corre en Docker y esa base es una
     copia vieja; arrancar el bot nativo sobre ella bifurcaria la medicion.
     Para volver al arranque nativo: scripts\rollback_from_docker.ps1.
 
@@ -74,20 +80,27 @@
 
 .EXAMPLE
     .\scripts\start_bot.ps1
-    Arranca el bot real en el puerto 8000 contra data\minerva_estabilidad.db.
+    Arranca el bot nativo de la v2 en el puerto 8001 contra data\minerva_estabilidad.db.
 
 .EXAMPLE
-    .\scripts\start_bot.ps1 -Port 8001 -DatabasePath "C:\temp\copia.db" -LogDir "C:\temp\logs"
-    Para probar el script en si (nunca el bot real).
+    .\scripts\start_bot.ps1 -Port 8002 -DatabasePath "C:\temp\copia.db" -LogDir "C:\temp\logs"
+    Para probar el script en si, con una base temporal.
 #>
 [CmdletBinding()]
 param(
-    [int]$Port = 8000,
+    [int]$Port = 8001,
     [string]$DatabasePath = "data/minerva_estabilidad.db",
     [string]$LogDir = "logs"
 )
 
 $ErrorActionPreference = "Stop"
+
+# El puerto 8000 es el del bot vivo de la v1: esta v2 no arranca nada ahi (ni siquiera para probar).
+if ($Port -eq 8000) {
+    Write-Output ("RECHAZADO: el puerto 8000 es el del bot vivo de la v1; esta v2 no arranca nada " +
+        "en el. Usa otro puerto (por defecto 8001).")
+    exit 1
+}
 $RepoRoot = Split-Path -Parent $PSScriptRoot
 Set-Location $RepoRoot
 
@@ -111,7 +124,7 @@ function Write-OpLog([string]$Message) {
 # Fase 7: tras la mudanza a Docker (scripts\migrate_to_docker.ps1) la base de este directorio es una
 # copia VIEJA y la viva esta en el volumen de Docker. Arrancar el bot nativo sobre ella BIFURCARIA la
 # medicion (dos historias distintas de la misma base). La marca la borra scripts\rollback_from_docker.ps1.
-$MigrationMarker = Join-Path (Split-Path -Parent $DatabaseFullPath) "MIGRADO_A_DOCKER.txt"
+$MigrationMarker = Join-Path (Split-Path -Parent $DatabaseFullPath) "MIGRADO_A_DOCKER_V2.txt"
 if (Test-Path -LiteralPath $MigrationMarker -PathType Leaf) {
     Write-OpLog ("RECHAZADO: el bot corre en Docker desde la mudanza (existe $MigrationMarker) y " +
         "$DatabaseFullPath es una copia VIEJA: arrancar el bot nativo bifurcaria la medicion. " +
@@ -135,7 +148,8 @@ if (-not (Test-Path $pythonw)) {
 }
 
 # Solo el bot REAL (puerto 8000) etiqueta con el LLM y consume getUpdates de Telegram;
-# cualquier otro puerto es una instancia de prueba (ver DESCRIPTION).
+# cualquier otro puerto es una instancia de prueba (ver DESCRIPTION). En la v2 el 8000 se rechaza
+# arriba, asi que `$isRealBot` es SIEMPRE false aqui.
 $isRealBot = ($Port -eq 8000)
 $telegramCommands = if ($isRealBot) { "true" } else { "false" }
 $llmLabeling = if ($isRealBot) { "true" } else { "false" }

@@ -3,7 +3,7 @@
 Tras la mudanza la base viva esta en un volumen de Docker, NO en `data/` del host. Dos cosas siguen
 de ahi:
 
-1. **La marca de la mudanza** (`data/MIGRADO_A_DOCKER.txt`, junto a la base nativa). La escribe
+1. **La marca de la mudanza** (`data/MIGRADO_A_DOCKER_V2.txt`, junto a la base nativa). La escribe
    `scripts/migrate_to_docker.ps1` y la borra `scripts/rollback_from_docker.ps1`. Mientras exista,
    `data/minerva_estabilidad.db` es una copia VIEJA: `start_bot.ps1` se niega a arrancar el bot
    nativo sobre ella y las herramientas que la usarian por defecto (respaldo, restauracion,
@@ -32,8 +32,13 @@ import time
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-MARKER_NAME = "MIGRADO_A_DOCKER.txt"
+# La marca de la v2 NO se llama como la de la v1 (`MIGRADO_A_DOCKER.txt`): una carpeta `data/` de
+# la v1 nunca se confunde con una de la v2.
+MARKER_NAME = "MIGRADO_A_DOCKER_V2.txt"
 SERVICE = "minerva"
+# Aislamiento de la v1: el proyecto de Compose de esta v2 y el de la v1, que NINGUN comando usa.
+PROJECT_NAME = "minerva-v2"
+V1_PROJECT_NAME = "minerva"
 CONTAINER_BACKUP_DIR = "/app/data/backups"
 # Variables de interpolacion de Compose SIN secretos: con `--env-file` Compose no lee ni interpola
 # el `.env` real (ver docker/compose.vars).
@@ -60,7 +65,7 @@ def marker_path(db_path: str | Path) -> Path:
         db_path: ruta de la base nativa.
 
     Returns:
-        La ruta de `MIGRADO_A_DOCKER.txt`.
+        La ruta de `MIGRADO_A_DOCKER_V2.txt`.
     """
     return Path(db_path).resolve().parent / MARKER_NAME
 
@@ -153,7 +158,9 @@ def run_docker(
 def compose(args: list[str], **kwargs) -> subprocess.CompletedProcess[str]:
     """`docker compose` sobre el compose del repo, sin interpolar el `.env` real.
 
-    `COMPOSE_PROJECT_NAME` (si esta) elige el proyecto.
+    `COMPOSE_PROJECT_NAME` (si esta) elige el proyecto; sin el, `PROJECT_NAME` (`minerva-v2`). El
+    proyecto se pasa SIEMPRE con `-p`, y el de la v1 (`minerva`) se rechaza: ningun comando de esta
+    v2 puede tocar los volumenes ni el contenedor del bot vivo de la v1.
 
     Args:
         args: argumentos de `compose`.
@@ -163,12 +170,21 @@ def compose(args: list[str], **kwargs) -> subprocess.CompletedProcess[str]:
         El resultado del proceso.
 
     Raises:
-        DockerError: ver `run_docker`.
+        DockerError: si el proyecto elegido es el de la v1; ver tambien `run_docker`.
 
     Efectos:
         Lanza `docker compose`.
     """
-    base = ["compose", "--progress", "quiet", "-f", str(REPO_ROOT / "docker-compose.yml")]
+    project = os.environ.get("COMPOSE_PROJECT_NAME") or PROJECT_NAME
+    if project == V1_PROJECT_NAME:
+        raise DockerError(
+            f"RECHAZADO: el proyecto de Compose '{V1_PROJECT_NAME}' es el del bot vivo de la v1; "
+            f"esta v2 solo opera sobre '{PROJECT_NAME}' (o un proyecto de prueba propio)."
+        )
+    base = [
+        "compose", "--progress", "quiet", "-f", str(REPO_ROOT / "docker-compose.yml"),
+        "-p", project,
+    ]
     if COMPOSE_VARS.is_file():
         base += ["--env-file", str(COMPOSE_VARS)]
     return run_docker([*base, *args], **kwargs)

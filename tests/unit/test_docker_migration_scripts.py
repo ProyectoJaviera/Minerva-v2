@@ -653,7 +653,7 @@ def test_start_bot_refuses_the_native_bot_on_the_old_database_after_the_migratio
     data = tmp_path / "data"
     data.mkdir()
     (data / "minerva_estabilidad.db").write_bytes(b"")
-    (data / "MIGRADO_A_DOCKER.txt").write_text("migrado", encoding="ascii")
+    (data / "MIGRADO_A_DOCKER_V2.txt").write_text("migrado", encoding="ascii")
 
     result = subprocess.run(
         ["powershell.exe", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File",

@@ -14,7 +14,7 @@
            traerla al host) y comprueba que tiene las MISMAS filas en todas las tablas
         4. la instala en data\minerva_estabilidad.db con restore_db.py; la base nativa vieja NO se
            borra: queda como minerva_estabilidad.db.previo_AAAAMMDD_HHMMSS
-        5. quita la marca data\MIGRADO_A_DOCKER.txt (start_bot.ps1 vuelve a poder arrancar)
+        5. quita la marca data\MIGRADO_A_DOCKER_V2.txt (start_bot.ps1 vuelve a poder arrancar)
         6. reactiva la tarea programada si estaba habilitada antes de la mudanza (la marca lo recuerda)
         7. baja y quita el contenedor (los volumenes de Docker se CONSERVAN)
         8. arranca el bot nativo con start_bot.ps1 y espera /health: status ok, frozen_hash_ok true,
@@ -40,12 +40,12 @@
 #>
 [CmdletBinding()]
 param(
-    [int]$NativePort = 8000,
-    [int]$DockerPort = 8000,
+    [int]$NativePort = 8001,
+    [int]$DockerPort = 8001,
     [string]$DatabasePath = "data/minerva_estabilidad.db",
     [string]$LogDir = "logs",
     [string]$BackupDir = "",
-    [string]$ProjectName = "minerva",
+    [string]$ProjectName = "minerva-v2",
     [string]$EnvFile = ".env",
     [int]$HealthTimeoutSeconds = 300,
     [switch]$DryRun,
@@ -55,6 +55,9 @@ param(
 
 $ErrorActionPreference = "Stop"
 . (Join-Path $PSScriptRoot "docker_common.ps1")
+# Aislamiento de la v1 (esta es la v2): se rechaza el proyecto y los puertos del bot vivo de la v1 ANTES
+# de hacer nada (la tarea se lee de la marca, que escribio migrate_to_docker.ps1 con su misma guardia).
+Assert-NotV1Resources -Project $ProjectName -Ports @($NativePort, $DockerPort)
 Set-Location $script:RepoRoot
 $script:ComposeProject = $ProjectName
 
@@ -71,7 +74,7 @@ Initialize-Log (Join-Path $LogDirFull "mudanza_docker.log")
 
 $script:State = @{
     Mutated = $false; ServiceBefore = "absent"; MarkerFields = @{}; MarkerText = ""
-    TaskName = "MinervaStartBot"; TaskBefore = "Missing"; TaskNow = "Missing"
+    TaskName = "MinervaV2StartBot"; TaskBefore = "Missing"; TaskNow = "Missing"
 }
 $script:Completed = $false
 $script:RollbackOk = $true
@@ -113,6 +116,11 @@ function Invoke-Preflight {
         if ($script:State.MarkerFields.ContainsKey("task_name")) {
             $script:State.TaskName = $script:State.MarkerFields["task_name"]
         }
+        # Aislamiento de la v1: una marca copiada de la v1 nombraria una tarea de la v1 (que esta v2
+        # reactivaria al volver); se rechaza antes de cambiar nada.
+        $taskIsV1 = ($script:V1TaskNames -contains $script:State.TaskName)
+        Add-Check (-not $taskIsV1) "La tarea de la marca no es de la v1" $(if ($taskIsV1) {
+            "'$($script:State.TaskName)' es de la v1 (la v2 usa el prefijo MinervaV2)" } else { $script:State.TaskName })
         if ($script:State.MarkerFields.ContainsKey("task_state_before")) {
             $script:State.TaskBefore = $script:State.MarkerFields["task_state_before"]
         }
