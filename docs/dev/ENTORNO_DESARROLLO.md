@@ -7,9 +7,14 @@ LLM, Telegram, el brazo ejecutado, las noticias y la memoria apagados por constr
 
 ## Las reglas que valen siempre
 
-1. **El bot real (puerto 8000, contenedor `minerva`) no se toca.** No lo detengas, reinicies ni
-   reconstruyas desde una sesión de desarrollo. Desplegar un cambio es una acción deliberada, en la
-   [ventana segura](RECETAS.md#desplegar-un-cambio-al-contenedor).
+1. **El bot vivo de la v1 (puerto 8000, proyecto `minerva`, contenedor `minerva-minerva-1`) no se toca
+   jamás desde la v2.** Esta v2 usa otros nombres para todo (proyecto y contenedor `minerva-v2`, imagen
+   `minerva-v2:local`, volúmenes `minerva-v2_data` y `minerva-v2_logs`, puerto 8001, tareas con prefijo
+   `MinervaV2`, marca `MIGRADO_A_DOCKER_V2.txt`) y los scripts rechazan los de la v1; el compose los fija por
+   nombre. Desplegar un cambio del bot de la v2 es una acción deliberada de una persona, no de una sesión de
+   desarrollo (ver [RECETAS](RECETAS.md#desplegar-un-cambio-al-contenedor)). **Nunca copies el `.env` real de la
+   v1 a la v2.** El 8001 es también el puerto por defecto del contenedor de la v2: no corras a la vez el servidor
+   de desarrollo y el contenedor con el puerto por defecto (cambia `MINERVA_PORT` o `--port`).
 2. **Todo desarrollo y prueba usa una base temporal y el puerto 8001.** Nunca apuntes `DATABASE_PATH` a
    `data/` ni abras la base de trabajo con una herramienta nueva: se trabaja sobre una copia.
 3. **Nunca imprimas, copies ni subas el `.env`.** Las pruebas no necesitan credenciales ni red.
@@ -196,7 +201,7 @@ El login usa el usuario y la contraseña de tu `.env`.
 
 ## Docker
 
-La imagen (`Dockerfile`, `minerva:local`) tiene tres etapas: compila el frontend con Node, instala en un
+La imagen (`Dockerfile`, `minerva-v2:local`) tiene tres etapas: compila el frontend con Node, instala en un
 venv las versiones **exactas** de `docker/requirements.lock` (solo ruedas binarias) y arma una imagen final
 sin Node ni compiladores. Copia `app/` y `scripts/` (no `tests/` ni `docs/`), corre como un usuario sin
 privilegios con el código de solo lectura y no lleva secretos: el `.env` se monta de solo lectura en
@@ -235,7 +240,7 @@ llega solo hasta SSSE3 (Intel Atom N570, por ejemplo) `import numpy` muere con `
   `OLD_CPU_NUMPY` del exportador; las pruebas de `tests/unit/test_docker_setup.py` exigen que difiera de la
   principal **solo** en NumPy y que `pandas` la admita.
 - **Cómo se construye:** `docker build -t <etiqueta> --build-arg REQUIREMENTS_FILE=docker/requirements.old-cpu.lock .`
-  (o `docker compose build --build-arg …`). La etiqueta de una prueba **no** puede ser `minerva:local`.
+  (o `docker compose build --build-arg …`). La etiqueta de una prueba **no** puede ser `minerva-v2:local`.
 - **Qué se verificó (2026-10-26):**
   1. *Ruedas:* las 38 versiones tienen rueda binaria para Linux x86_64 (CPython 3.11) en PyPI, y `pip install
      --only-binary=:all:` dentro de la imagen las instala todas.

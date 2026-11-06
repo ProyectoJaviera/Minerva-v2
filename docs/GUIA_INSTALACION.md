@@ -29,8 +29,8 @@ Si **ya tienes un bot nativo corriendo con una medición en curso** (con `start_
 ## 1. Clonar el repositorio
 
 ```bash
-git clone https://github.com/ProyectoJaviera/MinervaV2.git
-cd MinervaV2
+git clone https://github.com/ProyectoJaviera/Minerva-v2.git
+cd Minerva-v2
 ```
 
 Los comandos de esta guía se ejecutan desde la raíz del repositorio (la carpeta que acabas de clonar, que en el resto
@@ -150,7 +150,7 @@ primera vez):
 
 ```bash
 docker compose build
-docker run --rm -it minerva:local python scripts/hash_password.py
+docker run --rm -it minerva-v2:local python scripts/hash_password.py
 ```
 
 El script pide la contraseña dos veces (sin mostrarla) y escribe la línea completa `AUTH_PASSWORD_HASH='…'`.
@@ -167,7 +167,7 @@ con menos, el login responde 503 y el resto de la API rechaza todo. Genera una c
 python -c "import secrets; print(secrets.token_hex(32))"
 ```
 
-(Con Docker y sin Python: `docker run --rm minerva:local python -c "import secrets; print(secrets.token_hex(32))"`.)
+(Con Docker y sin Python: `docker run --rm minerva-v2:local python -c "import secrets; print(secrets.token_hex(32))"`.)
 Pégala en el `.env`:
 
 ```text
@@ -228,27 +228,27 @@ docker compose ps
 - La primera vez construye la imagen (3 etapas: compila el dashboard, instala las dependencias con versiones exactas y
   arma la imagen final): ≈ 1 minuto con buena conexión. Necesita internet (imágenes base, paquetes de Python y de
   Node).
-- Después arranca el contenedor `minerva` (puerto `127.0.0.1:8000`, base y logs en volúmenes de Docker).
+- Después arranca el contenedor `minerva` (puerto `127.0.0.1:8001`, base y logs en volúmenes de Docker).
   `docker compose ps` pasa a `healthy` en menos de un minuto; el contenedor tiene hasta 5 minutos de margen antes de
   marcarse como no sano.
-- **Con `docker compose up -d` a secas arranca como "bot real"**: etiquetado con Claude, brazo ejecutado de la cuenta
-  paper, noticias y notificaciones de Telegram encendidos (los que tengan sus credenciales). Es lo previsto para una
-  medición. Para explorar sin gastar, mira [Probar sin gastar](#probar-sin-gastar).
+- **En la v2, `docker compose up -d` a secas arranca en modo prueba**: sin etiquetado con Claude, sin brazo ejecutado,
+  sin noticias y sin Telegram (`MINERVA_REAL_BOT=false` por defecto), y publica el puerto `8001` (el `8000` es del bot
+  vivo de la v1). Para encenderlos a propósito mira [Encender el etiquetado y los avisos](#probar-sin-gastar).
 - El contenedor se reinicia solo (`restart: unless-stopped`) si Docker o el equipo se reinician; ver
   [Uso diario](USO.md#arrancar-y-detener).
 
 ### Probar sin gastar
 
-Si todavía no tienes clave de Anthropic, o solo quieres ver el dashboard, arranca en **modo prueba**: sin etiquetado
-del LLM, sin Telegram, sin brazo ejecutado, sin noticias. Añade esta línea al `.env` (Docker Compose la lee de ahí):
+En la v2 el **modo prueba es el valor por defecto**: sin etiquetado del LLM, sin Telegram, sin brazo ejecutado, sin
+noticias (`MINERVA_REAL_BOT=false`). El bot genera señales y operaciones sombra, pero no llama a ninguna API de pago.
+Para encender el etiquetado con Claude, el brazo ejecutado, las noticias y los avisos, añade esta línea al `.env`
+**propio de la v2** (Docker Compose la lee de ahí; no copies el `.env` de la v1, que tiene su propio token de Telegram):
 
 ```text
-MINERVA_REAL_BOT=false
+MINERVA_REAL_BOT=true
 ```
 
-y arranca con `docker compose up -d`. El bot sigue generando señales y operaciones sombra, pero no llama a ninguna
-API de pago. Cuando quieras la medición real, quita la línea (o ponla en `true`) y recrea el contenedor:
-`docker compose up -d --force-recreate`.
+y recrea el contenedor: `docker compose up -d --force-recreate`. Para volver al modo prueba, quita la línea.
 
 ### Procesador antiguo (sin SSE4)
 
@@ -278,7 +278,7 @@ docker compose up -d --no-build
 ## 5. Comprobar que funciona
 
 1. **Estado del contenedor:** `docker compose ps` debe decir `healthy`.
-2. **`/health`:** abre <http://127.0.0.1:8000/health> en el navegador (no pide sesión). En la primera respuesta
+2. **`/health`:** abre <http://127.0.0.1:8001/health> en el navegador (no pide sesión). En la primera respuesta
    `status` puede tardar unos segundos en pasar a `ok` (el primer ciclo del scheduler). Con los valores por defecto
    ("bot real") y todas las credenciales puestas, deberías ver:
 
@@ -291,7 +291,7 @@ docker compose up -d --no-build
    | `paper_execution.active` | `true` | El brazo ejecutado de la cuenta paper está armado |
    | `telegram_push.enabled` / `active` | `true` / `true` | Solo si pusiste token y `chat_id` |
 
-3. **Dashboard:** abre <http://127.0.0.1:8000/>, entra con el usuario y la contraseña que elegiste y mira la pestaña
+3. **Dashboard:** abre <http://127.0.0.1:8001/>, entra con el usuario y la contraseña que elegiste y mira la pestaña
    *Resumen*. Qué muestra cada pestaña: [Uso diario](USO.md#el-dashboard).
 4. **Telegram (si lo configuraste):** el bot envía un mensaje de arranque al chat; prueba `/status`.
 5. **Registros:** `docker compose logs --tail 50 minerva`. Los mensajes normales del primer arranque incluyen un
@@ -347,13 +347,14 @@ python -m venv .venv
 npm --prefix frontend ci
 npm --prefix frontend run build
 
-# 3. Arrancar y detener el bot (puerto 8000, sin consola)
+# 3. Arrancar y detener el bot (puerto 8001, sin consola)
 powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\start_bot.ps1
 powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\stop_bot.ps1
 ```
 
 `start_bot.ps1` fija sus propias variables (con **independencia** del `.env`): `DATABASE_PATH` en
-`data\minerva_estabilidad.db`, los interruptores del "bot real" encendidos solo con el puerto 8000 y la memoria de
+`data\minerva_estabilidad.db` (la de esta carpeta), los interruptores del "bot real" **siempre apagados** en la v2 (el
+script solo los enciende con el puerto 8000, que es el del bot vivo de la v1 y rechaza) y la memoria de
 lecciones apagada. Se niega a arrancar si el puerto ya está ocupado, espera a que `/health` responda (hasta 180 s) y
 escribe su bitácora en `logs\medicion.log`. `stop_bot.ps1` es un corte duro (Windows no da una señal de apagado
 cooperativo a un proceso sin consola): SQLite en modo WAL lo tolera, pero un etiquetado en vuelo se pierde; por eso se
@@ -364,12 +365,12 @@ reinicia en la ventana segura. El detalle de cada interruptor está en [Configur
 - **Con Docker** todo lo de esta guía es igual (cambia solo cómo copias el `.env` y las rutas de Python). La imagen es
   de Linux, así que la parte de Docker es la misma que se probó en Windows.
 - **Sin Docker** no hay scripts de arranque (los de PowerShell usan comandos de Windows). Puedes lanzar el servidor
-  tú mismo con las mismas variables que fija `start_bot.ps1`; por ejemplo:
+  tú mismo con las mismas variables que fija `start_bot.ps1` (en la v2, todas apagadas); por ejemplo:
 
   ```bash
-  LLM_LIVE_LABELING_ENABLED=true TELEGRAM_COMMANDS_ENABLED=true PAPER_EXECUTION_ENABLED=true \
-  NEWS_COLLECTION_ENABLED=true TELEGRAM_PUSH_ENABLED=true AUTO_OPEN_WITHOUT_LLM=false \
-  LESSONS_MEMORY_ENABLED=false .venv/bin/python -m uvicorn app.main:app --host 127.0.0.1 --port 8000
+  LLM_LIVE_LABELING_ENABLED=false TELEGRAM_COMMANDS_ENABLED=false PAPER_EXECUTION_ENABLED=false \
+  NEWS_COLLECTION_ENABLED=false TELEGRAM_PUSH_ENABLED=false AUTO_OPEN_WITHOUT_LLM=false \
+  LESSONS_MEMORY_ENABLED=false .venv/bin/python -m uvicorn app.main:app --host 127.0.0.1 --port 8001
   ```
 
   **No verificado:** el proyecto se desarrolló y se probó en Windows; este comando usa las mismas variables y el mismo

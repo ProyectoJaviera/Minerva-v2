@@ -27,7 +27,7 @@ labels: bug
 - Sistema operativo y versión:
 - Versión de Docker (`docker --version`) o de Python (`python --version`):
 - Commit del repositorio (`git log -1 --oneline`):
-- Resultado de `GET http://127.0.0.1:8000/health` (si el bot responde; ese JSON no lleva credenciales ni resultados):
+- Resultado de `GET http://127.0.0.1:8001/health` (si el bot responde; ese JSON no lleva credenciales ni resultados):
 
 ## Registros relevantes
 

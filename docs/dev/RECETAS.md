@@ -388,7 +388,7 @@ El detalle (horas válidas en tu zona horaria) está en [`../USO.md`](../USO.md#
 
 ```bash
 git pull                       # solo si despliegas desde otro clon; si es el mismo árbol, sáltalo
-docker compose up -d --build   # construye minerva:local y recrea el contenedor
+docker compose up -d --build   # construye minerva-v2:local y recrea el contenedor
 ```
 
 - La imagen se construye mientras el bot viejo sigue corriendo; la parada (SIGTERM, hasta 30 s para cerrar
@@ -396,7 +396,7 @@ docker compose up -d --build   # construye minerva:local y recrea el contenedor
   **reinicio** caiga dentro de la ventana. *Este orden es el comportamiento habitual de Compose; confírmalo en
   el primer despliegue observando `docker compose ps`.*
 - Compose recrea el contenedor solo si cambió la imagen o la configuración; los **volúmenes se conservan**
-  (la base está en `minerva_data`).
+  (la base está en `minerva-v2_data`).
 - **Nunca** `docker compose down -v` ni `docker volume rm`: borran la medición
   ([qué borra el volumen](../USO.md#qué-borra-el-volumen-de-docker)).
 

@@ -228,7 +228,7 @@ de red depende de los falsos de cada prueba.
 | Prueba | Qué protege |
 |---|---|
 | `tests/unit/test_no_console_windows.py` | por AST, **todo** `subprocess.run/Popen/...` y `asyncio.create_subprocess_exec` de `app/`, `scripts/` y `tests/` lleva `creationflags=NO_WINDOW` (con casos que deben fallar); nada usa `DETACHED_PROCESS`, `CREATE_NEW_CONSOLE` ni `os.system`. El motivo está medido: el `python.exe` de un venv de uv es un trampolín de consola |
-| `tests/unit/test_no_real_task_scheduler.py` | ninguna prueba toca el Programador de tareas **real** de Windows (`MinervaStartBot`, `MinervaHealthAlert`, `MinervaDailySummary`, `MinervaBackup`): la única vía es `$env:MINERVA_SCHTASKS_EXE`, que en las pruebas apunta siempre a un falso o a una trampa |
+| `tests/unit/test_no_real_task_scheduler.py` | ninguna prueba toca el Programador de tareas **real** de Windows (`MinervaV2StartBot`, `MinervaV2HealthAlert`, `MinervaV2DailySummary`, `MinervaV2Backup`): la única vía es `$env:MINERVA_SCHTASKS_EXE`, que en las pruebas apunta siempre a un falso o a una trampa |
 
 ### La base real no se toca
 

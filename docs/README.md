@@ -6,6 +6,11 @@ qué problema investiga) y sigue por la columna que te corresponda.
 > **Minerva es 100 % paper trading, experimental y no es asesoría financiera.** Nada de lo que hay aquí envía órdenes
 > reales. La medición del valor de la IA es *ciega* y está en curso: no hay resultados publicados.
 
+> **Esta es la documentación de la versión 2**, heredada de la v1.0 (etiqueta `v1.0` del repositorio Minerva-v1), cuya
+> medición sigue su curso en ese otro repositorio. Los nombres de la v2 son otros para que no pueda tocar el bot vivo de
+> la v1 (proyecto `minerva-v2`, imagen `minerva-v2:local`, puerto `8001`, tareas `MinervaV2…`; ver el
+> [README](../README.md)); el texto que describe «la medición» y «el bot real» sigue hablando en términos de la v1.
+
 ## Por dónde empezar
 
 | Quiero… | Lee, en este orden |

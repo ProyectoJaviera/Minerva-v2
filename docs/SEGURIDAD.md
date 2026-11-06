@@ -49,7 +49,7 @@ El `.gitignore` ya los cubre y hay una prueba que lo comprueba; no los fuerces c
 ## Red y puertos
 
 - **La API escucha solo en `127.0.0.1`.** Con Docker, el contenedor escucha dentro en `0.0.0.0` (para que funcione el
-  reenvío de puertos de Docker) pero `docker-compose.yml` lo publica únicamente como `127.0.0.1:8000`: no queda
+  reenvío de puertos de Docker) pero `docker-compose.yml` lo publica únicamente como `127.0.0.1:8001`: no queda
   expuesto a tu red local ni a internet. Sin Docker, `start_bot.ps1` arranca con `--host 127.0.0.1`.
 - **No hay TLS.** Todo corre sobre HTTP plano en la máquina local, y la cookie de sesión va sin el atributo `Secure`
   a propósito (con `Secure` el navegador la descartaría en silencio sobre HTTP). **No expongas el puerto fuera del

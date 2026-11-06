@@ -62,7 +62,7 @@ midiendo.
 | Síntoma | Causa probable | Qué hacer |
 |---|---|---|
 | `docker compose` dice que no puede conectar con la API o el demonio de Docker (`cannot connect to the Docker API`, `error during connect…`) | Docker Desktop no está abierto o aún está arrancando | Ábrelo y espera a que `docker info` responda. Con `restart: unless-stopped`, el bot vuelve solo cuando el motor arranca |
-| `Bind for 127.0.0.1:8000 failed: port is already allocated` | Otro programa o contenedor usa el puerto 8000 (por ejemplo, un bot nativo) | Es intencional: no corras dos bots reales. Detén el otro. Para una instancia de prueba usa `MINERVA_PORT` |
+| `Bind for 127.0.0.1:8001 failed: port is already allocated` | Otro programa o contenedor usa el puerto 8001 (por ejemplo, el bot nativo o el servidor de desarrollo de la v2) | Es intencional: no corras dos bots a la vez. Detén el otro, o usa otro puerto con `MINERVA_PORT` (nunca el 8000: es el del bot de la v1) |
 | `docker compose …` escribe `The "XYZ…" variable is not set`, a veces con un trozo largo | El hash de la contraseña del `.env` lleva `$` sin comillas simples: Compose lo interpreta y muestra trozos | Pon `AUTH_PASSWORD_HASH='$2b$12$…'` **entre comillas simples** y limpia la pantalla (no la compartas). El bot no se ve afectado |
 | El contenedor arranca pero el dashboard no pide ni acepta la contraseña | El `.env` no llegó al contenedor (no existe, o es una **carpeta**) | Debe existir **como archivo** en la raíz del repositorio antes de `docker compose up -d`. Si Docker Desktop creó una carpeta `.env`, bórrala, crea el archivo y recrea: `docker compose up -d --force-recreate` |
 | El bot no arranca y el log dice `UnicodeDecodeError` | El `.env` se guardó en UTF-16 | Guárdalo como UTF-8 |
@@ -72,7 +72,7 @@ midiendo.
 | `uv pip install` o `pip install` fallan con «invalid peer certificate: UnknownIssuer» u otro error de certificado | La red re-firma el tráfico HTTPS (inspección TLS) | Con uv, añade `--system-certs` (usa el almacén de certificados del sistema; verificado con uv 0.11). Con pip, consulta su documentación de certificados: no se ha comprobado aquí |
 | `pip install` dice «requires a different Python» | Tu `python` es 3.13 o superior (o anterior a 3.11) | Crea el entorno con Python 3.11 o 3.12 ([guía](GUIA_INSTALACION.md#antes-de-empezar)) |
 | PowerShell dice que la ejecución de scripts está deshabilitada | Política de ejecución | Lanza los scripts como en la documentación: `powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\…` |
-| `start_bot.ps1` dice RECHAZADO | Hay algo escuchando en el puerto 8000, **o** existe `data\MIGRADO_A_DOCKER.txt` (el bot corre en Docker) | Es el bot real o un contenedor: no arranques otro. Mira `logs\medicion.log`. Para volver al arranque nativo: `rollback_from_docker.ps1` |
+| `start_bot.ps1` dice RECHAZADO | Pediste el puerto 8000 (es el del bot de la v1 y la v2 lo rechaza), hay algo escuchando en el puerto, **o** existe `data\MIGRADO_A_DOCKER_V2.txt` (el bot corre en Docker) | Es el bot de la v1, otro bot o un contenedor: no arranques otro. Mira `logs\medicion.log`. Para volver al arranque nativo: `rollback_from_docker.ps1` |
 | Contenedor `unhealthy` | `/health` no responde, el ciclo se detuvo o `frozen_hash_ok` es falso | `docker inspect --format '{{json .State.Health}}' <contenedor>` da el motivo (el nombre lo ves con `docker compose ps`); `docker compose logs minerva` |
 | El dashboard abre sin interfaz (solo texto de la API) | Falta `frontend/dist` (instalación nativa sin compilar) | `npm --prefix frontend ci` y `npm --prefix frontend run build`. En Docker se compila al construir la imagen |
 
@@ -118,7 +118,7 @@ midiendo.
 | Síntoma | Causa probable | Qué hacer |
 |---|---|---|
 | `docker_db.py` termina con código 5 | Docker Desktop no está listo o falló la copia | Abre Docker Desktop y espera a que `docker info` responda; reintenta |
-| `backup_db.py`, `restore_db.py` o `resume_drawdown_stop.py` dicen "el bot corre en Docker" | Existe la marca de la mudanza (`data\MIGRADO_A_DOCKER.txt`): la base nativa es una copia vieja | Usa `docker_db.py backup` o `docker compose exec …`; con `--db` explícito sí operan |
+| `backup_db.py`, `restore_db.py` o `resume_drawdown_stop.py` dicen "el bot corre en Docker" | Existe la marca de la mudanza (`data\MIGRADO_A_DOCKER_V2.txt`): la base nativa es una copia vieja | Usa `docker_db.py backup` o `docker compose exec …`; con `--db` explícito sí operan |
 | `restore_db.py` dice que el destino existe | Hay una base en el destino | Es una protección. `--force` la aparta como `*.previo_*` (no la borra) |
 | Borré el volumen o la base por error | — | Restaura el último respaldo ([Restaurar](USO.md#restaurar)). Sin respaldo no hay forma de recuperarla |
 | Quiero comprobar si una copia de la base está sana | — | `python scripts/db_fingerprint.py --db <copia>` imprime la integridad y las filas por tabla |

@@ -6,7 +6,7 @@ porqué de la medición, lee la [metodología](METODOLOGIA.md).
 **APROBADA / RECHAZADA** — Las dos etiquetas con las que Claude juzga una señal. Se guardan una sola vez y no se
 pueden cambiar. Una sombra sin decisión es `SIN_LLM`, que **no** equivale a `RECHAZADA`.
 
-**API (de Minerva)** — Las rutas HTTP que sirve el propio bot en `127.0.0.1:8000`. Casi todas exigen iniciar sesión.
+**API (de Minerva)** — Las rutas HTTP que sirve el propio bot en `127.0.0.1:8001`. Casi todas exigen iniciar sesión.
 `GET /health` no.
 
 **ATR** — *Average True Range*: promedio del rango de movimiento de las últimas velas, una medida de volatilidad. Varias
@@ -87,7 +87,7 @@ margen aislado.
 
 **Margen aislado** — El riesgo de una posición se limita al margen que se le asignó. Es el único modo que simula Minerva.
 
-**Marca de la mudanza** — El archivo `data/MIGRADO_A_DOCKER.txt`: indica que el bot corre en Docker y que la base nativa
+**Marca de la mudanza** — El archivo `data/MIGRADO_A_DOCKER_V2.txt`: indica que el bot corre en Docker y que la base nativa
 de `data/` es una copia vieja. Ver [Pasar un bot nativo a Docker](MUDANZA_DOCKER.md).
 
 **Medición ciega** — Diseño por el cual nadie ve resultados (PnL, tasas de acierto, comparación entre aprobadas y
@@ -150,7 +150,7 @@ sola vez.
 puede reiniciar el bot sin cortar etiquetados en vuelo. Ver [Reinicios seguros](USO.md#reinicios-seguros).
 
 **Volumen (Docker)** — Almacenamiento interno de Docker donde viven la base de datos y los logs del contenedor
-(`minerva_data`, `minerva_logs`). Borrarlo borra la medición.
+(`minerva-v2_data`, `minerva-v2_logs`). Borrarlo borra la medición.
 
 **WAL** — *Write-Ahead Logging*: el modo de SQLite que usa Minerva. Por eso la base no se copia a mano, sino con las
 herramientas de respaldo.

@@ -90,7 +90,7 @@ no se abre solo salvo que se lo pidas** (en Windows no corre como servicio: arra
    Inicio/apagado y suspensión → Nunca**): tras una suspensión el reloj de la máquina virtual de Docker puede
    atrasarse y el scheduler se guía por la hora.
 4. Después de reiniciar el PC espera 1 o 2 minutos y comprueba: `docker compose ps` (debe decir `healthy`) y
-   `http://127.0.0.1:8000/health`.
+   `http://127.0.0.1:8001/health`.
 
 Docker **no reinicia un contenedor "unhealthy"** por sí mismo (`restart` actúa cuando el proceso termina, no cuando
 se cuelga): lo avisa la alerta externa y lo arreglas con `docker compose restart minerva` en la ventana segura.
@@ -101,16 +101,16 @@ se cuelga): lo avisa la alerta externa y lo arreglas con `docker compose restart
 
 | Paso | Qué hace |
 |---|---|
-| Comprobaciones | Ventana segura · Docker responde · el `.env` existe como archivo · entorno de Python (`.venv`) · base nativa · aún no migrado · hash del prompt congelado intacto · el bot nativo responde y no está pausado · puerto de Docker libre (si es otro que el del bot nativo) · `docker-compose.yml` válido · sin contenedores ni volúmenes previos · espacio en disco · estado de la tarea `MinervaStartBot` · avisos (arranque de Docker Desktop, hash del `.env` sin comillas simples, cambios sin confirmar) |
+| Comprobaciones | Ventana segura · Docker responde · el `.env` existe como archivo · entorno de Python (`.venv`) · base nativa · aún no migrado · hash del prompt congelado intacto · el bot nativo responde y no está pausado · puerto de Docker libre (si es otro que el del bot nativo) · `docker-compose.yml` válido · sin contenedores ni volúmenes previos · espacio en disco · estado de la tarea `MinervaV2StartBot` · avisos (arranque de Docker Desktop, hash del `.env` sin comillas simples, cambios sin confirmar) |
 | 1 | Respaldo de seguridad de la base nativa con el bot **corriendo** (API de backup, solo lectura): `data\backups\pre_docker_*.db` |
 | 2 | Construye la imagen (el bot nativo sigue midiendo) |
-| 3 | Deshabilita la tarea `MinervaStartBot`, si existe y está habilitada |
+| 3 | Deshabilita la tarea `MinervaV2StartBot`, si existe y está habilitada |
 | 4 | Detiene el bot nativo con `stop_bot.ps1` — **aquí empieza la pausa de la medición** |
 | 5 | Respaldo definitivo con el bot detenido (`migracion_*.db`) y su huella (integridad + filas por tabla) |
-| 6 | Copia el respaldo al volumen `minerva_data` con la API de backup (`restore_db.py` dentro de un contenedor) |
+| 6 | Copia el respaldo al volumen `minerva-v2_data` con la API de backup (`restore_db.py` dentro de un contenedor) |
 | 7 | **Verifica el volumen**: `PRAGMA integrity_check` y las **mismas filas en todas las tablas** antes y después |
-| 8 | Escribe la marca `data\MIGRADO_A_DOCKER.txt` (ver [La marca y las protecciones](#la-marca-y-las-protecciones)) |
-| 9 | `docker compose up -d` en `127.0.0.1:8000` con los **mismos interruptores que `start_bot.ps1`** y `restart: unless-stopped` |
+| 8 | Escribe la marca `data\MIGRADO_A_DOCKER_V2.txt` (ver [La marca y las protecciones](#la-marca-y-las-protecciones)) |
+| 9 | `docker compose up -d` en `127.0.0.1:8001` con los **mismos interruptores que `start_bot.ps1`** y `restart: unless-stopped` |
 | 10 | Espera `/health`: `status: ok`, `frozen_hash_ok: true`, `paused: false` |
 
 **Si algo falla a partir del paso 3 (o pulsas Ctrl+C), se deshace todo en orden inverso:** baja el contenedor, quita
@@ -136,12 +136,12 @@ y los interruptores reales puede tardar más en arrancar que en el ensayo.
 
 ## Después de la mudanza
 
-1. Abre `http://127.0.0.1:8000/` y entra con tu usuario de siempre.
+1. Abre `http://127.0.0.1:8001/` y entra con tu usuario de siempre.
 2. `docker compose ps` → `healthy` (Docker lo marca al primer chequeo, ≤ 1 minuto).
 3. `docker compose logs --tail 50 minerva`. (Los logs de nivel INFO muestran motivos de cierre de operaciones:
    evítalos mientras la medición siga ciega.)
 4. **Tareas programadas** (detalle en [Tareas programadas](USO.md#tareas-programadas)): la alerta de caída sigue
-   valiendo **sin cambios** (consulta `127.0.0.1:8000`); `MinervaStartBot`, si existe, el script la deshabilita (el
+   valiendo **sin cambios** (consulta `127.0.0.1:8001`); `MinervaV2StartBot`, si existe, el script la deshabilita (el
    contenedor la reemplaza); el resumen diario se adapta solo (al ver la marca saca su copia del contenedor), y
    conviene programar el respaldo diario con `scripts\docker_db.py backup`.
 5. Respaldos y copias para los informes: `python scripts\docker_db.py …` (ver [Respaldos](USO.md#respaldos)).
@@ -151,7 +151,7 @@ y los interruptores reales puede tardar más en arrancar que en el ensayo.
 Tras la mudanza, `data\minerva_estabilidad.db` es una **copia vieja** (la del momento de la mudanza). Para que nadie
 la use por error:
 
-- `scripts\migrate_to_docker.ps1` escribe `data\MIGRADO_A_DOCKER.txt` (con la fecha, el proyecto y el estado previo de
+- `scripts\migrate_to_docker.ps1` escribe `data\MIGRADO_A_DOCKER_V2.txt` (con la fecha, el proyecto y el estado previo de
   la tarea).
 - `start_bot.ps1` **se niega a arrancar** el bot nativo mientras exista (evitaría que la medición se bifurque).
 - `backup_db.py`, `restore_db.py` y `resume_drawdown_stop.py` **se niegan a operar sobre la base por defecto** (darían
@@ -171,12 +171,12 @@ la use por error:
 | 3 | Copia final de la base del volumen (API de backup dentro de un contenedor, SHA-256 al traerla) y comprueba que tiene las mismas filas en todas las tablas |
 | 4 | La instala en `data\minerva_estabilidad.db` con `restore_db.py`; **la base nativa vieja no se borra**: queda como `minerva_estabilidad.db.previo_AAAAMMDD_HHMMSS` |
 | 5 | Quita la marca |
-| 6 | Reactiva `MinervaStartBot` si estaba habilitada antes de la mudanza (la marca lo recuerda) |
+| 6 | Reactiva `MinervaV2StartBot` si estaba habilitada antes de la mudanza (la marca lo recuerda) |
 | 7 | Baja y quita el contenedor; **los volúmenes de Docker se conservan** |
 | 8 | Arranca el bot nativo con `start_bot.ps1` y espera `/health` |
 
 Si algo falla se deshace y el bot vuelve a quedar en Docker. Cuando estés seguro de que no necesitas el volumen:
-`docker volume rm minerva_data minerva_logs` (esto **borra la medición** que viva ahí: mira antes
+`docker volume rm minerva-v2_data minerva-v2_logs` (esto **borra la medición** que viva ahí: mira antes
 [Qué borra el volumen de Docker](USO.md#qué-borra-el-volumen-de-docker)).
 
 ## Si algo queda a medias
@@ -185,7 +185,7 @@ Casi nunca debería ocurrir (cada paso se deshace solo), pero si el script termi
 (corte de luz):
 
 1. **No arranques nada a mano todavía.** Mira `logs\mudanza_docker.log`: dice el último paso hecho.
-2. ¿Existe `data\MIGRADO_A_DOCKER.txt`?
+2. ¿Existe `data\MIGRADO_A_DOCKER_V2.txt`?
    - **Sí, y el contenedor corre y está sano:** la mudanza terminó; solo falta que hagas la verificación de
      [Después de la mudanza](#después-de-la-mudanza).
    - **Sí, y el contenedor no corre:** `docker compose up -d` si el volumen tiene la base
@@ -221,7 +221,7 @@ en `data\backups\` del host. Sin Docker no hay forma de leer el volumen, así qu
 - **Ctrl+C a mitad de la mudanza**: el script lo cubre con un bloque `finally`, pero no hay una prueba automática de eso.
 - **El comportamiento en semanas de operación continua** (crecimiento del volumen, rotación de logs en Docker).
 - **`schtasks` real:** solo se probó `/Change /DISABLE` y `/ENABLE` sobre una tarea ficticia creada por el ensayo; la
-  deshabilitación de una tarea `MinervaStartBot` real no se ejerció.
+  deshabilitación de una tarea `MinervaV2StartBot` real no se ejerció.
 
 El relato completo del ensayo (qué se ejecutó, qué falló y qué se corrigió) está en el
 [historial](historial/MUDANZA_DOCKER_ENSAYO.md).

@@ -38,8 +38,10 @@ podría desactivar un límite por completo. Las demás no se validan.
 ## Interruptores
 
 Piezas opcionales. Casi todas están **apagadas por defecto** en el código y el lanzador enciende solo las del "bot
-real" (el del puerto 8000). Así una instancia de prueba nunca gasta API, ni compite por el token de Telegram, ni
-escribe al chat. La excepción es `DASHBOARD_CONTROLS_ENABLED`, que viene encendida.
+real". **En la v2 ningún lanzador las enciende por defecto** (`MINERVA_REAL_BOT=false`; el puerto 8000, que en la v1
+era el del bot real, está reservado y se rechaza): una instancia de la v2 nunca gasta API, ni compite por el token de
+Telegram, ni escribe al chat salvo que lo pidas con `MINERVA_REAL_BOT=true`. La excepción es
+`DASHBOARD_CONTROLS_ENABLED`, que viene encendida.
 
 | Variable | Qué hace | Por defecto | Cuándo cambiarla |
 |---|---|---|---|
@@ -56,14 +58,15 @@ escribe al chat. La excepción es `DASHBOARD_CONTROLS_ENABLED`, que viene encend
 
 | Lanzador | Etiquetado, brazo, Telegram (comandos y avisos) y noticias | Memoria de lecciones | `AUTO_OPEN_WITHOUT_LLM` |
 |---|---|---|---|
-| `docker compose up -d` | Todos `true` (por defecto), o todos `false` con `MINERVA_REAL_BOT=false` | `false` | `false` |
-| `scripts/start_bot.ps1` | `true` solo con el puerto 8000 (`-Port 8000`, el valor por defecto); `false` con cualquier otro | `false` | `false` |
+| `docker compose up -d` | Todos `false` (por defecto), o todos `true` con `MINERVA_REAL_BOT=true` | `false` | `false` |
+| `scripts/start_bot.ps1` | Siempre `false` en la v2: el script solo los enciende con `-Port 8000`, y el 8000 (el de la v1) se rechaza; el puerto por defecto es el 8001 | `false` | `false` |
 | `scripts/run_dev_server.py` (puerto 8001, sobre una copia) | Todos `false`, y además vacía la clave de Anthropic y el token de Telegram | `false` | (sin tocar) |
 
 Para **cambiar uno** en el bot real, edita la línea correspondiente donde la fija el lanzador: la sección
 `environment:` de [`docker-compose.yml`](../docker-compose.yml) o las variables `$llmLabeling`, `$telegramPush`… de
-[`scripts/start_bot.ps1`](../scripts/start_bot.ps1). Para apagarlos **todos** a la vez con Docker (modo prueba) basta
-`MINERVA_REAL_BOT=false` (ver [Variables de Docker Compose](#variables-de-docker-compose)).
+[`scripts/start_bot.ps1`](../scripts/start_bot.ps1). Para encenderlos **todos** a la vez con Docker basta
+`MINERVA_REAL_BOT=true` (ver [Variables de Docker Compose](#variables-de-docker-compose)); apagados es el valor por
+defecto de la v2.
 
 ## Variables del `.env`
 
@@ -256,8 +259,8 @@ shell o en el `.env` de la raíz (Compose lo lee para interpolar). Todas son opc
 
 | Variable | Qué hace | Por defecto | Cuándo cambiarla |
 |---|---|---|---|
-| `MINERVA_PORT` | Puerto del equipo (siempre en `127.0.0.1`) donde se publica la API y el dashboard | `8000` | Solo para una instancia de prueba. Dos bots reales a la vez duplicarían el token y la clave |
-| `MINERVA_REAL_BOT` | `true`: los mismos interruptores que `start_bot.ps1` con el puerto 8000. `false`: los de una instancia de prueba (sin etiquetado del LLM, Telegram, brazo ejecutado, noticias ni avisos) | `true` | `false` para explorar sin gastar API ni competir por el token |
+| `MINERVA_PORT` | Puerto del equipo (siempre en `127.0.0.1`) donde se publica la API y el dashboard | `8001` | Para otro puerto libre. **No uses el 8000**: es el del bot vivo de la v1. Dos bots reales a la vez duplicarían el token y la clave |
+| `MINERVA_REAL_BOT` | `true`: los mismos interruptores que tenía el bot real de la v1 (etiquetado del LLM, Telegram, brazo ejecutado, noticias y avisos). `false`: una instancia de prueba, sin nada de eso | `false` | `true` solo a propósito, con un `.env` propio de la v2 |
 | `MINERVA_RESTART` | Política de reinicio del contenedor: `unless-stopped` (vuelve solo tras reiniciar Docker o el equipo, salvo que lo detengas tú) o `no` | `unless-stopped` | `no` para instancias de prueba |
 | `MINERVA_ENV_FILE` | Archivo de credenciales que se monta de solo lectura en `/app/.env` | `.env` | Para probar con otro archivo |
 

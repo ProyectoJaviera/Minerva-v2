@@ -58,10 +58,11 @@ no crear a mano el registro oficial del veredicto. Ver [Gate, placebo y veredict
 `NEWS_COLLECTION_ENABLED` y `TELEGRAM_PUSH_ENABLED` en `true`; `LESSONS_MEMORY_ENABLED=false` siempre.
 
 **Invariantes — no romper.**
-- **Rehúsa** arrancar si algo ya escucha en `-Port` (dos procesos sobre la misma base SQLite) y si existe `data/MIGRADO_A_DOCKER.txt` (la base nativa sería una copia
+- **Rehúsa** arrancar si algo ya escucha en `-Port` (dos procesos sobre la misma base SQLite) y si existe `data/MIGRADO_A_DOCKER_V2.txt` (la base nativa sería una copia
   vieja y bifurcaría la medición).
-- Los parámetros `-Port`, `-DatabasePath` y `-LogDir` existen para probar contra el puerto 8001 y una base temporal; un puerto distinto de 8000 apaga LLM, Telegram,
-  brazo, noticias y avisos.
+- **Aislamiento de la v1:** rechaza `-Port 8000` (el puerto del bot vivo de la v1); el puerto por defecto es el 8001. Como solo el 8000 enciende los interruptores, en
+  la v2 quedan siempre apagados (LLM, Telegram, brazo, noticias y avisos). `stop_bot.ps1` también rechaza el 8000.
+- Los parámetros `-Port`, `-DatabasePath` y `-LogDir` permiten otro puerto y una base temporal.
 
 **Trampas conocidas.** `pythonw.exe` de un venv de uv es un trampolín **de consola**: se envuelve en `cmd.exe /c "... >> archivo 2>&1"` oculto con `-WindowStyle Hidden`.
 
@@ -83,7 +84,7 @@ escritura). **Nunca** lo uses contra el bot real para probarlo: usa `-Port 8001`
 
 **Invariantes — no romper.**
 - Se niegan a correr fuera de los minutos :10–:40 de una hora UTC que no sea de cierre de vela de 4 h (00, 04, 08, 12, 16, 20): ahí las filas de la medición ya no están en vuelo.
-- Tras la mudanza la base viva está en un volumen de Docker; la marca `data/MIGRADO_A_DOCKER.txt` protege la copia vieja.
+- Tras la mudanza la base viva está en un volumen de Docker; la marca `data/MIGRADO_A_DOCKER_V2.txt` protege la copia vieja.
 - Con `-DryRun` solo hacen comprobaciones sin efectos; los parámetros de ensayo (`-NativePort`, `-DockerPort`, `-ProjectName`, `-EnvFile`…) existen para no tocar el bot real.
 
 **Trampas conocidas.** Solo ASCII y compatibles con Windows PowerShell 5.1 (sin `??`, ternario ni `&&`): lo vigilan las pruebas.
@@ -222,7 +223,7 @@ con `. (Join-Path $PSScriptRoot "docker_common.ps1")`.
 - **Tablas que lee:** ninguno
 - **Tablas que escribe:** ninguno
 - **Tablas que crea o altera:** ninguno
-- **Pruebas que lo importan o citan:** `tests/unit/test_dev_docs_facts.py`, `tests/unit/test_docker_setup.py`, `tests/unit/test_telegram_alert_script.py`, `tests/unit/test_telegram_daily_script.py`
+- **Pruebas que lo importan o citan:** `tests/unit/test_dev_docs_facts.py`, `tests/unit/test_docker_setup.py`, `tests/unit/test_telegram_alert_script.py`, `tests/unit/test_telegram_daily_script.py`, `tests/unit/test_v1_isolation.py`
 <!-- /hechos:scripts/check_health.py -->
 
 ### `scripts/compare_fase2_runs.py`
@@ -323,7 +324,7 @@ con `. (Join-Path $PSScriptRoot "docker_common.ps1")`.
 
 ### `scripts/docker_support.py`
 
-**Responsabilidad.** Soporte para operar con el bot en Docker: la **marca de la mudanza** (`data/MIGRADO_A_DOCKER.txt`) y sacar una copia consistente de la base del volumen.
+**Responsabilidad.** Soporte para operar con el bot en Docker: la **marca de la mudanza** (`data/MIGRADO_A_DOCKER_V2.txt`) y sacar una copia consistente de la base del volumen.
 
 **Funciones y clases clave.**
 - `docker_mode_active()` / `docker_mode_refusal()`, `run_docker()` / `compose()` (nunca usan el shell ni esperan una terminal), `export_db_copy()` (respaldo dentro del contenedor, `docker compose cp` y SHA-256),
@@ -343,7 +344,7 @@ con `. (Join-Path $PSScriptRoot "docker_common.ps1")`.
 - **Tablas que lee:** ninguno
 - **Tablas que escribe:** ninguno
 - **Tablas que crea o altera:** ninguno
-- **Pruebas que lo importan o citan:** `tests/unit/test_docker_db_script.py`, `tests/unit/test_docker_mode_guards.py`, `tests/unit/test_docker_setup.py`, `tests/unit/test_docker_support.py`
+- **Pruebas que lo importan o citan:** `tests/unit/test_docker_db_script.py`, `tests/unit/test_docker_mode_guards.py`, `tests/unit/test_docker_setup.py`, `tests/unit/test_docker_support.py`, `tests/unit/test_v1_isolation.py`
 <!-- /hechos:scripts/docker_support.py -->
 
 ### `scripts/download_history.py`
@@ -824,7 +825,7 @@ Solo imprime conteos y fechas. Códigos: 0 identidad única y congelada (o sin f
 - **Tablas que lee:** ninguno
 - **Tablas que escribe:** ninguno
 - **Tablas que crea o altera:** ninguno
-- **Pruebas que lo importan o citan:** `tests/unit/test_telegram_alert_script.py`
+- **Pruebas que lo importan o citan:** `tests/unit/test_telegram_alert_script.py`, `tests/unit/test_v1_isolation.py`
 <!-- /hechos:scripts/telegram_alert.py -->
 
 ### `scripts/telegram_daily.py`
@@ -848,7 +849,7 @@ Solo imprime conteos y fechas. Códigos: 0 identidad única y congelada (o sin f
 - **Tablas que lee:** `llm_logs`
 - **Tablas que escribe:** ninguno
 - **Tablas que crea o altera:** ninguno
-- **Pruebas que lo importan o citan:** `tests/e2e/world.py`, `tests/unit/test_docker_mode_guards.py`, `tests/unit/test_docker_setup.py`, `tests/unit/test_measurement_uptime.py`, `tests/unit/test_telegram_daily_script.py`
+- **Pruebas que lo importan o citan:** `tests/e2e/world.py`, `tests/unit/test_docker_mode_guards.py`, `tests/unit/test_docker_setup.py`, `tests/unit/test_measurement_uptime.py`, `tests/unit/test_telegram_daily_script.py`, `tests/unit/test_v1_isolation.py`
 <!-- /hechos:scripts/telegram_daily.py -->
 
 ### `scripts/check_measurement_safety.py`

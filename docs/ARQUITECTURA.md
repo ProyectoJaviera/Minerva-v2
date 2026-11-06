@@ -203,7 +203,7 @@ flowchart LR
 La imagen es multietapa (compila el dashboard con Node, instala las dependencias de Python con versiones exactas y
 deja una imagen final sin Node ni compiladores), corre como usuario sin privilegios y no lleva secretos. El
 `docker-compose.yml` publica el puerto solo en `127.0.0.1`, guarda la base y los logs en **volúmenes con nombre**
-(`minerva_data` y `minerva_logs`; SQLite en modo WAL no es fiable sobre las carpetas compartidas de Docker Desktop),
+(`minerva-v2_data` y `minerva-v2_logs`; SQLite en modo WAL no es fiable sobre las carpetas compartidas de Docker Desktop),
 monta el `.env` y `docs/` de solo lectura y define un *healthcheck* sobre `/health`. Más en
 [Seguridad](SEGURIDAD.md#el-contenedor).
 

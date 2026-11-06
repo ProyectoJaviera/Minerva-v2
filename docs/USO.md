@@ -30,7 +30,7 @@ medición llegue a su punto de análisis. Si todavía no lo instalaste, empieza 
 
 ## Qué es "sano"
 
-`GET /health` (abre <http://127.0.0.1:8000/health>; no pide sesión) resume el estado. Cada 60 segundos el scheduler
+`GET /health` (abre <http://127.0.0.1:8001/health>; no pide sesión) resume el estado. Cada 60 segundos el scheduler
 evalúa el cierre de vela más reciente.
 
 | Campo de `/health` | Señal sana |
@@ -56,10 +56,10 @@ en marcha, con un 23,6 % de disponibilidad. Cada hora de equipo apagado alarga e
 1. **Lee el resumen diario de Telegram** (si registraste la tarea; ver [Tareas programadas](#tareas-programadas)).
    Debe decir: bot OK, `frozen_hash_ok`, etiquetado activo, etiquetadas y fallidas de las últimas 24 h, costo del LLM, N
    efectivo por lado (x/300) y si el *gate* está abierto. Nunca trae PnL.
-2. **Si no llegó:** el equipo estaba apagado a esa hora o el bot no responde. Mira <http://127.0.0.1:8000/health> o
+2. **Si no llegó:** el equipo estaba apagado a esa hora o el bot no responde. Mira <http://127.0.0.1:8001/health> o
    corre `python scripts/check_health.py` (códigos de salida: 0 OK, 1 STALE, 2 SIN_RESPUESTA).
 3. **Si recibiste una alerta de caída**, ve a [Solución de problemas](SOLUCION_PROBLEMAS.md).
-4. En el dashboard (<http://127.0.0.1:8000/>), la pestaña *Resumen* muestra salud, costo y avance; *Riesgo y
+4. En el dashboard (<http://127.0.0.1:8001/>), la pestaña *Resumen* muestra salud, costo y avance; *Riesgo y
    controles* muestra el *circuit breaker*, el kill switch y la pausa.
 
 ### Cada semana (≈ 10 minutos)
@@ -89,7 +89,7 @@ pnl_neto=`): es una limitación conocida; evita abrir los logs sin necesidad.
 
 ## El dashboard
 
-Se abre en <http://127.0.0.1:8000/> (solo desde el propio equipo) y pide el usuario y la contraseña de tu `.env`. La
+Se abre en <http://127.0.0.1:8001/> (solo desde el propio equipo) y pide el usuario y la contraseña de tu `.env`. La
 sesión dura 24 horas. Arriba muestra tu sesión y *Cerrar sesión*; si el scheduler está en pausa o el kill switch
 activo, aparece un **aviso rojo en todas las pestañas** ("LA MEDICION ESTA DETENIDA…"). Al pie, la atribución
 "Data provided by CoinGecko". Los datos se consultan periódicamente; no hay tiempo real por WebSocket. Tiene cinco
@@ -168,18 +168,21 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\start_bot.ps1
 powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\stop_bot.ps1
 ```
 
-`start_bot.ps1` abre el bot en el puerto 8000 sin consola, sobre `data\minerva_estabilidad.db`, con las variables fijas
-del "bot real" **con independencia de lo que diga el `.env`**. Se niega a arrancar si el puerto ya está ocupado o si
-existe la marca `data\MIGRADO_A_DOCKER.txt`, y espera hasta 180 s a que `/health` responda. `stop_bot.ps1` termina solo
-el proceso que escucha el puerto 8000 y sus lanzadores. **Es un corte duro** (Windows no da una señal de apagado
+`start_bot.ps1` abre el bot en el puerto 8001 sin consola, sobre `data\minerva_estabilidad.db`, con las variables fijas
+**con independencia de lo que diga el `.env`** (en la v2 los interruptores del "bot real" quedan siempre apagados: el
+script rechaza el puerto 8000, que es el del bot vivo de la v1). Se niega a arrancar si el puerto ya está ocupado o si
+existe la marca `data\MIGRADO_A_DOCKER_V2.txt`, y espera hasta 180 s a que `/health` responda. `stop_bot.ps1` termina solo
+el proceso que escucha el puerto 8001 (y rechaza el 8000) y sus lanzadores. **Es un corte duro** (Windows no da una señal de apagado
 cooperativo a un proceso sin consola): SQLite en modo WAL lo tolera, pero un etiquetado en vuelo se pierde; por eso se
 reinicia en la ventana segura. La parada de Docker, en cambio, es ordenada.
 
 ### Nunca los dos a la vez
 
-El puerto 8000 publicado por Docker choca **a propósito** con el del bot nativo: si lo levantas por error con el bot
-encendido, Docker falla al enlazar el puerto *antes* de arrancar el proceso. Si cambias `MINERVA_PORT` para evitarlo,
-tendrás dos bots con el mismo token y la misma clave: no lo hagas salvo para pruebas (`MINERVA_REAL_BOT=false`).
+El puerto 8001 publicado por Docker choca **a propósito** con el del bot nativo de la v2 (que también usa el 8001) y con
+el servidor de desarrollo: si lo levantas por error con otro encendido, Docker falla al enlazar el puerto *antes* de
+arrancar el proceso. Si cambias `MINERVA_PORT` para evitarlo, tendrás dos bots con el mismo token y la misma clave: no lo
+hagas salvo para pruebas (`MINERVA_REAL_BOT=false`, el valor por defecto de la v2). **El 8000 nunca se usa en la v2: es
+el del bot vivo de la v1.**
 
 ## Reinicios seguros
 
@@ -300,7 +303,7 @@ Códigos: 0 ok, 2 uso, 3 el respaldo no existe, 4 no es válido, 5 el destino ex
 
 ### Qué borra el volumen de Docker
 
-El volumen `minerva_data` es la medición completa. Lo borran: `docker compose down -v`, `docker volume rm minerva_data`,
+El volumen `minerva-v2_data` es la medición completa. Lo borran: `docker compose down -v`, `docker volume rm minerva-v2_data`,
 `docker volume prune --all` (sin `--all` solo borra volúmenes anónimos), `docker system prune --volumes -a` y, en Docker
 Desktop, *Troubleshoot → Clean / Purge data*, *Reset to factory defaults* y desinstalar borrando los datos. **Nunca uses
 esas acciones sin un respaldo reciente fuera del equipo.** `docker compose down` (sin `-v`), `stop`, `restart`,
@@ -360,10 +363,10 @@ Viven **fuera** del bot a propósito: si el bot se cuelga, siguen avisando. Toda
 
 | Tarea (nombre sugerido) | Qué hace | Cuándo |
 |---|---|---|
-| `MinervaHealthAlert` | `scripts/telegram_alert.py`: avisa por Telegram si `/health` está `stale` o sin respuesta. Avisa en cada **cambio** de estado y, mientras sigue caído, con un recordatorio cada 60 minutos | Cada 10 min |
-| `MinervaDailySummary` | El resumen diario por Telegram (solo conteos, nunca PnL) | Una vez al día |
-| `MinervaBackup` | Respaldo diario consistente (ver [Respaldos](#respaldos)) | Una vez al día |
-| `MinervaStartBot` | Solo para el arranque **nativo** en Windows: lanza `start_bot.ps1` al iniciar sesión. Con Docker no aplica (lo reemplaza `restart: unless-stopped`) | Al iniciar sesión |
+| `MinervaV2HealthAlert` | `scripts/telegram_alert.py`: avisa por Telegram si `/health` está `stale` o sin respuesta. Avisa en cada **cambio** de estado y, mientras sigue caído, con un recordatorio cada 60 minutos | Cada 10 min |
+| `MinervaV2DailySummary` | El resumen diario por Telegram (solo conteos, nunca PnL) | Una vez al día |
+| `MinervaV2Backup` | Respaldo diario consistente (ver [Respaldos](#respaldos)) | Una vez al día |
+| `MinervaV2StartBot` | Solo para el arranque **nativo** en Windows: lanza `start_bot.ps1` al iniciar sesión. Con Docker no aplica (lo reemplaza `restart: unless-stopped`) | Al iniciar sesión |
 
 ### Windows (Programador de tareas)
 
@@ -377,7 +380,7 @@ eso los comandos de abajo usan `conhost.exe --headless` con el `python.exe` del 
 lo vea, así que la tarea guarda la ruta absoluta):
 
 ```bat
-schtasks /Create /SC MINUTE /MO 10 /TN "MinervaHealthAlert" /ST 00:00 /F ^
+schtasks /Create /SC MINUTE /MO 10 /TN "MinervaV2HealthAlert" /ST 00:00 /F ^
     /TR "conhost.exe --headless %cd%\.venv\Scripts\python.exe %cd%\scripts\telegram_alert.py"
 ```
 
@@ -399,7 +402,7 @@ $action = New-ScheduledTaskAction -Execute "conhost.exe" `
 $trigger = New-ScheduledTaskTrigger -Daily -At 09:15
 # El cmdlet guarda la hora en UTC; se fija la hora LOCAL (sin "Z") para que siga siendo 09:15 con el cambio de horario.
 $trigger.StartBoundary = (Get-Date -Hour 9 -Minute 15 -Second 0).ToString("yyyy-MM-ddTHH:mm:ss")
-Register-ScheduledTask -TaskName "MinervaDailySummary" -Action $action -Trigger $trigger -Settings $settings `
+Register-ScheduledTask -TaskName "MinervaV2DailySummary" -Action $action -Trigger $trigger -Settings $settings `
     -Description "Resumen diario de Minerva por Telegram."
 
 # Respaldo diario a las 03:30
@@ -407,7 +410,7 @@ $action = New-ScheduledTaskAction -Execute "conhost.exe" `
     -Argument "--headless $python `"$RepoRoot\scripts\docker_db.py`" backup --keep 14" `
     -WorkingDirectory $RepoRoot
 $trigger = New-ScheduledTaskTrigger -Daily -At 03:30
-Register-ScheduledTask -TaskName "MinervaBackup" -Action $action -Trigger $trigger -Settings $settings `
+Register-ScheduledTask -TaskName "MinervaV2Backup" -Action $action -Trigger $trigger -Settings $settings `
     -Description "Respaldo diario consistente de la base de Minerva (Docker)."
 ```
 
@@ -427,7 +430,7 @@ $action = New-ScheduledTaskAction -Execute "conhost.exe" `
 $trigger = New-ScheduledTaskTrigger -AtLogOn
 $trigger.Delay = "PT60S"   # 60 s de retraso: tiempo para que haya red
 $settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries
-Register-ScheduledTask -TaskName "MinervaStartBot" -Action $action -Trigger $trigger -Settings $settings `
+Register-ScheduledTask -TaskName "MinervaV2StartBot" -Action $action -Trigger $trigger -Settings $settings `
     -Description "Arranca el bot nativo de Minerva al iniciar sesion."
 ```
 
@@ -436,7 +439,7 @@ Para eliminar cualquiera: `Unregister-ScheduledTask -TaskName "<nombre>" -Confir
 minutos, corrígela sin recrearla:
 
 ```powershell
-$t = Get-ScheduledTask -TaskName MinervaHealthAlert
+$t = Get-ScheduledTask -TaskName MinervaV2HealthAlert
 $t.Actions[0].Execute = "conhost.exe"
 $t.Actions[0].Arguments = "--headless $RepoRoot\.venv\Scripts\python.exe scripts\telegram_alert.py"
 Set-ScheduledTask -InputObject $t
@@ -586,13 +589,13 @@ reconoce el registro oficial al instante. Los informes **nunca** abren la base v
 |---|---|---|
 | `.env` | Credenciales y configuración local (el hash de la contraseña, entre comillas simples) | **No, nunca** |
 | `data/minerva_estabilidad.db` | Base del bot **nativo** de Windows. Tras pasar a Docker es una copia vieja | **No** |
-| `data/MIGRADO_A_DOCKER.txt` | Marca de la mudanza: la escribe `migrate_to_docker.ps1` y la quita `rollback_from_docker.ps1` | **No** |
+| `data/MIGRADO_A_DOCKER_V2.txt` | Marca de la mudanza: la escribe `migrate_to_docker.ps1` y la quita `rollback_from_docker.ps1` | **No** |
 | `data/backups/` | Respaldos y copias de trabajo (`minerva_*`, `docker_*`, `veredicto_*`, y los de la mudanza) | **No** |
-| `logs/minerva.log` | Log principal (rota: 5 × 10 MB). Con Docker vive en el volumen `minerva_logs`: `docker compose logs minerva` | No |
+| `logs/minerva.log` | Log principal (rota: 5 × 10 MB). Con Docker vive en el volumen `minerva-v2_logs`: `docker compose logs minerva` | No |
 | `logs/medicion.log` | Bitácora de `start_bot.ps1` (cada arranque, rechazo o error) | No |
 | `logs/mudanza_docker.log` | Registro de `migrate_to_docker.ps1` y `rollback_from_docker.ps1` | No |
 | `docs/VEREDICTO_3_6_REGISTRO*.txt` | Registro oficial del veredicto | Sí (recomendado) |
-| Volúmenes `minerva_data`, `minerva_logs` | **Base viva** y logs del contenedor | No |
+| Volúmenes `minerva-v2_data`, `minerva-v2_logs` | **Base viva** y logs del contenedor | No |
 
 Claves de `system_state` (estado persistente del sistema): `scheduler_paused`, `kill_switch_active`,
 `drawdown_stop_active`, `circuit_breaker_until`, `equity_peak_usdt`, `real_arm_started_at`, `real_arm_drawdown_baseline` y

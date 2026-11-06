@@ -7,6 +7,21 @@ de su autor. El detalle commit por commit está en `git log`, y la bitácora com
 
 Las fechas son las de los commits (2026). **Nada de lo que hay aquí envía órdenes reales**: todo es paper trading.
 
+## Minerva v2: inicio y aislamiento de la v1 — 2026-11-05
+
+- La v2 parte de la etiqueta `v1.0` del repositorio Minerva-v1 (mismo código e historial); la medición ciega de la v1
+  sigue su curso en ese otro repositorio.
+- Nombres propios para que ningún comando de la v2 pueda tocar el bot vivo de la v1: proyecto y contenedor `minerva-v2`,
+  imagen `minerva-v2:local`, volúmenes `minerva-v2_data` y `minerva-v2_logs` y red `minerva-v2_default` (fijados por
+  nombre en el compose), puerto del equipo `8001`, tareas programadas `MinervaV2…` y marca `MIGRADO_A_DOCKER_V2.txt`.
+- `MINERVA_REAL_BOT` vale `false` por defecto: sin etiquetado del LLM, Telegram, brazo ejecutado, noticias ni avisos.
+- Candados: `start_bot.ps1`, `stop_bot.ps1`, `migrate_to_docker.ps1` y `rollback_from_docker.ps1` rechazan el puerto 8000;
+  los de la mudanza rechazan además el proyecto `minerva` y las tareas de la v1; `scripts/docker_support.py` rechaza el
+  proyecto `minerva` y pasa siempre `-p`. Pruebas nuevas en `tests/unit/test_v1_isolation.py`.
+- `CLAUDE.md` reescrito para la v2 (sin las reglas de congelamiento de la v1; todo cambio de comportamiento respecto de
+  la v1.0 se anota en `docs/historial/PROGRESS.md`).
+- Sin cambios de comportamiento de `app/` respecto de la v1.0.
+
 ## Variante de la imagen para procesadores sin SSE4 — 2026-10-26
 
 - Nuevo `docker/requirements.old-cpu.lock`: las mismas versiones exactas que `docker/requirements.lock` salvo

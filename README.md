@@ -14,6 +14,17 @@
 > ejecución real tiene latencia, comisiones, deslizamiento y límites que el simulador solo aproxima
 > ([lo que no se pudo verificar](docs/COSTOS_Y_LIMITES.md#lo-no-verificado)).
 
+> ## Esta es la versión 2
+>
+> La v2 **parte de la etiqueta `v1.0`** del repositorio Minerva-v1 (el mismo código y el mismo historial). La medición ciega
+> de la v1 sigue su curso **en ese otro repositorio**, con su propio bot; la v2 es donde continúa el desarrollo nuevo.
+> Para que nada de la v2 pueda tocar el bot vivo de la v1, **todos sus nombres cambian**: proyecto y contenedor
+> `minerva-v2`, imagen `minerva-v2:local`, volúmenes `minerva-v2_data` y `minerva-v2_logs`, puerto `8001` (el `8000` es de la v1),
+> tareas programadas con prefijo `MinervaV2` y marca `MIGRADO_A_DOCKER_V2.txt`. Además arranca **sin** etiquetado del LLM,
+> Telegram, brazo ejecutado, noticias ni avisos (`MINERVA_REAL_BOT=false` por defecto). **Nunca copies el `.env` real de la
+> v1 a la v2.** La mayor parte de esta documentación se heredó de la v1 y todavía habla en sus términos (por ejemplo, de «la
+> medición» y del «bot real»): donde difiera de esta nota, manda esta nota y el código.
+
 ## Qué es
 
 Minerva evalúa, en cada cierre de vela, un universo dinámico de las principales criptomonedas con seis estrategias por
@@ -107,11 +118,11 @@ Windows; la imagen de Docker es de Linux.
 ## Inicio rápido con Docker
 
 ```bash
-git clone https://github.com/ProyectoJaviera/MinervaV2.git
-cd MinervaV2
+git clone https://github.com/ProyectoJaviera/Minerva-v2.git
+cd Minerva-v2
 cp .env.example .env                          # Windows (PowerShell): Copy-Item .env.example .env
 docker compose build                          # construye la imagen (~1 min la primera vez)
-docker run --rm -it minerva:local python scripts/hash_password.py    # imprime AUTH_PASSWORD_HASH='…'
+docker run --rm -it minerva-v2:local python scripts/hash_password.py    # imprime AUTH_PASSWORD_HASH='…'
 ```
 
 1. **Edita el `.env`**: pega el hash que imprimió el último comando (con sus comillas simples), elige `AUTH_USERNAME`, pon
@@ -124,12 +135,13 @@ docker run --rm -it minerva:local python scripts/hash_password.py    # imprime A
    docker compose ps                          # STATUS pasa a "healthy" en ~1 minuto
    ```
 
-3. Abre el dashboard en <http://127.0.0.1:8000/> (con el `AUTH_USERNAME` de tu `.env` y la contraseña que elegiste al
-   generar el hash) y el estado en <http://127.0.0.1:8000/health>.
+3. Abre el dashboard en <http://127.0.0.1:8001/> (con el `AUTH_USERNAME` de tu `.env` y la contraseña que elegiste al
+   generar el hash) y el estado en <http://127.0.0.1:8001/health>.
 
-> Sin clave de Anthropic, o para explorar sin gastar, añade `MINERVA_REAL_BOT=false` al `.env`: el bot genera señales y
-> sombras pero no llama a ninguna API de pago. No verás resultados de la IA en ningún caso hasta el veredicto: **la
-> medición es ciega** y toma meses.
+> En la v2 `MINERVA_REAL_BOT` vale `false` por defecto: el bot genera señales y sombras pero no llama a ninguna API de
+> pago (ni a Telegram). Para encender el etiquetado con Claude, el brazo ejecutado, las noticias y los avisos, ponlo
+> a propósito (`MINERVA_REAL_BOT=true`, con un `.env` **propio de la v2**). No verás resultados de la IA en ningún caso
+> hasta el veredicto: **la medición es ciega** y toma meses.
 
 ## Documentación
 
@@ -199,15 +211,15 @@ no results are published. Documentation is in Spanish; code identifiers are in E
 ### Quick start
 
 ```bash
-git clone https://github.com/ProyectoJaviera/MinervaV2.git && cd MinervaV2
+git clone https://github.com/ProyectoJaviera/Minerva-v2.git && cd Minerva-v2
 cp .env.example .env
 docker compose build
-docker run --rm -it minerva:local python scripts/hash_password.py   # paste the printed line into .env
+docker run --rm -it minerva-v2:local python scripts/hash_password.py   # paste the printed line into .env
 # edit .env: AUTH_USERNAME, AUTH_PASSWORD_HASH, JWT_SECRET (>= 32 chars), ANTHROPIC_API_KEY
 docker compose up -d
 ```
 
-Open <http://127.0.0.1:8000/> (dashboard) and <http://127.0.0.1:8000/health>. Requirements: Git, Docker with Compose v2,
+Open <http://127.0.0.1:8001/> (dashboard) and <http://127.0.0.1:8001/health>. Requirements: Git, Docker with Compose v2,
 Python 3.11/3.12 for helper scripts, and an Anthropic API key (the only paid component; about 0.005 USD per labeled
 signal, with a hard daily cap). Full guide (in Spanish): [`docs/GUIA_INSTALACION.md`](docs/GUIA_INSTALACION.md).
 
