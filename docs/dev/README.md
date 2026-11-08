@@ -72,8 +72,9 @@ docker/         healthcheck, versiones exactas de la imagen y variables de Compo
 | `app/config.py` | la clase `Settings` y la instancia `settings`; una variable de `.env` por campo | [config](modulos/config.md) |
 | `app/core/` | el bucle del scheduler, el logging, el latido y el cliente HTTP | [core](modulos/core.md) |
 | `app/market/` | datos de mercado públicos y el universo de activos | [market](modulos/market.md) |
-| `app/indicators/` | EMA, ATR, RSI, Bollinger, Donchian (causales) | [indicators](modulos/indicators.md) |
+| `app/indicators/` | EMA, ATR, RSI, Bollinger, Donchian (causales) y los indicadores de la v2 | [indicators](modulos/indicators.md) |
 | `app/strategies/` | las estrategias: dicen LONG, SHORT o HOLD, no abren nada | [strategies](modulos/strategies.md) |
+| `app/candidates/` | los candidatos de la v2 (preregistro en borrador), todavía sin conectar | [candidates](modulos/candidates.md) |
 | `app/trading/` | el núcleo operativo y el paquete más grande | [trading](modulos/trading.md) |
 | `app/llm/` | todo lo que rodea la decisión de Claude sobre una señal | [llm](modulos/llm.md) |
 | `app/execution/` | la cuenta paper y las fórmulas de PnL | [execution](modulos/execution.md) |
@@ -93,6 +94,7 @@ docker/         healthcheck, versiones exactas de la imagen y variables de Compo
 flowchart LR
     api["api<br/>20 archivos"]
     backtesting["backtesting<br/>7 archivos"]
+    candidates["candidates<br/>5 archivos"]
     core["core<br/>5 archivos"]
     execution["execution<br/>5 archivos"]
     indicators["indicators<br/>7 archivos"]
@@ -110,6 +112,8 @@ flowchart LR
     api -->|7| news
     api -->|16| trading
     backtesting -->|3| trading
+    candidates -->|5| indicators
+    candidates -->|4| strategies
     core -->|5| trading
     execution -->|5| trading
     llm -->|3| memory
@@ -131,19 +135,20 @@ El diagrama muestra solo las flechas con 3 o más imports; no dibuja las que lle
 | Paquete | Archivos | Líneas | Importa de (imports) | Lo importan |
 |---|---:|---:|---|---|
 | `api` | 20 | 2246 | persistence 36, trading 16, config 11, core 7, news 7, llm 4, market 3, memory 3, telegram 2 | main, scripts, telegram |
-| `backtesting` | 7 | 2063 | persistence 9, trading 3, config 2, core 2, market 2, strategies 2, execution 1 | scripts, trading |
+| `backtesting` | 7 | 2092 | persistence 9, trading 3, config 2, core 2, market 2, strategies 2, execution 1 | scripts, trading |
+| `candidates` | 5 | 610 | indicators 5, strategies 4 | ninguno |
 | `config` | 1 | 423 | ninguno | api, backtesting, core, execution, llm, main, market, memory, news, scripts, telegram, trading |
 | `core` | 5 | 593 | trading 5, persistence 4, config 2, market 2, execution 1 | api, backtesting, execution, llm, main, market, memory, news, scripts, telegram, trading |
 | `execution` | 5 | 666 | persistence 7, trading 5, config 1, core 1, market 1 | backtesting, core, main, trading |
-| `indicators` | 7 | 1146 | ninguno | strategies |
+| `indicators` | 7 | 1146 | ninguno | candidates, scripts, strategies |
 | `llm` | 9 | 1478 | persistence 16, config 5, memory 3, core 1, market 1, news 1 | api, scripts, telegram, trading |
 | `main` | 2 | 278 | api 16, market 4, trading 4, core 3, telegram 3, config 1, execution 1, memory 1, news 1, persistence 1 | ninguno |
 | `market` | 11 | 1908 | persistence 13, core 9, config 1 | api, backtesting, core, execution, llm, main, scripts, telegram, trading |
 | `memory` | 10 | 1252 | persistence 20, config 3, core 2, news 1, trading 1 | api, llm, main, scripts |
 | `news` | 11 | 1703 | persistence 11, core 4, config 3 | api, llm, main, memory, scripts |
 | `persistence` | 22 | 5016 | ninguno | api, backtesting, core, execution, llm, main, market, memory, news, scripts, telegram, trading |
-| `scripts` | 32 | 8781 | trading 26, config 19, persistence 19, market 9, llm 6, backtesting 3, core 3, strategies 3, memory 2, news 2, api 1 | ninguno |
-| `strategies` | 9 | 807 | indicators 4 | backtesting, scripts, trading |
+| `scripts` | 33 | 9020 | trading 26, config 20, persistence 19, market 10, llm 6, backtesting 3, core 3, strategies 3, indicators 2, memory 2, news 2, api 1 | ninguno |
+| `strategies` | 9 | 807 | indicators 4 | backtesting, candidates, scripts, trading |
 | `telegram` | 8 | 1903 | persistence 12, trading 7, core 5, config 4, market 2, api 1, llm 1 | api, main |
 | `trading` | 23 | 7441 | persistence 57, config 9, market 8, core 6, execution 5, llm 5, backtesting 4, strategies 4 | api, backtesting, core, execution, main, memory, scripts, telegram |
 <!-- /grafo-paquetes -->

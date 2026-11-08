@@ -589,6 +589,12 @@ entrada se omite si su SL perderia mas de <code>MAX_SL_MARGIN_LOSS_PCT</code> de
 indicadores se precalculan una vez y la estrategia ve ventanas de <code><a href="#MAX_LOOKBACK_BARS">MAX_LOOKBACK_BARS</a></code>.
 Si hay menos de 60 velas alineadas devuelve listas vacias.</p>
 
+<p>Desde la v2, el DataFrame de <code>precompute</code> trae tambien <code>open_time</code> (ms UTC de apertura), y
+una estrategia con el atributo <code>skip_entry_if_sl_crossed = True</code> no abre la entrada si el
+<code>open</code> de la vela de entrada ya cruzo el SL que pide (se cuenta en el log; no va a las
+entradas omitidas por tope). Las estrategias de la v1 no declaran ese atributo: sus
+operaciones son identicas a las de antes (<code>tests/unit/test_backtest_v1_regression.py</code>).</p>
+
 <h6 id="arguments">Arguments:</h6>
 
 <ul>

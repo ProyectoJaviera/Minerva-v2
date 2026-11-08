@@ -68,6 +68,11 @@ afectar la medición (aunque cambiar un criterio de descarte tras ver resultados
 - Tope de riesgo por operación: si el SL implicaría perder más de `MAX_SL_MARGIN_LOSS_PCT` del margen, la entrada se omite y se
   registra en `skipped`.
 - **Ya no descarga nada por red:** lee de la caché con `get_cached_or_raise` y lanza `MissingHistoricalDataError` si faltan velas.
+- **Desde la v2:** el DataFrame de `precompute` trae `open_time` (ms UTC) como última columna, y una estrategia con
+  `skip_entry_if_sl_crossed = True` no abre la entrada si el OPEN ya cruzó el SL que pide (se cuenta en el log; no va a
+  `skipped`, que es de omisiones por el tope). Ninguna estrategia de la v1 declara ese atributo: sus operaciones son
+  idénticas a las de antes (`tests/unit/test_backtest_v1_regression.py`, contra una referencia generada con el motor
+  anterior).
 
 **Trampas conocidas.**
 - `MAX_LOOKBACK_BARS = 300`: nunca le pasa más historia a `evaluate` por vela (fue la causa del bug de la estrategia por
@@ -85,7 +90,7 @@ afectar la medición (aunque cambiar un criterio de descarte tras ver resultados
 - **Tablas que lee:** `contract_specs_cache`, `funding_cache`
 - **Tablas que escribe:** ninguno
 - **Tablas que crea o altera:** ninguno
-- **Pruebas que lo importan o citan:** `tests/unit/test_backtest_engine.py`, `tests/unit/test_backtest_metrics.py`, `tests/unit/test_backtest_report.py`, `tests/unit/test_backtest_sanity.py`, `tests/unit/test_funding_contrarian_percentile_strategy.py`, `tests/unit/test_portfolio_simulation.py`, `tests/unit/test_risk_analysis.py`, `tests/unit/test_sl_calc.py`, `tests/unit/test_slippage_and_funding_accrual.py`, `tests/unit/test_stop_engine.py`
+- **Pruebas que lo importan o citan:** `tests/unit/test_backtest_engine.py`, `tests/unit/test_backtest_engine_v2.py`, `tests/unit/test_backtest_metrics.py`, `tests/unit/test_backtest_report.py`, `tests/unit/test_backtest_sanity.py`, `tests/unit/test_backtest_v1_regression.py`, `tests/unit/test_funding_contrarian_percentile_strategy.py`, `tests/unit/test_portfolio_simulation.py`, `tests/unit/test_risk_analysis.py`, `tests/unit/test_sl_calc.py`, `tests/unit/test_slippage_and_funding_accrual.py`, `tests/unit/test_stop_engine.py`
 <!-- /hechos:app/backtesting/engine.py -->
 
 ### `app/backtesting/funding.py`

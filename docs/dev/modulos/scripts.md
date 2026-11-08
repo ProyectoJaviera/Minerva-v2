@@ -852,6 +852,34 @@ Solo imprime conteos y fechas. Códigos: 0 identidad única y congelada (o sin f
 - **Pruebas que lo importan o citan:** `tests/e2e/world.py`, `tests/unit/test_docker_mode_guards.py`, `tests/unit/test_docker_setup.py`, `tests/unit/test_measurement_uptime.py`, `tests/unit/test_telegram_daily_script.py`, `tests/unit/test_v1_isolation.py`
 <!-- /hechos:scripts/telegram_daily.py -->
 
+### `scripts/v2_tradingview_check.py`
+
+**Responsabilidad.** Imprime, para comparar a mano con TradingView antes de congelar el preregistro de la v2, los niveles
+Camarilla R3/R4/S3/S4 de tres días UTC y las últimas señales SFP en 1h de BTCUSDT y ETHUSDT.
+
+**Funciones y clases clave.**
+- `build_report()`, `fetch_bars()` (paginación hacia atrás de 200 velas), `camarilla_lines()` (también compara el agregado
+  de 1h con la vela diaria de Bitunix) y `sfp_lines()` (hora de la barrida y de la confirmación).
+
+**Invariantes — no romper.** Solo lectura: velas LAST_PRICE del endpoint público de Bitunix; no lee `.env` (toma el URL
+por defecto de `Settings`), no abre ninguna base y no escribe nada. Descarta la vela en curso.
+
+**Trampas conocidas.** Para comparar hay que abrir en TradingView el mismo par perpetuo de Bitunix y poner el gráfico en
+UTC; con otro exchange los precios difieren un poco.
+
+<!-- hechos:scripts/v2_tradingview_check.py -->
+**Hechos derivados del código** (los escribe `scripts/build_dev_docs.py`; no se editan):
+
+- **Referencia pdoc:** [`api/scripts/v2_tradingview_check.html`](../api/scripts/v2_tradingview_check.html)
+- **Importa (internos):** `app.config`, `app.indicators.levels`, `app.indicators.structure`, `app.market.bitunix_rest`
+- **Lo importan:** ninguno
+- **Configuración que lee:** ninguno
+- **Tablas que lee:** ninguno
+- **Tablas que escribe:** ninguno
+- **Tablas que crea o altera:** ninguno
+- **Pruebas que lo importan o citan:** `tests/unit/test_v2_tradingview_check_script.py`
+<!-- /hechos:scripts/v2_tradingview_check.py -->
+
 ### `scripts/check_measurement_safety.py`
 
 **Responsabilidad.** Compara el árbol de trabajo, el índice (`--staged`) o los commits desde una revisión (`--since`, `--since-measurement`) con la lista de **zonas protegidas** de la medición y avisa qué archivos, parámetros de configuración o tablas protegidos cambiaron y de qué manera. Es la lista de zonas, en código, de [ZONAS_PROTEGIDAS](../ZONAS_PROTEGIDAS.md).

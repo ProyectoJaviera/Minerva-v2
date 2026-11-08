@@ -582,6 +582,7 @@ reconoce el registro oficial al instante. Los informes **nunca** abren la base v
 | `export_schema_doc.py`, `export_docker_requirements.py` | Regeneran `docs/ESQUEMA_BD.md` y `docker/requirements.lock` (`--check` verifica que estén al día) | — |
 | `build_dev_docs.py`, `dev_docs_facts.py` | Para quien modifica el código ([documentación técnica](dev/README.md)): regeneran la de `docs/dev/` (referencia pdoc de `app/` y `scripts/`, hechos derivados de cada archivo y grafo de paquetes); `--check` verifica que esté al día. `dev_docs_facts.py` es una pieza compartida, no se ejecuta sola | — |
 | `check_measurement_safety.py` | Para quien modifica el código: compara lo que cambió (el árbol de trabajo, `--staged`, o todo desde el congelamiento con `--since-measurement`) con las [zonas protegidas](dev/ZONAS_PROTEGIDAS.md) de la medición y avisa qué archivos, parámetros o tablas protegidos tocó. Solo ejecuta `git` y lee archivos: no abre la base ni el `.env` | Seguro (no abre la base) |
+| `v2_tradingview_check.py` | Para la v2: imprime los niveles Camarilla R3/R4/S3/S4 de tres días UTC y las últimas señales SFP en 1h de BTCUSDT y ETHUSDT, para compararlos a mano con TradingView antes de congelar el [preregistro](v2/PREREGISTRO_V2.md). Lee velas públicas de Bitunix; no abre la base ni el `.env` | Seguro (no abre la base) |
 
 ## Archivos y carpetas
 

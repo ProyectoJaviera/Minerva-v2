@@ -90,12 +90,12 @@ backtest recalculaba cada indicador desde cero en cada vela.
 
 - **Referencia pdoc:** [`api/app/strategies/base.html`](../api/app/strategies/base.html)
 - **Importa (internos):** ninguno
-- **Lo importan:** `app.backtesting.engine`, `app.strategies.donchian_breakout`, `app.strategies.ema_cross`, `app.strategies.funding_contrarian`, `app.strategies.funding_contrarian_percentile`, `app.strategies.mean_reversion_rsi_bb`, `app.strategies.registry`, `app.strategies.trend_atr_stop`, `app.trading.levels`, `app.trading.signal_generator`, `app.trading.sl_calc`
+- **Lo importan:** 15 módulos (backtesting 1, candidates 4, strategies 7, trading 3)
 - **Configuración que lee:** ninguno
 - **Tablas que lee:** ninguno
 - **Tablas que escribe:** ninguno
 - **Tablas que crea o altera:** ninguno
-- **Pruebas que lo importan o citan:** `tests/e2e/series.py`, `tests/e2e/test_series.py`, `tests/unit/test_backtest_engine.py`, `tests/unit/test_backtest_sanity.py`, `tests/unit/test_donchian_breakout_strategy.py`, `tests/unit/test_ema_cross_strategy.py`, `tests/unit/test_funding_contrarian_percentile_strategy.py`, `tests/unit/test_funding_contrarian_strategy.py`, `tests/unit/test_mean_reversion_strategy.py`, `tests/unit/test_signal_generator.py`, `tests/unit/test_sl_calc.py`, `tests/unit/test_trend_atr_stop_strategy.py`
+- **Pruebas que lo importan o citan:** 14 archivos (e2e 2, unit 12)
 <!-- /hechos:app/strategies/base.py -->
 
 ### `app/strategies/donchian_breakout.py`
@@ -266,7 +266,7 @@ ventana de 720 velas).
 - **Tablas que lee:** ninguno
 - **Tablas que escribe:** ninguno
 - **Tablas que crea o altera:** ninguno
-- **Pruebas que lo importan o citan:** `tests/e2e/series.py`, `tests/unit/test_analyze_risk_script.py`, `tests/unit/test_run_backtest_script.py`, `tests/unit/test_run_full_backtest_smoke.py`
+- **Pruebas que lo importan o citan:** `tests/e2e/series.py`, `tests/unit/test_analyze_risk_script.py`, `tests/unit/test_backtest_v1_regression.py`, `tests/unit/test_run_backtest_script.py`, `tests/unit/test_run_full_backtest_smoke.py`, `tests/unit/test_strategies_v2.py`
 <!-- /hechos:app/strategies/registry.py -->
 
 ### `app/strategies/trend_atr_stop.py`

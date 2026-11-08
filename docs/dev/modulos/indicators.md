@@ -110,12 +110,12 @@ al calentamiento. No mezclar con `engine.ema`, que arranca con el primer valor (
 
 - **Referencia pdoc:** sin página (módulo privado)
 - **Importa (internos):** ninguno
-- **Lo importan:** `app.indicators.levels`, `app.indicators.oscillators`, `app.indicators.structure`, `app.indicators.trend_filters`
+- **Lo importan:** `app.candidates.range_filter_flip`, `app.candidates.sfp_reversal`, `app.indicators.levels`, `app.indicators.oscillators`, `app.indicators.structure`, `app.indicators.trend_filters`
 - **Configuración que lee:** ninguno
 - **Tablas que lee:** ninguno
 - **Tablas que escribe:** ninguno
 - **Tablas que crea o altera:** ninguno
-- **Pruebas que lo importan o citan:** `tests/unit/test_indicators_v2_pine.py`, `tests/unit/test_indicators_v2_structure.py`, `tests/unit/test_indicators_v2_trend_oscillators.py`
+- **Pruebas que lo importan o citan:** `tests/unit/test_indicators_v2_pine.py`, `tests/unit/test_indicators_v2_structure.py`, `tests/unit/test_indicators_v2_trend_oscillators.py`, `tests/unit/test_strategies_v2.py`
 <!-- /hechos:app/indicators/_pine.py -->
 
 ### `app/indicators/levels.py`
@@ -140,12 +140,12 @@ mínimo y el cierre del día desde las propias velas de la serie.
 
 - **Referencia pdoc:** [`api/app/indicators/levels.html`](../api/app/indicators/levels.html)
 - **Importa (internos):** `app.indicators._pine`
-- **Lo importan:** ninguno
+- **Lo importan:** `app.candidates.camarilla_s3_r3`, `scripts.v2_tradingview_check`
 - **Configuración que lee:** ninguno
 - **Tablas que lee:** ninguno
 - **Tablas que escribe:** ninguno
 - **Tablas que crea o altera:** ninguno
-- **Pruebas que lo importan o citan:** `tests/unit/test_indicators_v2_causality.py`, `tests/unit/test_indicators_v2_levels.py`
+- **Pruebas que lo importan o citan:** `tests/unit/test_indicators_v2_causality.py`, `tests/unit/test_indicators_v2_levels.py`, `tests/unit/test_strategies_v2.py`, `tests/unit/test_v2_tradingview_check_script.py`
 <!-- /hechos:app/indicators/levels.py -->
 
 ### `app/indicators/oscillators.py`
@@ -200,7 +200,7 @@ confirmación) y zonas de liquidez deterministas emitidas al confirmarse el pivo
 
 - **Referencia pdoc:** [`api/app/indicators/structure.html`](../api/app/indicators/structure.html)
 - **Importa (internos):** `app.indicators._pine`
-- **Lo importan:** ninguno
+- **Lo importan:** `app.candidates.sfp_reversal`, `scripts.v2_tradingview_check`
 - **Configuración que lee:** ninguno
 - **Tablas que lee:** ninguno
 - **Tablas que escribe:** ninguno
@@ -229,7 +229,7 @@ queda «bajista» hasta el primer cruce real (comportamiento del original, con p
 
 - **Referencia pdoc:** [`api/app/indicators/trend_filters.html`](../api/app/indicators/trend_filters.html)
 - **Importa (internos):** `app.indicators._pine`
-- **Lo importan:** ninguno
+- **Lo importan:** `app.candidates.range_filter_flip`
 - **Configuración que lee:** ninguno
 - **Tablas que lee:** ninguno
 - **Tablas que escribe:** ninguno

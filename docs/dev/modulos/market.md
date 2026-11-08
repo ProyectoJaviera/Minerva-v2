@@ -99,7 +99,7 @@ y reintentos con backoff.
 
 - **Referencia pdoc:** [`api/app/market/bitunix_rest.html`](../api/app/market/bitunix_rest.html)
 - **Importa (internos):** `app.core.http`, `app.core.logging`, `app.market.rate_limiter`
-- **Lo importan:** `app.core.scheduler`, `app.execution.paper_backend`, `app.main`, `app.market.contract_specs`, `app.market.funding_history`, `app.market.ohlcv_history`, `app.market.universe`, `app.trading.position_monitor`, `app.trading.signal_generator`, `scripts.download_history`, `scripts.repair_ohlcv_gaps`
+- **Lo importan:** `app.core.scheduler`, `app.execution.paper_backend`, `app.main`, `app.market.contract_specs`, `app.market.funding_history`, `app.market.ohlcv_history`, `app.market.universe`, `app.trading.position_monitor`, `app.trading.signal_generator`, `scripts.download_history`, `scripts.repair_ohlcv_gaps`, `scripts.v2_tradingview_check`
 - **Configuración que lee:** ninguno
 - **Tablas que lee:** ninguno
 - **Tablas que escribe:** ninguno
@@ -260,7 +260,7 @@ estaba 100 % cubierto: cientos de solicitudes desperdiciadas por reintento. Un h
 - **Tablas que lee:** `ohlcv_cache`, `ohlcv_floor`, `ohlcv_series_complete`, `ohlcv_unrepairable_gaps`
 - **Tablas que escribe:** `ohlcv_cache`, `ohlcv_floor`, `ohlcv_unrepairable_gaps`
 - **Tablas que crea o altera:** ninguno
-- **Pruebas que lo importan o citan:** `tests/unit/test_backtest_engine.py`, `tests/unit/test_backtest_sanity.py`, `tests/unit/test_download_history.py`, `tests/unit/test_funding_contrarian_percentile_strategy.py`, `tests/unit/test_ohlcv_history.py`, `tests/unit/test_run_backtest_script.py`, `tests/unit/test_run_full_backtest_smoke.py`, `tests/unit/test_signal_generator.py`
+- **Pruebas que lo importan o citan:** `tests/unit/test_backtest_engine.py`, `tests/unit/test_backtest_engine_v2.py`, `tests/unit/test_backtest_sanity.py`, `tests/unit/test_backtest_v1_regression.py`, `tests/unit/test_download_history.py`, `tests/unit/test_funding_contrarian_percentile_strategy.py`, `tests/unit/test_ohlcv_history.py`, `tests/unit/test_run_backtest_script.py`, `tests/unit/test_run_full_backtest_smoke.py`, `tests/unit/test_signal_generator.py`
 <!-- /hechos:app/market/ohlcv_history.py -->
 
 ### `app/market/rate_limiter.py`

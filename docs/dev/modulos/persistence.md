@@ -90,7 +90,7 @@ reescribir sus filas no. Ver [Sombras](../ZONAS_PROTEGIDAS.md#sombras) y
 - **Tablas que lee:** ninguno
 - **Tablas que escribe:** ninguno
 - **Tablas que crea o altera:** `asset_universe`, `backtest_runs`, `backtest_skipped_entries`, `backtest_trades`, `backtest_verdicts`, `contract_specs_cache`, `control_audit`, `data_source_health`, `fear_greed`, `funding_cache`, `lesson_applications`, `lessons`, `lessons_reports`, `llm_logs`, `memory_entries`, `news_fetch_state`, `news_items`, `ohlcv_cache`, `ohlcv_floor`, `ohlcv_series_complete`, `ohlcv_unrepairable_gaps`, `paper_execution_log`, `risk_rejections`, `shadow_trades`, `signals`, `signals_discarded_by_sl_cap`, `system_state`, `trades`
-- **Pruebas que lo importan o citan:** 30 archivos (e2e 1, tests/ 1, unit 28)
+- **Pruebas que lo importan o citan:** 31 archivos (e2e 1, tests/ 1, unit 29)
 <!-- /hechos:app/persistence/database.py -->
 
 ### `app/persistence/llm_log_fields.py`
@@ -141,7 +141,7 @@ FastAPI no protegería nada).
 - **Tablas que lee:** ninguno
 - **Tablas que escribe:** ninguno
 - **Tablas que crea o altera:** ninguno
-- **Pruebas que lo importan o citan:** 57 archivos (e2e 10, unit 47)
+- **Pruebas que lo importan o citan:** 59 archivos (e2e 10, unit 49)
 <!-- /hechos:app/persistence/models.py -->
 
 ### `app/persistence/repositories/__init__.py`
@@ -238,7 +238,7 @@ longitud que `columns`.
 - **Tablas que lee:** `funding_cache`
 - **Tablas que escribe:** `funding_cache`
 - **Tablas que crea o altera:** ninguno
-- **Pruebas que lo importan o citan:** `tests/unit/test_funding_contrarian_percentile_strategy.py`, `tests/unit/test_funding_history.py`, `tests/unit/test_llm_market_features.py`, `tests/unit/test_llm_prompts.py`, `tests/unit/test_position_monitor.py`, `tests/unit/test_signal_generator.py`, `tests/unit/test_slippage_and_funding_accrual.py`
+- **Pruebas que lo importan o citan:** `tests/unit/test_backtest_v1_regression.py`, `tests/unit/test_funding_contrarian_percentile_strategy.py`, `tests/unit/test_funding_history.py`, `tests/unit/test_llm_market_features.py`, `tests/unit/test_llm_prompts.py`, `tests/unit/test_position_monitor.py`, `tests/unit/test_signal_generator.py`, `tests/unit/test_slippage_and_funding_accrual.py`
 <!-- /hechos:app/persistence/repositories/funding_repo.py -->
 
 ### `app/persistence/repositories/health_repo.py`
@@ -371,7 +371,7 @@ visto no existía para esa decisión. Solo título, URL, dominio y fecha (nunca 
 - **Tablas que lee:** `ohlcv_cache`, `ohlcv_floor`, `ohlcv_series_complete`, `ohlcv_unrepairable_gaps`
 - **Tablas que escribe:** `ohlcv_cache`, `ohlcv_floor`, `ohlcv_series_complete`, `ohlcv_unrepairable_gaps`
 - **Tablas que crea o altera:** ninguno
-- **Pruebas que lo importan o citan:** 14 archivos (e2e 2, unit 12)
+- **Pruebas que lo importan o citan:** 16 archivos (e2e 2, unit 14)
 <!-- /hechos:app/persistence/repositories/ohlcv_repo.py -->
 
 ### `app/persistence/repositories/paper_execution_repo.py`

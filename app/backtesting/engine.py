@@ -161,6 +161,12 @@ async def run_backtest(
     indicadores se precalculan una vez y la estrategia ve ventanas de `MAX_LOOKBACK_BARS`.
     Si hay menos de 60 velas alineadas devuelve listas vacias.
 
+    Desde la v2, el DataFrame de `precompute` trae tambien `open_time` (ms UTC de apertura), y
+    una estrategia con el atributo `skip_entry_if_sl_crossed = True` no abre la entrada si el
+    `open` de la vela de entrada ya cruzo el SL que pide (se cuenta en el log; no va a las
+    entradas omitidas por tope). Las estrategias de la v1 no declaran ese atributo: sus
+    operaciones son identicas a las de antes (`tests/unit/test_backtest_v1_regression.py`).
+
     Args:
         db: conexion a la base (solo lectura de caches).
         strategy: instancia de la estrategia.
@@ -242,9 +248,18 @@ async def run_backtest(
     )
     bar_duration_hours = step_ms / 3_600_000
 
+    # `open_time` (ms UTC de apertura) va al final: las estrategias de la v1 no lo leen y no les
+    # cambia nada (tests/unit/test_backtest_v1_regression.py); las de la v2 lo necesitan para
+    # saber a que dia UTC pertenece cada vela (niveles Camarilla).
     df = pd.DataFrame({"open": opens, "high": highs, "low": lows, "close": closes,
-                        "funding_rate": funding_rates, "funding_is_approximated": funding_approx})
+                        "funding_rate": funding_rates, "funding_is_approximated": funding_approx,
+                        "open_time": open_times})
     df = strategy.precompute(df)
+    # Opcional, solo para estrategias que lo declaran (ninguna de la v1): si el `open` de la vela
+    # de entrada ya cruzo el SL que pide la estrategia, la entrada se omite en vez de abrirse con
+    # un SL del lado equivocado o caer en el SL de respaldo.
+    skip_if_sl_crossed = bool(getattr(strategy, "skip_entry_if_sl_crossed", False))
+    crossed_sl_skips = 0
 
     margin_usdt = settings.default_margin_usdt
     leverage = settings.leverage
@@ -283,6 +298,12 @@ async def run_backtest(
             close_reason=reason, sl_margin_loss_pct=position.sl_margin_loss_pct,
         ))
         position = None
+
+    def sl_already_crossed(side: Signal, entry: float, sl: float | None) -> bool:
+        """`True` si el SL pedido no queda del lado de la perdida respecto de la entrada."""
+        if sl is None:
+            return False
+        return sl >= entry if side == Signal.LONG else sl <= entry
 
     def process_bar(i: int) -> None:
         """Evalua funding + SL/liquidacion (adverso) + TP (favorable) +
@@ -352,37 +373,42 @@ async def run_backtest(
             fill = compute_open_fill(margin_usdt, leverage, fill_price, taker_fee_pct)
 
             sl = strategy.stop_price(sub_df, side, fill_price)
-            fallback_sl, fallback_tp = fallback_sl_tp_prices(side, fill_price, settings)
-            if sl is None:
-                sl = fallback_sl
-            trailing = strategy.trailing_distance(sub_df)
-            tp = strategy.take_profit_price(sub_df, side, fill_price)
-            if tp is None and trailing is None:
-                tp = fallback_tp
-
-            sl_margin_loss_pct = margin_loss_pct(fill_price, sl, leverage)
-
-            if sl_margin_loss_pct > settings.max_sl_margin_loss_pct:
-                skipped.append(RawSkip(
-                    strategy=strategy_name, symbol=symbol, timeframe=timeframe, side=side,
-                    ts=ms_to_dt(open_times[i]), intended_sl_margin_loss_pct=sl_margin_loss_pct,
-                ))
+            if skip_if_sl_crossed and sl_already_crossed(side, fill_price, sl):
+                # El `open` ya paso el SL: no se abre ni se fuerza otro SL. No va a
+                # `backtest_skipped_entries` (esa tabla es de omisiones por el tope de riesgo).
+                crossed_sl_skips += 1
             else:
-                liq_price = compute_liquidation_price(
-                    side, fill_price, leverage, fill.notional_usdt, margin_tiers_json
-                )
-                slippage_entry = entry_slippage_usdt(
-                    fill.notional_usdt, settings.backtest_slippage_bps
-                )
-                position = _Position(
-                    side=side, entry_time_ms=open_times[i], entry_price=fill_price,
-                    qty=fill.qty, margin_usdt=margin_usdt, notional=fill.notional_usdt,
-                    leverage=leverage, fee_entry_usdt=fill.fee_entry_usdt, sl_price=sl,
-                    original_sl_price=sl, tp_price=tp, trailing_distance=trailing,
-                    effective_stop=sl, best_price=fill_price, liq_price=liq_price,
-                    slippage_entry_usdt=slippage_entry, sl_margin_loss_pct=sl_margin_loss_pct,
-                )
-                just_opened = True
+                fallback_sl, fallback_tp = fallback_sl_tp_prices(side, fill_price, settings)
+                if sl is None:
+                    sl = fallback_sl
+                trailing = strategy.trailing_distance(sub_df)
+                tp = strategy.take_profit_price(sub_df, side, fill_price)
+                if tp is None and trailing is None:
+                    tp = fallback_tp
+
+                sl_margin_loss_pct = margin_loss_pct(fill_price, sl, leverage)
+
+                if sl_margin_loss_pct > settings.max_sl_margin_loss_pct:
+                    skipped.append(RawSkip(
+                        strategy=strategy_name, symbol=symbol, timeframe=timeframe, side=side,
+                        ts=ms_to_dt(open_times[i]), intended_sl_margin_loss_pct=sl_margin_loss_pct,
+                    ))
+                else:
+                    liq_price = compute_liquidation_price(
+                        side, fill_price, leverage, fill.notional_usdt, margin_tiers_json
+                    )
+                    slippage_entry = entry_slippage_usdt(
+                        fill.notional_usdt, settings.backtest_slippage_bps
+                    )
+                    position = _Position(
+                        side=side, entry_time_ms=open_times[i], entry_price=fill_price,
+                        qty=fill.qty, margin_usdt=margin_usdt, notional=fill.notional_usdt,
+                        leverage=leverage, fee_entry_usdt=fill.fee_entry_usdt, sl_price=sl,
+                        original_sl_price=sl, tp_price=tp, trailing_distance=trailing,
+                        effective_stop=sl, best_price=fill_price, liq_price=liq_price,
+                        slippage_entry_usdt=slippage_entry, sl_margin_loss_pct=sl_margin_loss_pct,
+                    )
+                    just_opened = True
             pending_signal = None
 
         if just_opened and position is not None:
@@ -400,4 +426,7 @@ async def run_backtest(
     if position is not None:
         finalize(closes[-1], len(df) - 1, "END_OF_DATA")
 
+    if crossed_sl_skips:
+        logger.info("%s %s %s: %d entradas omitidas porque el open ya habia cruzado el SL",
+                    strategy_name, symbol, timeframe, crossed_sl_skips)
     return trades, skipped

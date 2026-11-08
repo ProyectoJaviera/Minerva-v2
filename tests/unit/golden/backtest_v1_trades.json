@@ -1,0 +1,44 @@
+{
+  "donchian_breakout_20|1d": {
+    "skipped": 18,
+    "skipped_sha256": "9dcad0bcd00d6fe771d6bac2bec7312fde14a0a7f3923e4cb44935181714e303",
+    "trades": 22,
+    "trades_sha256": "f5ba88e90dd2a29d53aae494de84e6ee3925de95845e2258309891880be4756d"
+  },
+  "donchian_breakout_20|4h": {
+    "skipped": 9,
+    "skipped_sha256": "3cc905a7d247c44c2adf8c5e9c1fd734f3f94ad30d26d573f8edbc28e2adab59",
+    "trades": 42,
+    "trades_sha256": "c643bedb57b501b0ba20b14ff2d0e976b3ac493cb8a568115696cc535ef3d086"
+  },
+  "ema_cross_9_21|4h": {
+    "skipped": 0,
+    "skipped_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "trades": 21,
+    "trades_sha256": "e4179c1bf44ef98857fda13a76489d5b8e1cb469972a5cd4495009f72e9feedc"
+  },
+  "funding_contrarian_experimental|4h": {
+    "skipped": 0,
+    "skipped_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "trades": 18,
+    "trades_sha256": "67a18cfd027202817c1855f70b9ab6f44080c695df277db4d2d5b7732a438bc1"
+  },
+  "funding_contrarian_percentile_experimental|4h": {
+    "skipped": 0,
+    "skipped_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "trades": 9,
+    "trades_sha256": "7d6f23aff7e46c9c761f45bdc54f891c0884d8ce24fac2f4caf54b783d39d6ca"
+  },
+  "mean_reversion_rsi14_bb20|1h": {
+    "skipped": 0,
+    "skipped_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "trades": 46,
+    "trades_sha256": "2e6160e079084fe92e59883eb6309c0bcf587a20bdc89bee18cc2b6412d3c434"
+  },
+  "trend_atr_stop_9_21_50|4h": {
+    "skipped": 20,
+    "skipped_sha256": "6c4ae30cb8179ba03f3ebfc8a3cb616c738f5ca3f043e307425f6b768c01b83b",
+    "trades": 27,
+    "trades_sha256": "65b17cceb8fa9d8936d2b01d241fa85542861009d3df674415112608e272c0cf"
+  }
+}
