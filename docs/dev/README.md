@@ -95,7 +95,7 @@ flowchart LR
     backtesting["backtesting<br/>7 archivos"]
     core["core<br/>5 archivos"]
     execution["execution<br/>5 archivos"]
-    indicators["indicators<br/>2 archivos"]
+    indicators["indicators<br/>7 archivos"]
     llm["llm<br/>9 archivos"]
     market["market<br/>11 archivos"]
     memory["memory<br/>10 archivos"]
@@ -135,7 +135,7 @@ El diagrama muestra solo las flechas con 3 o más imports; no dibuja las que lle
 | `config` | 1 | 423 | ninguno | api, backtesting, core, execution, llm, main, market, memory, news, scripts, telegram, trading |
 | `core` | 5 | 593 | trading 5, persistence 4, config 2, market 2, execution 1 | api, backtesting, execution, llm, main, market, memory, news, scripts, telegram, trading |
 | `execution` | 5 | 666 | persistence 7, trading 5, config 1, core 1, market 1 | backtesting, core, main, trading |
-| `indicators` | 2 | 161 | ninguno | strategies |
+| `indicators` | 7 | 1146 | ninguno | strategies |
 | `llm` | 9 | 1478 | persistence 16, config 5, memory 3, core 1, market 1, news 1 | api, scripts, telegram, trading |
 | `main` | 2 | 278 | api 16, market 4, trading 4, core 3, telegram 3, config 1, execution 1, memory 1, news 1, persistence 1 | ninguno |
 | `market` | 11 | 1908 | persistence 13, core 9, config 1 | api, backtesting, core, execution, llm, main, scripts, telegram, trading |
