@@ -36,7 +36,8 @@ con el de `app/indicators/engine.py` a precisión de máquina.
 - **TP:** 2R sobre esa distancia: `entrada ∓ 2 · |entrada − SL|`.
 - **Omisión:** si el `open` de la vela de entrada ya pasó el SL, la entrada **se omite** (no se fuerza otro SL). Lo
   hace el motor con el atributo `skip_entry_if_sl_crossed`; esas omisiones se cuentan en el log de la corrida y **no**
-  van a `backtest_skipped_entries` (esa tabla es de omisiones por el tope de riesgo).
+  van a `backtest_skipped_entries` (esa tabla es de omisiones por el tope de riesgo). Aprobado así por el dueño
+  (2026-11-08); el informe las reporta igual (sección 6).
 - **Trailing:** ninguno.
 
 ### 2.2 `camarilla_s3_r3` — aprobado tal cual
@@ -45,8 +46,8 @@ con el de `app/indicators/engine.py` a precisión de máquina.
 - **Entrada:** LARGO si la vela toca S3 y cierra por encima (`low ≤ S3 < close`); CORTO si toca R3 y cierra por debajo
   (`high ≥ R3 > close`). Si una misma vela cumple ambas, no hay señal. Como máximo **una entrada por lado y por día
   UTC**: da señal solo la **primera** vela del día que cumple la condición de ese lado; si el motor la ignora (posición
-  abierta) o la omite (tope de riesgo), no hay otra ese día. Sin niveles (día anterior faltante o incompleto), no hay
-  señal.
+  abierta) o la omite (tope de riesgo), no hay otra ese día (aprobado así por el dueño el 2026-11-08). Sin niveles
+  (día anterior faltante o incompleto), no hay señal.
 - **SL:** el de la tabla del original: LARGO en `S4 · 0.99`; CORTO en `R4 · 1.01`.
 - **TP:** el «TP 1» de la tabla: LARGO en R3; CORTO en S3.
 - **Trailing:** ninguno. Los niveles quedan fijados con los del día de la señal aunque la posición pase la medianoche.
@@ -68,11 +69,11 @@ con el de `app/indicators/engine.py` a precisión de máquina.
 - **Para qué sirve:** separar el valor de la **dirección** del SFP del valor de su momento y de su gestión de riesgo.
 - **Entrada:** en las **mismas velas** en que `sfp_reversal_5_1` tiene señal, con la dirección sorteada 50/50 de forma
   determinista.
-- **Sorteo (detalle de implementación, a confirmar por el dueño):** el borrador decía «semilla derivada de
-  `(42, símbolo, marco)`, en orden cronológico». La interfaz de las estrategias no recibe el símbolo ni el marco, así
-  que el sorteo de cada vela se deriva de `(42, open_time, close)` de la vela de señal (bit de un SHA-256). Cumple lo
-  que se buscaba: es reproducible, no depende del orden en que se recorran las series y dos símbolos a la misma hora
-  sortean por separado.
+- **Sorteo (aprobado por el dueño el 2026-11-08):** la dirección de cada vela de señal sale de un bit del
+  **SHA-256 de `(42, open_time, close)`** de esa vela. Reemplaza la «semilla derivada de `(42, símbolo, marco)`, en
+  orden cronológico» del borrador, porque la interfaz de las estrategias no recibe el símbolo ni el marco. Es
+  reproducible, no depende del orden en que se recorran las series y dos símbolos a la misma hora sortean por
+  separado.
 - **SL y TP:** misma distancia que el SFP (`|entrada − (mecha ± 0.1 · ATR(14))|`) puesta del lado que corresponde a la
   dirección sorteada; TP 2R. Misma regla de omisión: se omite cuando el SFP natural se omitiría.
 - **Papel:** **nunca se aprueba.** Si el control **pasa** todos los criterios de descarte, la ronda completa queda
@@ -139,6 +140,9 @@ con funding aproximado; simulación de cartera Monte Carlo solo informativa; liq
 - **Comparaciones múltiples:** 3 candidatos × 2 marcos = 6 combinaciones evaluadas (más 2 del control). Con varias
   pruebas, la probabilidad de que alguna pase por azar es mayor que con una sola; los umbrales **no** se ajustan por
   eso (están congelados), pero el informe dirá cuántas combinaciones se probaron.
+- **Entradas omitidas:** el informe reporta, **por candidato y por marco** (control incluido), cuántas entradas se
+  omitieron por cada motivo: **tope de riesgo** (`MAX_SL_MARGIN_LOSS_PCT`, tabla `backtest_skipped_entries`) y **SL
+  cruzado** (`skip_entry_if_sl_crossed`, log de la corrida), junto al número de operaciones abiertas.
 - Ninguna de estas estrategias existe en la v1: su resultado no es comparable con la medición ciega de la v1 ni la
   cambia.
 
@@ -152,4 +156,7 @@ con funding aproximado; simulación de cartera Monte Carlo solo informativa; liq
 | 2026-11-08 | Universo y periodo de la Fase 2, fecha final 2026-10-01; los datos posteriores quedan reservados |
 | 2026-11-08 | Requisitos: prueba de regresión de la v1 para los cambios del motor; script de comparación con TradingView y confirmación del dueño antes de congelar |
 
-**Pendiente del dueño:** confirmar la comparación con TradingView y el detalle del sorteo del control (2.4).
+| 2026-11-08 | Sorteo del control con SHA-256 de `(42, open_time, close)` aprobado; omisiones por SL cruzado en el log y Camarilla solo en la primera vela del día de cada lado, aprobados |
+| 2026-11-08 | El informe reporta, por candidato y marco, las entradas omitidas por cada motivo (tope de riesgo y SL cruzado) |
+
+**Pendiente del dueño:** confirmar la comparación con TradingView. No se congela ni se corre nada antes.
