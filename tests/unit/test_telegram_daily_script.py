@@ -5,6 +5,7 @@ nunca debe incluir PnL ni resultados de sombras."""
 from __future__ import annotations
 
 import hashlib
+import inspect
 import sqlite3
 import subprocess
 import sys
@@ -38,6 +39,9 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 SCRIPT = REPO_ROOT / "scripts" / "telegram_daily.py"
 NOW = BASE + timedelta(hours=100)
 HUGE_RETURN = 987654.0  # un PnL inconfundible: no debe aparecer jamas en el resumen
+# Puerto que `build_message` informa cuando no se le pasa uno: se lee de su firma para que las
+# aserciones no se rompan si cambia el puerto por defecto del script.
+DEFAULT_PORT = inspect.signature(build_message).parameters["port"].default
 
 HEALTH_OK = {
     "status": "ok", "mode": "PAPER_TRADING",
@@ -188,7 +192,10 @@ async def test_message_has_health_24h_cost_effective_n_and_gate_and_no_pnl(db_pa
     # BASE + 100 h = 2026-10-05 04:00 UTC = 01:00 en Chile (UTC-3, horario de verano)
     assert "resumen diario 2026-10-05 01:00 (America/Santiago)" in msg
     assert "MODO PAPER TRADING" in msg
-    assert "Bot (puerto 8000): OK | hash congelado OK: si | etiquetado en vivo: activo" in msg
+    assert (
+        f"Bot (puerto {DEFAULT_PORT}): OK | hash congelado OK: si | etiquetado en vivo: activo"
+        in msg
+    )
     assert "Ultimo ciclo de senales: hace 3 min" in msg
     assert "- Etiquetadas: 4 (APROBADA 2 / RECHAZADA 2)" in msg
     assert "- Fallidas: 2 (INVALID 1, TIMEOUT 1)" in msg
@@ -224,7 +231,7 @@ def test_message_says_so_when_the_bot_does_not_respond_and_still_reports_the_dat
         snapshot=snap, db_error=None, now=NOW,
     )
 
-    assert "BOT SIN RESPUESTA (puerto 8000)" in msg and "connection refused" in msg
+    assert f"BOT SIN RESPUESTA (puerto {DEFAULT_PORT})" in msg and "connection refused" in msg
     assert "sale de la base" in msg
     assert "Gate: CERRADO" in msg
 
@@ -236,7 +243,7 @@ def test_message_flags_stale_unfrozen_and_disabled_labeling():
         now=NOW,
     )
 
-    assert "Bot (puerto 8000): STALE | hash congelado OK: NO" in msg
+    assert f"Bot (puerto {DEFAULT_PORT}): STALE | hash congelado OK: NO" in msg
     assert "etiquetado en vivo: DESACTIVADO" in msg
     assert "ATENCION: el bot esta STALE" in msg
     assert "NO coincide con el congelado" in msg
