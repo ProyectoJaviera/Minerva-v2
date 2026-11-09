@@ -32,6 +32,12 @@
                     <a class="variable" href="#HOUR_MS">HOUR_MS</a>
             </li>
             <li>
+                    <a class="variable" href="#INTERVAL_MS">INTERVAL_MS</a>
+            </li>
+            <li>
+                    <a class="variable" href="#WEEK_OFFSET_MS">WEEK_OFFSET_MS</a>
+            </li>
+            <li>
                     <a class="variable" href="#PAGE">PAGE</a>
             </li>
             <li>
@@ -50,10 +56,22 @@
                     <a class="function" href="#fetch_bars">fetch_bars</a>
             </li>
             <li>
+                    <a class="function" href="#weekly_from_daily">weekly_from_daily</a>
+            </li>
+            <li>
+                    <a class="function" href="#fetch_interval">fetch_interval</a>
+            </li>
+            <li>
+                    <a class="function" href="#bars_lines">bars_lines</a>
+            </li>
+            <li>
                     <a class="function" href="#camarilla_lines">camarilla_lines</a>
             </li>
             <li>
                     <a class="function" href="#sfp_lines">sfp_lines</a>
+            </li>
+            <li>
+                    <a class="function" href="#rf_lines">rf_lines</a>
             </li>
             <li>
                     <a class="function" href="#build_report">build_report</a>
@@ -88,9 +106,15 @@ compara contra el grafico de TradingView, para BTCUSDT y ETHUSDT:</p>
 2026-11-07), calculados con el maximo, el minimo y el cierre del dia UTC anterior agregados
 desde velas de 1h. Tambien imprime la vela diaria de Bitunix de ese dia anterior, para ver si
 el agregado coincide con la vela diaria que usaria TradingView.</li>
-<li>Las ultimas 10 senales SFP (pivote 5/1) en 1h, con la hora UTC de la vela de barrida (donde el
-original pone la etiqueta «SFP») y de la vela de confirmacion (la flecha, que es la senal).</li>
+<li>Las ultimas 10 senales SFP (pivote 5/1) en 1h (o 4h con <code>--interval 4h</code>), con la hora UTC de
+la vela de barrida (donde el original pone la etiqueta «SFP») y de la vela de confirmacion (la
+flecha, que es la senal), mas el ATR(14) de la vela de senal (el del colchon del SL).</li>
+<li>Con <code>--rf-count N</code>, los ultimos N giros del Range Filter de Frost (modo Intraday; el ▲/▼ de
+Frost), con la EMA 144 y el ATR(14) de esa vela, que es lo que usa <code>range_filter_flip_ema144</code>.</li>
 </ol>
+
+<p>Con <code>--end AAAA-MM-DD</code> todo se calcula como si «ahora» fuera esa fecha a las 00:00 UTC, para
+comparar semanas pasadas; con <code>--skip-camarilla</code> se omiten los niveles.</p>
 
 <p>Las velas son LAST_PRICE de Bitunix Futures (endpoint publico verificado en
 <code>app/market/bitunix_rest.py</code>). Para comparar, abrir en TradingView el mismo par perpetuo de
@@ -100,6 +124,8 @@ Bitunix y poner el grafico en UTC: con otro exchange los precios difieren un poc
 
 <pre><code>python scripts/v2_tradingview_check.py
 python scripts/v2_tradingview_check.py --symbols BTCUSDT --days 2026-11-06 --sfp-count 5
+python scripts/v2_tradingview_check.py --interval 4h --skip-camarilla --rf-count 10
+python scripts/v2_tradingview_check.py --end 2025-06-15 --skip-camarilla --sfp-count 15
 </code></pre>
 </div>
 
@@ -115,6 +141,30 @@ python scripts/v2_tradingview_check.py --symbols BTCUSDT --days 2026-11-06 --sfp
         
     </div>
     <a class="headerlink" href="#HOUR_MS"></a>
+    
+    
+
+                </section>
+                <section id="INTERVAL_MS">
+                    <div class="attr variable">
+            <span class="name">INTERVAL_MS</span>        =
+<span class="default_value">{&#39;1h&#39;: 3600000, &#39;4h&#39;: 14400000, &#39;1d&#39;: 86400000, &#39;1w&#39;: 604800000}</span>
+
+        
+    </div>
+    <a class="headerlink" href="#INTERVAL_MS"></a>
+    
+    
+
+                </section>
+                <section id="WEEK_OFFSET_MS">
+                    <div class="attr variable">
+            <span class="name">WEEK_OFFSET_MS</span>        =
+<span class="default_value">345600000</span>
+
+        
+    </div>
+    <a class="headerlink" href="#WEEK_OFFSET_MS"></a>
     
     
 
@@ -234,6 +284,101 @@ python scripts/v2_tradingview_check.py --symbols BTCUSDT --days 2026-11-06 --sfp
 
 
                 </section>
+                <section id="weekly_from_daily">
+                    <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">weekly_from_daily</span><span class="signature pdoc-code condensed">(<span class="param"><span class="n">daily</span><span class="p">:</span> <span class="n">pandas</span><span class="o">.</span><span class="n">DataFrame</span>, </span><span class="param"><span class="n">now_ms</span><span class="p">:</span> <span class="nb">int</span></span><span class="return-annotation">) -> <span class="n">pandas</span><span class="o">.</span><span class="n">DataFrame</span>:</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#weekly_from_daily"></a>
+    
+            <div class="docstring"><p>Agrega velas de 1d en semanas lunes-domingo UTC y descarta la semana en curso.</p>
+
+<h6 id="arguments">Arguments:</h6>
+
+<ul>
+<li><strong>daily:</strong>  velas de 1d con <code>open_time</code>, <code>open</code>, <code>high</code>, <code>low</code> y <code>close</code>.</li>
+<li><strong>now_ms:</strong>  instante actual en ms (una semana solo cuenta si ya cerro).</li>
+</ul>
+
+<h6 id="returns">Returns:</h6>
+
+<blockquote>
+  <p>DataFrame semanal con las mismas columnas; <code>open_time</code> es el lunes 00:00 UTC.</p>
+</blockquote>
+</div>
+
+
+                </section>
+                <section id="fetch_interval">
+                    <div class="attr function">
+            
+        <span class="def">async def</span>
+        <span class="name">fetch_interval</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="n">client</span><span class="p">:</span> <span class="n">Any</span>,</span><span class="param">	<span class="n">symbol</span><span class="p">:</span> <span class="nb">str</span>,</span><span class="param">	<span class="n">interval</span><span class="p">:</span> <span class="nb">str</span>,</span><span class="param">	<span class="n">bars</span><span class="p">:</span> <span class="nb">int</span>,</span><span class="param">	<span class="n">now_ms</span><span class="p">:</span> <span class="nb">int</span></span><span class="return-annotation">) -> <span class="n">pandas</span><span class="o">.</span><span class="n">DataFrame</span>:</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#fetch_interval"></a>
+    
+            <div class="docstring"><p>Velas cerradas de <code>interval</code>; las semanales salen de agregar velas de 1d.</p>
+
+<h6 id="arguments">Arguments:</h6>
+
+<ul>
+<li><strong>client:</strong>  cliente con <code>get_kline</code>.</li>
+<li><strong>symbol:</strong>  simbolo.</li>
+<li><strong>interval:</strong>  <code>1h</code>, <code>4h</code>, <code>1d</code> o <code>1w</code>.</li>
+<li><strong>bars:</strong>  velas a juntar como minimo.</li>
+<li><strong>now_ms:</strong>  instante actual en ms.</li>
+</ul>
+
+<h6 id="returns">Returns:</h6>
+
+<blockquote>
+  <p>Las velas cerradas, en orden cronologico.</p>
+</blockquote>
+
+<h6 id="efectos">Efectos:</h6>
+
+<blockquote>
+  <p>Red: GET publicos a Bitunix.</p>
+</blockquote>
+</div>
+
+
+                </section>
+                <section id="bars_lines">
+                    <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">bars_lines</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="n">symbol</span><span class="p">:</span> <span class="nb">str</span>,</span><span class="param">	<span class="n">bars</span><span class="p">:</span> <span class="n">pandas</span><span class="o">.</span><span class="n">DataFrame</span>,</span><span class="param">	<span class="n">count</span><span class="p">:</span> <span class="nb">int</span>,</span><span class="param">	<span class="n">interval</span><span class="p">:</span> <span class="nb">str</span></span><span class="return-annotation">) -> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>:</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#bars_lines"></a>
+    
+            <div class="docstring"><p>Lineas con el OHLC de las ultimas <code>count</code> velas, para compararlas una a una.</p>
+
+<h6 id="arguments">Arguments:</h6>
+
+<ul>
+<li><strong>symbol:</strong>  simbolo.</li>
+<li><strong>bars:</strong>  velas con <code>open_time</code> y OHLC.</li>
+<li><strong>count:</strong>  cuantas velas mostrar.</li>
+<li><strong>interval:</strong>  etiqueta de la temporalidad.</li>
+</ul>
+
+<h6 id="returns">Returns:</h6>
+
+<blockquote>
+  <p>Las lineas de texto.</p>
+</blockquote>
+</div>
+
+
+                </section>
                 <section id="camarilla_lines">
                     <div class="attr function">
             
@@ -268,20 +413,54 @@ python scripts/v2_tradingview_check.py --symbols BTCUSDT --days 2026-11-06 --sfp
                     <div class="attr function">
             
         <span class="def">def</span>
-        <span class="name">sfp_lines</span><span class="signature pdoc-code condensed">(<span class="param"><span class="n">symbol</span><span class="p">:</span> <span class="nb">str</span>, </span><span class="param"><span class="n">hourly</span><span class="p">:</span> <span class="n">pandas</span><span class="o">.</span><span class="n">DataFrame</span>, </span><span class="param"><span class="n">count</span><span class="p">:</span> <span class="nb">int</span></span><span class="return-annotation">) -> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>:</span></span>
+        <span class="name">sfp_lines</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="n">symbol</span><span class="p">:</span> <span class="nb">str</span>,</span><span class="param">	<span class="n">hourly</span><span class="p">:</span> <span class="n">pandas</span><span class="o">.</span><span class="n">DataFrame</span>,</span><span class="param">	<span class="n">count</span><span class="p">:</span> <span class="nb">int</span>,</span><span class="param">	<span class="n">interval</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">'1h'</span></span><span class="return-annotation">) -> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>:</span></span>
 
         
     </div>
     <a class="headerlink" href="#sfp_lines"></a>
     
-            <div class="docstring"><p>Lineas con las ultimas <code>count</code> senales SFP (5/1) en 1h.</p>
+            <div class="docstring"><p>Lineas con las ultimas <code>count</code> senales SFP (5/1) y el ATR(14) de la vela de senal.</p>
 
 <h6 id="arguments">Arguments:</h6>
 
 <ul>
 <li><strong>symbol:</strong>  simbolo.</li>
-<li><strong>hourly:</strong>  velas de 1h con <code>open_time</code>.</li>
+<li><strong>hourly:</strong>  velas de <code>interval</code> con <code>open_time</code>.</li>
 <li><strong>count:</strong>  cuantas senales mostrar (las mas recientes).</li>
+<li><strong>interval:</strong>  etiqueta de la temporalidad (<code>1h</code> o <code>4h</code>), solo para el texto.</li>
+</ul>
+
+<h6 id="returns">Returns:</h6>
+
+<blockquote>
+  <p>Las lineas de texto.</p>
+</blockquote>
+</div>
+
+
+                </section>
+                <section id="rf_lines">
+                    <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">rf_lines</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="n">symbol</span><span class="p">:</span> <span class="nb">str</span>,</span><span class="param">	<span class="n">bars</span><span class="p">:</span> <span class="n">pandas</span><span class="o">.</span><span class="n">DataFrame</span>,</span><span class="param">	<span class="n">count</span><span class="p">:</span> <span class="nb">int</span>,</span><span class="param">	<span class="n">interval</span><span class="p">:</span> <span class="nb">str</span></span><span class="return-annotation">) -> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>:</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#rf_lines"></a>
+    
+            <div class="docstring"><p>Lineas con los ultimos <code>count</code> giros del Range Filter (modo Intraday), EMA 144 y ATR(14).</p>
+
+<p>Usa las mismas funciones que <code>range_filter_flip_ema144</code> (<code>range_filter</code>, <code>pine_ema</code>,
+<code>pine_atr</code>). Un giro solo es senal del candidato si el cierre esta del lado de la EMA.</p>
+
+<h6 id="arguments">Arguments:</h6>
+
+<ul>
+<li><strong>symbol:</strong>  simbolo.</li>
+<li><strong>bars:</strong>  velas con <code>open_time</code>, <code>high</code>, <code>low</code> y <code>close</code>.</li>
+<li><strong>count:</strong>  cuantos giros mostrar (los mas recientes).</li>
+<li><strong>interval:</strong>  etiqueta de la temporalidad, solo para el texto.</li>
 </ul>
 
 <h6 id="returns">Returns:</h6>
@@ -297,7 +476,7 @@ python scripts/v2_tradingview_check.py --symbols BTCUSDT --days 2026-11-06 --sfp
                     <div class="attr function">
             
         <span class="def">async def</span>
-        <span class="name">build_report</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="n">client</span><span class="p">:</span> <span class="n">Any</span>,</span><span class="param">	<span class="n">symbols</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>,</span><span class="param">	<span class="n">days</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">datetime</span><span class="o">.</span><span class="n">date</span><span class="p">]</span>,</span><span class="param">	<span class="n">sfp_count</span><span class="p">:</span> <span class="nb">int</span>,</span><span class="param">	<span class="n">history_bars</span><span class="p">:</span> <span class="nb">int</span>,</span><span class="param">	<span class="n">now_ms</span><span class="p">:</span> <span class="nb">int</span></span><span class="return-annotation">) -> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>:</span></span>
+        <span class="name">build_report</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="n">client</span><span class="p">:</span> <span class="n">Any</span>,</span><span class="param">	<span class="n">symbols</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>,</span><span class="param">	<span class="n">days</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">datetime</span><span class="o">.</span><span class="n">date</span><span class="p">]</span>,</span><span class="param">	<span class="n">sfp_count</span><span class="p">:</span> <span class="nb">int</span>,</span><span class="param">	<span class="n">history_bars</span><span class="p">:</span> <span class="nb">int</span>,</span><span class="param">	<span class="n">now_ms</span><span class="p">:</span> <span class="nb">int</span>,</span><span class="param">	<span class="n">interval</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">'1h'</span>,</span><span class="param">	<span class="n">rf_count</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>,</span><span class="param">	<span class="n">bar_count</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span></span><span class="return-annotation">) -> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>:</span></span>
 
         
     </div>
@@ -311,9 +490,12 @@ python scripts/v2_tradingview_check.py --symbols BTCUSDT --days 2026-11-06 --sfp
 <li><strong>client:</strong>  cliente con <code>get_kline</code>.</li>
 <li><strong>symbols:</strong>  simbolos a informar.</li>
 <li><strong>days:</strong>  dias UTC para Camarilla.</li>
-<li><strong>sfp_count:</strong>  senales SFP a mostrar por simbolo.</li>
+<li><strong>sfp_count:</strong>  senales SFP a mostrar por simbolo (0 = ninguna).</li>
 <li><strong>history_bars:</strong>  velas de 1h a descargar (el SFP necesita historia para su estado).</li>
-<li><strong>now_ms:</strong>  instante actual en ms.</li>
+<li><strong>now_ms:</strong>  instante actual en ms (o el corte de <code>--end</code>).</li>
+<li><strong>interval:</strong>  temporalidad de SFP y Range Filter (<code>1h</code> o <code>4h</code>).</li>
+<li><strong>rf_count:</strong>  giros del Range Filter a mostrar (0 = ninguno).</li>
+<li><strong>bar_count:</strong>  velas OHLC a listar (0 = ninguna).</li>
 </ul>
 
 <h6 id="returns">Returns:</h6>

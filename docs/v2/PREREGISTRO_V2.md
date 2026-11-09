@@ -131,6 +131,15 @@ con funding aproximado; simulación de cartera Monte Carlo solo informativa; liq
 5. **Comparación con TradingView — pendiente del dueño.** `python scripts/v2_tradingview_check.py` imprime, para
    BTCUSDT y ETHUSDT, los niveles Camarilla R3/R4/S3/S4 de 2026-11-05, 2026-11-06 y 2026-11-07 y las últimas 10 señales
    SFP en 1h con fecha y hora UTC. **No se congela hasta que el dueño confirme la comparación.**
+   **Hecha por Claude el 2026-11-09 (falta la confirmación del dueño):** contra el gráfico de TradingView del dueño
+   (feed de Bitunix, indicadores originales PunkAlgo HeatMap y Frost), leyendo las velas y las salidas que la página
+   ya tenía cargadas. Resultado: velas idénticas en 1h, 4h, 1D y 1S (salvo diferencias de centavos y un hueco de
+   TradingView en ETHUSDT, 2025-11-27 12:00 a 2025-11-28 20:00); giros del Range Filter idénticos mes a mes en todo el
+   historial que carga TradingView (1h desde 2026-01, 4h desde 2024-01, 1D y 1S desde 2022-04), con una sola
+   diferencia (ETHUSDT 1D, 2025-12-18 y 2026-01-06) que desaparece al quitar del cálculo el día que le falta a
+   TradingView; señales SFP idénticas en hora, dirección y precio en las últimas ~26 de cada gráfico (TradingView
+   solo conserva 50 etiquetas) y en todo el historial semanal y diario visible; Camarilla idéntica (las velas diarias
+   coinciden). Detalle en `docs/historial/PROGRESS.md` (entrada del 2026-11-09).
 6. Conectar los candidatos a `scripts/run_backtest.py` (hoy solo lee `STRATEGIES`) — paso posterior, con el documento
    congelado; se anota en `docs/historial/PROGRESS.md`.
 7. Congelar este documento en un commit propio, sin la marca de borrador, **antes** de la primera corrida.

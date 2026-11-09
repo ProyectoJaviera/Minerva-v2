@@ -193,7 +193,7 @@
     "scripts/shadow_report.py": "4cf541952b9a13636347e061b4934d1725fdded8a9b977cfa7c5b54095ce036d",
     "scripts/telegram_alert.py": "420a0d2512756461f3d9983afe0f7f3169126f2e78fa5821c55bd725bf9156ab",
     "scripts/telegram_daily.py": "53731284bd82370fece668cfc3ab7c35abd559ae6589162844fd2ecd8833b521",
-    "scripts/v2_tradingview_check.py": "34522f4e3215699ac3e97ca9c06b77041c08cd65fb09e0ac0df5106ba4334fe8"
+    "scripts/v2_tradingview_check.py": "c890267e808e55e8ff6897796ab6debc476171f1f5352498537d222a5fcfe8dc"
   },
   "generador": "scripts/build_dev_docs.py",
   "paginas": {
@@ -386,6 +386,6 @@
     "scripts/shadow_report.html": "9923ed7e104eda324c172a26522c48d385a8fba83f3f585e45d00cb284f204a4",
     "scripts/telegram_alert.html": "8f93a90aa01cc9213a84518ca27f3f6269f759c7d01956f03ed447b42959c587",
     "scripts/telegram_daily.html": "e4a136fa55d0602545d01bb28050ddd6c2d779efd201a9611e1385502f1c182b",
-    "scripts/v2_tradingview_check.html": "9e92b00f58d66e72736abbc87d16d24f3d8152b53677daaae3045fe633407c5c"
+    "scripts/v2_tradingview_check.html": "a4784c1d4dc20ea368d746d5d6349e60405fcf2beb92898251d7ac9037cfedda"
   }
 }

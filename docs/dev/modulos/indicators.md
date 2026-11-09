@@ -110,7 +110,7 @@ al calentamiento. No mezclar con `engine.ema`, que arranca con el primer valor (
 
 - **Referencia pdoc:** sin página (módulo privado)
 - **Importa (internos):** ninguno
-- **Lo importan:** `app.candidates.range_filter_flip`, `app.candidates.sfp_reversal`, `app.indicators.levels`, `app.indicators.oscillators`, `app.indicators.structure`, `app.indicators.trend_filters`
+- **Lo importan:** `app.candidates.range_filter_flip`, `app.candidates.sfp_reversal`, `app.indicators.levels`, `app.indicators.oscillators`, `app.indicators.structure`, `app.indicators.trend_filters`, `scripts.v2_tradingview_check`
 - **Configuración que lee:** ninguno
 - **Tablas que lee:** ninguno
 - **Tablas que escribe:** ninguno
@@ -229,10 +229,10 @@ queda «bajista» hasta el primer cruce real (comportamiento del original, con p
 
 - **Referencia pdoc:** [`api/app/indicators/trend_filters.html`](../api/app/indicators/trend_filters.html)
 - **Importa (internos):** `app.indicators._pine`
-- **Lo importan:** `app.candidates.range_filter_flip`
+- **Lo importan:** `app.candidates.range_filter_flip`, `scripts.v2_tradingview_check`
 - **Configuración que lee:** ninguno
 - **Tablas que lee:** ninguno
 - **Tablas que escribe:** ninguno
 - **Tablas que crea o altera:** ninguno
-- **Pruebas que lo importan o citan:** `tests/unit/test_indicators_v2_causality.py`, `tests/unit/test_indicators_v2_trend_oscillators.py`
+- **Pruebas que lo importan o citan:** `tests/unit/test_indicators_v2_causality.py`, `tests/unit/test_indicators_v2_trend_oscillators.py`, `tests/unit/test_v2_tradingview_check_script.py`
 <!-- /hechos:app/indicators/trend_filters.py -->

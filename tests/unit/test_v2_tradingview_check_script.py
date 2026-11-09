@@ -88,3 +88,63 @@ def test_sfp_lines_list_the_sweep_and_confirmation_times():
     assert lines[1].startswith("  confirmacion 2025-11-05 11:00  BAJISTA (corto)  "
                                "barrida 2025-11-05 09:00")
     assert "mecha 21.00" in lines[1]
+
+
+def _walk(n: int, seed: int = 11):
+    import pandas as pd
+
+    rng = np.random.default_rng(seed)
+    close = 100 + np.cumsum(rng.normal(0, 2, n))
+    open_ = np.concatenate(([100.0], close[:-1]))
+    return pd.DataFrame({
+        "open_time": DAY0 + np.arange(n) * HOUR_MS, "open": open_,
+        "high": np.maximum(open_, close) + 1.0, "low": np.minimum(open_, close) - 1.0,
+        "close": close,
+    })
+
+
+def test_weekly_from_daily_starts_on_monday_and_drops_the_open_week():
+    import pandas as pd
+
+    # 2025-11-03 fue lunes; 15 dias: dos semanas completas y una en curso.
+    monday = 20_395 * DAY_MS
+    days = pd.DataFrame({
+        "open_time": monday + np.arange(15) * DAY_MS, "open": np.arange(15.0),
+        "high": np.arange(15.0) + 10, "low": np.arange(15.0) - 10, "close": np.arange(15.0) + 1,
+    })
+    weekly = check.weekly_from_daily(days, monday + 15 * DAY_MS)
+    assert list(weekly["open_time"]) == [monday, monday + 7 * DAY_MS]
+    first = weekly.iloc[0]
+    assert (first["open"], first["high"], first["low"], first["close"]) == (0.0, 16.0, -10.0, 7.0)
+
+
+def test_rf_lines_list_every_flip_with_its_ema_side():
+    from app.indicators.trend_filters import range_filter
+
+    df = _walk(600)
+    rf = range_filter(df["close"])
+    flips = int((rf["rf_buy"] | rf["rf_sell"]).sum())
+    assert flips > 0
+    lines = check.rf_lines("BTCUSDT", df, 1000, "1h")
+    assert lines[0].startswith("Range Filter BTCUSDT 1h")
+    assert len(lines) == flips + 1
+    assert all(("COMPRA" in s or "VENTA" in s) and "EMA144" in s and "ATR14" in s
+               for s in lines[1:])
+    assert all(s.endswith("-> senal del candidato") or s.endswith("(filtrada por EMA)")
+               for s in lines[1:])
+
+
+def test_bars_lines_print_the_last_candles():
+    df = _walk(5)
+    lines = check.bars_lines("ETHUSDT", df, 2, "4h")
+    assert lines[0] == "Velas ETHUSDT 4h: ultimas 2 (hora UTC de apertura)"
+    assert len(lines) == 3 and lines[-1].startswith("  2025-11-05 04:00  O ")
+
+
+@pytest.mark.asyncio
+async def test_report_without_camarilla_nor_sfp_only_lists_the_requested_sections():
+    lines = await check.build_report(FakeClient(), ["BTCUSDT"], [], 0, 500, NOW, "1d", 0, 2)
+    text = "\n".join(lines)
+    assert "Camarilla" not in text and "SFP" not in text and "Range Filter" not in text
+    assert "BTCUSDT: 4 velas de 1d" in text
+    assert "Velas BTCUSDT 1d: ultimas 2" in text

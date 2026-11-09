@@ -871,7 +871,7 @@ UTC; con otro exchange los precios difieren un poco.
 **Hechos derivados del código** (los escribe `scripts/build_dev_docs.py`; no se editan):
 
 - **Referencia pdoc:** [`api/scripts/v2_tradingview_check.html`](../api/scripts/v2_tradingview_check.html)
-- **Importa (internos):** `app.config`, `app.indicators.levels`, `app.indicators.structure`, `app.market.bitunix_rest`
+- **Importa (internos):** `app.config`, `app.indicators._pine`, `app.indicators.levels`, `app.indicators.structure`, `app.indicators.trend_filters`, `app.market.bitunix_rest`
 - **Lo importan:** ninguno
 - **Configuración que lee:** ninguno
 - **Tablas que lee:** ninguno
