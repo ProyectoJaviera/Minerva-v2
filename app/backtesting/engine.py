@@ -260,6 +260,13 @@ async def run_backtest(
     # un SL del lado equivocado o caer en el SL de respaldo.
     skip_if_sl_crossed = bool(getattr(strategy, "skip_entry_if_sl_crossed", False))
     crossed_sl_skips = 0
+    # Opcional (ninguna estrategia de la v1 ni del preregistro de la v2): `entry_mode = "limit"`
+    # entra con una orden limite al cierre de la vela de senal, valida solo durante la vela
+    # siguiente. Se llena unicamente si esa vela ATRAVIESA el precio (estricto), paga la comision
+    # maker y no tiene slippage de entrada; si no se llena, la senal se pierde. En la vela de
+    # entrada solo se evalua el lado adverso (no se sabe si el TP se toco antes del llenado).
+    limit_entry = getattr(strategy, "entry_mode", "market") == "limit"
+    unfilled_limits = 0
 
     margin_usdt = settings.default_margin_usdt
     leverage = settings.leverage
@@ -305,11 +312,12 @@ async def run_backtest(
             return False
         return sl >= entry if side == Signal.LONG else sl <= entry
 
-    def process_bar(i: int) -> None:
+    def process_bar(i: int, adverse_only: bool = False) -> None:
         """Evalua funding + SL/liquidacion (adverso) + TP (favorable) +
         actualizacion de trailing para la vela `i` sobre la posicion
         abierta -- se llama tanto para velas posteriores a la entrada como
-        para la PROPIA vela de entrada (tarea 4a)."""
+        para la PROPIA vela de entrada (tarea 4a). Con `adverse_only` (vela de
+        entrada de una orden limite) no se evalua el TP ni se mueve el trailing."""
         nonlocal position
         assert position is not None
         is_long = position.side == Side.LONG
@@ -333,6 +341,9 @@ async def run_backtest(
             else:
                 is_original_sl = position.effective_stop == position.original_sl_price
                 finalize(price, i, "SL" if is_original_sl else "TRAILING")
+            return
+
+        if adverse_only:
             return
 
         if position.tp_price is not None:
@@ -369,11 +380,20 @@ async def run_backtest(
         if position is None and pending_signal is not None and i > 0:
             side = pending_signal
             fill_price = opens[i]
+            entry_fee_pct = taker_fee_pct
+            limit_filled = True
+            if limit_entry:
+                fill_price = closes[i - 1]
+                limit_filled = (lows[i] < fill_price if side == Signal.LONG
+                                else highs[i] > fill_price)
+                entry_fee_pct = settings.maker_fee_pct
             sub_df = df.iloc[max(0, i - MAX_LOOKBACK_BARS) : i]
-            fill = compute_open_fill(margin_usdt, leverage, fill_price, taker_fee_pct)
+            fill = compute_open_fill(margin_usdt, leverage, fill_price, entry_fee_pct)
 
-            sl = strategy.stop_price(sub_df, side, fill_price)
-            if skip_if_sl_crossed and sl_already_crossed(side, fill_price, sl):
+            sl = strategy.stop_price(sub_df, side, fill_price) if limit_filled else None
+            if not limit_filled:
+                unfilled_limits += 1
+            elif skip_if_sl_crossed and sl_already_crossed(side, fill_price, sl):
                 # El `open` ya paso el SL: no se abre ni se fuerza otro SL. No va a
                 # `backtest_skipped_entries` (esa tabla es de omisiones por el tope de riesgo).
                 crossed_sl_skips += 1
@@ -397,7 +417,7 @@ async def run_backtest(
                     liq_price = compute_liquidation_price(
                         side, fill_price, leverage, fill.notional_usdt, margin_tiers_json
                     )
-                    slippage_entry = entry_slippage_usdt(
+                    slippage_entry = 0.0 if limit_entry else entry_slippage_usdt(
                         fill.notional_usdt, settings.backtest_slippage_bps
                     )
                     position = _Position(
@@ -414,7 +434,7 @@ async def run_backtest(
         if just_opened and position is not None:
             # Tarea 4a: la propia vela de entrada tambien puede cerrar la
             # posicion (SL/TP/liquidacion/funding dentro de su mismo rango).
-            process_bar(i)
+            process_bar(i, adverse_only=limit_entry)
 
         if position is None:
             sub_df_signal = df.iloc[max(0, i + 1 - MAX_LOOKBACK_BARS) : i + 1]
@@ -426,6 +446,9 @@ async def run_backtest(
     if position is not None:
         finalize(closes[-1], len(df) - 1, "END_OF_DATA")
 
+    if unfilled_limits:
+        logger.info("%s %s %s: %d ordenes limite sin llenar",
+                    strategy_name, symbol, timeframe, unfilled_limits)
     if crossed_sl_skips:
         logger.info("%s %s %s: %d entradas omitidas porque el open ya habia cruzado el SL",
                     strategy_name, symbol, timeframe, crossed_sl_skips)

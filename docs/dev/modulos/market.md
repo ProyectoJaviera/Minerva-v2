@@ -255,12 +255,12 @@ estaba 100 % cubierto: cientos de solicitudes desperdiciadas por reintento. Un h
 
 - **Referencia pdoc:** [`api/app/market/ohlcv_history.html`](../api/app/market/ohlcv_history.html)
 - **Importa (internos):** `app.core.logging`, `app.market.bitunix_rest`, `app.persistence.database`, `app.persistence.models`, `app.persistence.repositories.ohlcv_repo`
-- **Lo importan:** `app.backtesting.engine`, `app.backtesting.report`, `app.explorer.service`, `app.llm.market_features`, `app.market.funding_history`, `app.trading.position_monitor`, `app.trading.signal_generator`, `scripts.download_history`, `scripts.repair_ohlcv_gaps`, `scripts.run_backtest`, `scripts.run_backtest_v2`
+- **Lo importan:** `app.backtesting.engine`, `app.backtesting.report`, `app.explorer.service`, `app.llm.market_features`, `app.market.funding_history`, `app.trading.position_monitor`, `app.trading.signal_generator`, `scripts.download_history`, `scripts.repair_ohlcv_gaps`, `scripts.run_backtest`, `scripts.run_backtest_v2`, `scripts.v2_round3`
 - **Configuración que lee:** ninguno
 - **Tablas que lee:** `ohlcv_cache`, `ohlcv_floor`, `ohlcv_series_complete`, `ohlcv_unrepairable_gaps`
 - **Tablas que escribe:** `ohlcv_cache`, `ohlcv_floor`, `ohlcv_unrepairable_gaps`
 - **Tablas que crea o altera:** ninguno
-- **Pruebas que lo importan o citan:** `tests/unit/test_backtest_engine.py`, `tests/unit/test_backtest_engine_v2.py`, `tests/unit/test_backtest_sanity.py`, `tests/unit/test_backtest_v1_regression.py`, `tests/unit/test_download_history.py`, `tests/unit/test_explorer.py`, `tests/unit/test_funding_contrarian_percentile_strategy.py`, `tests/unit/test_ohlcv_history.py`, `tests/unit/test_run_backtest_script.py`, `tests/unit/test_run_backtest_v2_script.py`, `tests/unit/test_run_full_backtest_smoke.py`, `tests/unit/test_signal_generator.py`
+- **Pruebas que lo importan o citan:** 13 archivos (unit 13)
 <!-- /hechos:app/market/ohlcv_history.py -->
 
 ### `app/market/rate_limiter.py`

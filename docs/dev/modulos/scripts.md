@@ -998,3 +998,30 @@ terminar en `.db`.
 - **Tablas que crea o altera:** ninguno
 - **Pruebas que lo importan o citan:** `tests/unit/test_explorer.py`
 <!-- /hechos:scripts/update_history_file.py -->
+
+### `scripts/v2_round3.py`
+
+**Responsabilidad.** La ronda 3 exploratoria de la v2, solo en 4h: 23 señales (4 heredadas por su PF IS y 19 nuevas
+con FVG, funding, régimen de BTC y fuerza relativa), cada una con 6 salidas y 2 modos de entrada, más los controles al
+azar por gatillo. El diseño y la regla de selección están en su docstring, subido antes de correr.
+
+**Funciones y clases clave.** `build_entries()`, `select()` (una variante por señal elegida por PF IS con mínimos de
+operaciones, juzgada en el OOS; finalistas con la regla fija) y `main()`.
+
+**Invariantes — no romper.** La salida y el modo de entrada de cada señal se eligen **solo con el IS**; el OOS solo
+juzga la variante ya elegida. Sin red; exige `DATABASE_PATH` con una base temporal.
+
+**Trampas conocidas.** El OOS ya se usó en dos rondas: un finalista no es una estrategia aprobada.
+
+<!-- hechos:scripts/v2_round3.py -->
+**Hechos derivados del código** (los escribe `scripts/build_dev_docs.py`; no se editan):
+
+- **Referencia pdoc:** [`api/scripts/v2_round3.html`](../api/scripts/v2_round3.html)
+- **Importa (internos):** `app.backtesting.report`, `app.config`, `app.core.logging`, `app.market.ohlcv_history`, `app.persistence.database`, `app.persistence.repositories.universe_repo`, `app.research.round3`, `app.strategies.base`
+- **Lo importan:** ninguno
+- **Configuración que lee:** `DATABASE_PATH`, `backtest_official_end_ms`
+- **Tablas que lee:** `asset_universe`
+- **Tablas que escribe:** ninguno
+- **Tablas que crea o altera:** ninguno
+- **Pruebas que lo importan o citan:** ninguno
+<!-- /hechos:scripts/v2_round3.py -->

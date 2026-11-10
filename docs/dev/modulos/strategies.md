@@ -90,12 +90,12 @@ backtest recalculaba cada indicador desde cero en cada vela.
 
 - **Referencia pdoc:** [`api/app/strategies/base.html`](../api/app/strategies/base.html)
 - **Importa (internos):** ninguno
-- **Lo importan:** 19 módulos (backtesting 2, candidates 4, research 1, scripts 2, strategies 7, trading 3)
+- **Lo importan:** 21 módulos (backtesting 2, candidates 4, research 2, scripts 3, strategies 7, trading 3)
 - **Configuración que lee:** ninguno
 - **Tablas que lee:** ninguno
 - **Tablas que escribe:** ninguno
 - **Tablas que crea o altera:** ninguno
-- **Pruebas que lo importan o citan:** 15 archivos (e2e 2, unit 13)
+- **Pruebas que lo importan o citan:** 16 archivos (e2e 2, unit 14)
 <!-- /hechos:app/strategies/base.py -->
 
 ### `app/strategies/donchian_breakout.py`

@@ -2396,3 +2396,11 @@ Pedido: el dueño pidió usar todas las herramientas de HeatMap y Frost y combin
 - 8 gatillos × 11 variantes de filtros (EMA 144, Range Filter, VIDYA, WaveTrend, solos y de a dos) + 8 controles al azar, en 1h y 4h: 176 combinaciones reales, **ninguna pasa los criterios de la Fase 2; sin finalistas**. Mediana de PF OOS 0.89. La más cercana, SFP + EMA + Range Filter en 4h (PF OOS 1.27, estresado 1.14), falla por concentración (46 %) y pierde en IS (0.87).
 - Corrida de 105 min sobre una base temporal del scratchpad (copia de la de la Fase 2). Monte Carlo informativo con 20 repeticiones.
 - **Cambios de comportamiento respecto de la v1.0:** ninguno.
+
+## v2: ronda 3 exploratoria — diseño fijado antes de correr (2026-11-10)
+
+Pedido: el dueño aprobó una ronda con costos más bajos, salidas mejores (dio permiso para cambiar TP, SL y trailing), el FVG e información distinta al precio propio. **Exploratoria.**
+
+- **Motor (`app/backtesting/engine.py`), cambio opcional:** `entry_mode = "limit"` (orden límite al cierre de la vela de señal, llenado solo si la vela siguiente atraviesa el precio, comisión maker, sin slippage de entrada; en la vela de entrada solo se evalúa el lado adverso). Ninguna estrategia de la v1 ni del preregistro lo declara: la regresión de la v1 pasa igual. **Sin cambio de comportamiento respecto de la v1.0.**
+- **`app/research/round3.py`:** gatillo `fvg` (definición estándar de 3 velas; no viene en HeatMap ni en Frost), filtros `fund`, `btc` y `rs`, 6 salidas y modo de entrada.
+- **`scripts/v2_round3.py`:** 23 señales × 6 salidas × 2 entradas + controles (372 variantes, solo 4h). **La salida de cada señal se elige solo con el IS** y esa única variante se juzga en el OOS: es la forma de «optimizar» sin sobreajustar. Regla de finalistas en el docstring, subida antes de correr.

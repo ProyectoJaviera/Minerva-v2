@@ -68,10 +68,38 @@ de cierres; se vacía al pasar de 64 series. El marco se deduce del paso entre v
 
 - **Referencia pdoc:** [`api/app/research/combos.html`](../api/app/research/combos.html)
 - **Importa (internos):** `app.candidates.camarilla_s3_r3`, `app.candidates.common`, `app.candidates.sfp_reversal`, `app.indicators._pine`, `app.indicators.oscillators`, `app.indicators.structure`, `app.indicators.trend_filters`, `app.strategies.base`
-- **Lo importan:** `app.api.routes.explorer`, `app.explorer.service`, `scripts.v2_explore`
+- **Lo importan:** `app.api.routes.explorer`, `app.explorer.service`, `app.research.round3`, `scripts.v2_explore`
 - **Configuración que lee:** ninguno
 - **Tablas que lee:** ninguno
 - **Tablas que escribe:** ninguno
 - **Tablas que crea o altera:** ninguno
 - **Pruebas que lo importan o citan:** `tests/unit/test_explorer.py`, `tests/unit/test_research_combos.py`
 <!-- /hechos:app/research/combos.py -->
+
+### `app/research/round3.py`
+
+**Responsabilidad.** La ronda 3 exploratoria: el gatillo `fvg` (Fair Value Gap estándar de 3 velas, retesteo único),
+los filtros `fund` (funding contra su mediana móvil), `btc` (régimen de BTC: cierre contra su EMA 200) y `rs` (fuerza
+relativa frente a BTC), seis salidas en múltiplos del ATR (`EXITS`) y el modo de entrada (`market` o `limit`).
+
+**Funciones y clases clave.** `fvg_signals()`, `compute_features_r3()`, `set_btc_context()` y `Round3Strategy`
+(subclase de `ComboStrategy`; su atributo `entry_mode` lo lee el motor de backtest).
+
+**Invariantes — no romper.** Causal (prueba con serie truncada == completa). `btc` y `rs` quedan en falso si no se
+registró la serie de BTC del marco con `set_btc_context`. No cambia la interfaz de `combos.py`.
+
+**Trampas conocidas.** El contexto de BTC es un estado del módulo: hay que registrarlo antes de correr y vacía la
+caché de columnas.
+
+<!-- hechos:app/research/round3.py -->
+**Hechos derivados del código** (los escribe `scripts/build_dev_docs.py`; no se editan):
+
+- **Referencia pdoc:** [`api/app/research/round3.html`](../api/app/research/round3.html)
+- **Importa (internos):** `app.candidates.common`, `app.candidates.sfp_reversal`, `app.indicators._pine`, `app.research.combos`, `app.strategies.base`
+- **Lo importan:** `scripts.v2_round3`
+- **Configuración que lee:** ninguno
+- **Tablas que lee:** ninguno
+- **Tablas que escribe:** ninguno
+- **Tablas que crea o altera:** ninguno
+- **Pruebas que lo importan o citan:** `tests/unit/test_research_round3.py`
+<!-- /hechos:app/research/round3.py -->

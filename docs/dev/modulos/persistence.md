@@ -85,7 +85,7 @@ reescribir sus filas no. Ver [Sombras](../ZONAS_PROTEGIDAS.md#sombras) y
 
 - **Referencia pdoc:** [`api/app/persistence/database.html`](../api/app/persistence/database.html)
 - **Importa (internos):** ninguno
-- **Lo importan:** 85 módulos (api 15, backtesting 2, core 1, execution 1, explorer 1, llm 5, main 1, market 4, memory 8, news 4, persistence 16, scripts 12, telegram 3, trading 12)
+- **Lo importan:** 86 módulos (api 15, backtesting 2, core 1, execution 1, explorer 1, llm 5, main 1, market 4, memory 8, news 4, persistence 16, scripts 13, telegram 3, trading 12)
 - **Configuración que lee:** ninguno
 - **Tablas que lee:** ninguno
 - **Tablas que escribe:** ninguno
@@ -141,7 +141,7 @@ FastAPI no protegería nada).
 - **Tablas que lee:** ninguno
 - **Tablas que escribe:** ninguno
 - **Tablas que crea o altera:** ninguno
-- **Pruebas que lo importan o citan:** 61 archivos (e2e 10, unit 51)
+- **Pruebas que lo importan o citan:** 62 archivos (e2e 10, unit 52)
 <!-- /hechos:app/persistence/models.py -->
 
 ### `app/persistence/repositories/__init__.py`
@@ -371,7 +371,7 @@ visto no existía para esa decisión. Solo título, URL, dominio y fecha (nunca 
 - **Tablas que lee:** `ohlcv_cache`, `ohlcv_floor`, `ohlcv_series_complete`, `ohlcv_unrepairable_gaps`
 - **Tablas que escribe:** `ohlcv_cache`, `ohlcv_floor`, `ohlcv_series_complete`, `ohlcv_unrepairable_gaps`
 - **Tablas que crea o altera:** ninguno
-- **Pruebas que lo importan o citan:** 18 archivos (e2e 2, unit 16)
+- **Pruebas que lo importan o citan:** 19 archivos (e2e 2, unit 17)
 <!-- /hechos:app/persistence/repositories/ohlcv_repo.py -->
 
 ### `app/persistence/repositories/paper_execution_repo.py`
@@ -596,7 +596,7 @@ más reciente.
 
 - **Referencia pdoc:** [`api/app/persistence/repositories/universe_repo.html`](../api/app/persistence/repositories/universe_repo.html)
 - **Importa (internos):** `app.persistence.database`, `app.persistence.models`
-- **Lo importan:** `app.api.routes.universe`, `app.core.scheduler`, `app.market.universe`, `app.news.collector`, `app.telegram.push`, `app.trading.signal_generator`, `scripts.run_backtest`, `scripts.run_backtest_v2`, `scripts.v2_explore`
+- **Lo importan:** `app.api.routes.universe`, `app.core.scheduler`, `app.market.universe`, `app.news.collector`, `app.telegram.push`, `app.trading.signal_generator`, `scripts.run_backtest`, `scripts.run_backtest_v2`, `scripts.v2_explore`, `scripts.v2_round3`
 - **Configuración que lee:** ninguno
 - **Tablas que lee:** `asset_universe`
 - **Tablas que escribe:** `asset_universe`

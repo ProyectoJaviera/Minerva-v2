@@ -104,7 +104,7 @@ flowchart LR
     market["market<br/>11 archivos"]
     memory["memory<br/>10 archivos"]
     news["news<br/>11 archivos"]
-    research["research<br/>2 archivos"]
+    research["research<br/>3 archivos"]
     strategies["strategies<br/>9 archivos"]
     telegram["telegram<br/>8 archivos"]
     trading["trading<br/>23 archivos"]
@@ -123,8 +123,8 @@ flowchart LR
     llm -->|3| memory
     market -->|9| core
     news -->|4| core
-    research -->|3| candidates
-    research -->|4| indicators
+    research -->|5| candidates
+    research -->|5| indicators
     strategies -->|4| indicators
     telegram -->|5| core
     telegram -->|7| trading
@@ -141,7 +141,7 @@ El diagrama muestra solo las flechas con 3 o más imports; no dibuja las que lle
 | Paquete | Archivos | Líneas | Importa de (imports) | Lo importan |
 |---|---:|---:|---|---|
 | `api` | 21 | 2352 | persistence 36, trading 16, config 12, core 7, news 7, llm 4, market 3, memory 3, telegram 2, explorer 1, research 1 | main, scripts, telegram |
-| `backtesting` | 7 | 2108 | persistence 9, strategies 3, trading 3, config 2, core 2, market 2, execution 1 | explorer, scripts, trading |
+| `backtesting` | 7 | 2131 | persistence 9, strategies 3, trading 3, config 2, core 2, market 2, execution 1 | explorer, scripts, trading |
 | `candidates` | 5 | 610 | indicators 5, strategies 4 | explorer, research, scripts |
 | `config` | 1 | 429 | ninguno | api, backtesting, core, execution, explorer, llm, main, market, memory, news, scripts, telegram, trading |
 | `core` | 5 | 593 | trading 5, persistence 4, config 2, market 2, execution 1 | api, backtesting, execution, llm, main, market, memory, news, scripts, telegram, trading |
@@ -154,8 +154,8 @@ El diagrama muestra solo las flechas con 3 o más imports; no dibuja las que lle
 | `memory` | 10 | 1252 | persistence 20, config 3, core 2, news 1, trading 1 | api, llm, main, scripts |
 | `news` | 11 | 1703 | persistence 11, core 4, config 3 | api, llm, main, memory, scripts |
 | `persistence` | 22 | 5016 | ninguno | api, backtesting, core, execution, explorer, llm, main, market, memory, news, scripts, telegram, trading |
-| `research` | 2 | 414 | indicators 4, candidates 3, strategies 1 | api, explorer, scripts |
-| `scripts` | 36 | 9687 | trading 26, config 23, persistence 23, market 11, llm 6, backtesting 5, core 5, strategies 5, indicators 4, memory 2, news 2, api 1, candidates 1, research 1 | ninguno |
+| `research` | 3 | 732 | candidates 5, indicators 5, strategies 2 | api, explorer, scripts |
+| `scripts` | 37 | 9888 | trading 26, persistence 25, config 24, market 12, backtesting 6, core 6, llm 6, strategies 6, indicators 4, memory 2, news 2, research 2, api 1, candidates 1 | ninguno |
 | `strategies` | 9 | 807 | indicators 4 | backtesting, candidates, research, scripts, trading |
 | `telegram` | 8 | 1903 | persistence 12, trading 7, core 5, config 4, market 2, api 1, llm 1 | api, main |
 | `trading` | 23 | 7441 | persistence 57, config 9, market 8, core 6, execution 5, llm 5, backtesting 4, strategies 4 | api, backtesting, core, execution, main, memory, scripts, telegram |

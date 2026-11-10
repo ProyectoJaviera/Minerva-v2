@@ -110,7 +110,7 @@ al calentamiento. No mezclar con `engine.ema`, que arranca con el primer valor (
 
 - **Referencia pdoc:** sin página (módulo privado)
 - **Importa (internos):** ninguno
-- **Lo importan:** `app.candidates.range_filter_flip`, `app.candidates.sfp_reversal`, `app.indicators.levels`, `app.indicators.oscillators`, `app.indicators.structure`, `app.indicators.trend_filters`, `app.research.combos`, `scripts.v2_tradingview_check`
+- **Lo importan:** `app.candidates.range_filter_flip`, `app.candidates.sfp_reversal`, `app.indicators.levels`, `app.indicators.oscillators`, `app.indicators.structure`, `app.indicators.trend_filters`, `app.research.combos`, `app.research.round3`, `scripts.v2_tradingview_check`
 - **Configuración que lee:** ninguno
 - **Tablas que lee:** ninguno
 - **Tablas que escribe:** ninguno
