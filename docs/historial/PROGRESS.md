@@ -2369,3 +2369,12 @@ Pedido: seguir tras congelar el preregistro. **Todavía sin corrida.**
 - `app/backtesting/report.py::run_full_backtest` acepta `strategies`, `timeframes_by_strategy` y `experimental` (y `_build_verdict`, el conjunto de experimentales). Sin esos argumentos corre exactamente lo de antes (las 6 estrategias de la v1 con `STRATEGY_TIMEFRAMES` y `EXPERIMENTAL_STRATEGIES`): el smoke test de la v1 sigue igual. **Sin cambio de comportamiento respecto de la v1.0.**
 - `scripts/run_backtest_v2.py` (nuevo): la corrida única de la Fase 2 de la v2. Una combinación por candidato y marco (`sfp_reversal_5_1_1h`, …), cada una con su veredicto; aplica el criterio adicional del SFP contra el control del mismo marco y la regla de ronda sospechosa; reporta las omisiones por tope de riesgo (`backtest_skipped_entries`) y por SL cruzado (contadas desde el log del motor). Sin red, exige `DATABASE_PATH` con una base temporal. Tests en `tests/unit/test_run_backtest_v2_script.py` (incluida una corrida de punta a punta con velas sintéticas).
 - **Datos:** el historial se descarga con `scripts/download_history.py` a una base temporal del scratchpad (nunca a `data/`). El universo es el top-10 de CoinGecko del 2026-11-10: BTC, ETH, BNB, XRP, SOL, TRX, ZEC, HYPE, XMR y DOGE (más el grupo de control BTC/ETH). La configuración efectiva coincide con el preregistro (OOS 30 %, fecha final 2026-10-01, TP de respaldo 10 %, tope de riesgo 50 %).
+
+## v2: corrida única de la Fase 2 — los 3 candidatos descartados (2026-11-10)
+
+Pedido: el dueño ordenó congelar el preregistro y seguir. Corrida única con `scripts/run_backtest_v2.py` sobre una base temporal del scratchpad (217 s). Resultado completo en `docs/v2/RESULTADO_FASE2_V2.md`.
+
+- **Veredicto:** ninguna de las 6 combinaciones sobrevive a los criterios de la Fase 2. PF OOS: SFP 0.93 (1h) y 0.98 (4h); Camarilla 0.79 y 0.75; Range Filter 0.92 y 1.06 (4h: 71 % de folds positivos, pero PF estresado 0.91 y concentración del 102 %). El control (PF OOS 0.87 y 0.96) no pasó: la ronda no es sospechosa. El SFP apenas se distingue de su control con dirección al azar.
+- **Omisiones:** por tope de riesgo, de 371 a 1034 según la combinación; por SL cruzado, 0 (el `open` de entrada es el cierre de la vela de confirmación, que ya volvió más acá de la mecha).
+- **No se cambió nada tras ver el resultado.** Cualquier variante es un preregistro nuevo.
+- **Cambios de comportamiento respecto de la v1.0:** ninguno.
