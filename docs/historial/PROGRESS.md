@@ -2354,3 +2354,10 @@ Pedido: el dueño pidió validar con TradingView, en su Chrome y con su sesión,
 - **Layout del dueño:** tiene el autoguardado activado; se activaron temporalmente las etiquetas «AI Tags» de Frost y se cambió de par y temporalidad. Quedó como estaba (BTC, 1D, AI Tags apagado).
 - **Cambios de comportamiento respecto de la v1.0:** ninguno.
 - **Pendiente:** la confirmación del dueño; después, conectar los candidatos a `scripts/run_backtest.py` y congelar el preregistro.
+
+## v2: preregistro congelado (2026-11-10)
+
+Pedido: el dueño confirmó la comparación con TradingView y ordenó congelar el preregistro y seguir. `docs/v2/PREREGISTRO_V2.md` queda **congelado** en este commit propio, sin la marca de borrador, **antes** de cualquier corrida de los candidatos. Ningún criterio, parámetro, SL/TP, marco ni periodo cambió respecto de la versión aprobada el 2026-11-08; solo se marcaron como hechos los pasos 5 y 7 y se agregó la decisión al registro.
+
+- **Cambios de comportamiento respecto de la v1.0:** ninguno.
+- **Siguiente:** conectar los candidatos a `scripts/run_backtest.py`, preparar los datos de la Fase 2 y la corrida única.

@@ -1,9 +1,10 @@
-# Minerva v2 — Preregistro de candidatos (BORRADOR)
+# Minerva v2 — Preregistro de candidatos (CONGELADO)
 
-> **BORRADOR — NO EJECUTAR.** Aprobado por el dueño del proyecto el 2026-11-08 **con cambios**, que ya están
-> incorporados abajo. Sigue siendo borrador hasta que el dueño confirme la comparación con TradingView (sección 5). Recién
-> entonces se congela en un commit propio, sin esta marca y **antes** de cualquier corrida, igual que
-> `docs/historial/FASE2_CRITERIOS.md` en la v1. **No se corrió ningún backtest.**
+> **CONGELADO el 2026-11-10** en un commit propio, por orden del dueño del proyecto, **antes** de cualquier corrida
+> (igual que `docs/historial/FASE2_CRITERIOS.md` en la v1). Aprobado con cambios el 2026-11-08; el dueño confirmó la
+> comparación con TradingView el 2026-11-10. **Al congelarse no se había corrido ningún backtest de estos candidatos.**
+> Desde aquí no se cambia nada de este documento: cualquier variante es un preregistro nuevo, y el informe dirá cuántas
+> rondas se probaron.
 >
 > Implementación: `app/candidates/` (fuera de `app/strategies/`, la zona protegida de la v1), sin registrar en
 > `STRATEGIES`. Indicadores: `docs/v2/ESPECIFICACION_INDICADORES.md`.
@@ -128,10 +129,10 @@ con funding aproximado; simulación de cartera Monte Carlo solo informativa; liq
 4. ~~Pruebas de cada candidato~~ — **hecho**: causalidad (serie truncada == completa; velas futuras extremas no cambian
    las señales), SL/TP reproducidos a mano y una corrida de punta a punta en el motor real con velas sintéticas
    (`tests/unit/test_strategies_v2.py`, `tests/unit/test_backtest_engine_v2.py`).
-5. **Comparación con TradingView — pendiente del dueño.** `python scripts/v2_tradingview_check.py` imprime, para
-   BTCUSDT y ETHUSDT, los niveles Camarilla R3/R4/S3/S4 de 2026-11-05, 2026-11-06 y 2026-11-07 y las últimas 10 señales
-   SFP en 1h con fecha y hora UTC. **No se congela hasta que el dueño confirme la comparación.**
-   **Hecha por Claude el 2026-11-09 (falta la confirmación del dueño):** contra el gráfico de TradingView del dueño
+5. ~~Comparación con TradingView~~ — **hecho y confirmado por el dueño el 2026-11-10.**
+   `python scripts/v2_tradingview_check.py` imprime, para BTCUSDT y ETHUSDT, los niveles Camarilla R3/R4/S3/S4 y las
+   señales SFP y del Range Filter con fecha y hora UTC.
+   **Hecha por Claude el 2026-11-09:** contra el gráfico de TradingView del dueño
    (feed de Bitunix, indicadores originales PunkAlgo HeatMap y Frost), leyendo las velas y las salidas que la página
    ya tenía cargadas. Resultado: velas idénticas en 1h, 4h, 1D y 1S (salvo diferencias de centavos y un hueco de
    TradingView en ETHUSDT, 2025-11-27 12:00 a 2025-11-28 20:00); giros del Range Filter idénticos mes a mes en todo el
@@ -142,7 +143,8 @@ con funding aproximado; simulación de cartera Monte Carlo solo informativa; liq
    coinciden). Detalle en `docs/historial/PROGRESS.md` (entrada del 2026-11-09).
 6. Conectar los candidatos a `scripts/run_backtest.py` (hoy solo lee `STRATEGIES`) — paso posterior, con el documento
    congelado; se anota en `docs/historial/PROGRESS.md`.
-7. Congelar este documento en un commit propio, sin la marca de borrador, **antes** de la primera corrida.
+7. ~~Congelar este documento en un commit propio, sin la marca de borrador, **antes** de la primera corrida~~ —
+   **hecho** el 2026-11-10.
 
 ## 6. Advertencias que se publican junto al resultado
 
@@ -167,5 +169,7 @@ con funding aproximado; simulación de cartera Monte Carlo solo informativa; liq
 
 | 2026-11-08 | Sorteo del control con SHA-256 de `(42, open_time, close)` aprobado; omisiones por SL cruzado en el log y Camarilla solo en la primera vela del día de cada lado, aprobados |
 | 2026-11-08 | El informe reporta, por candidato y marco, las entradas omitidas por cada motivo (tope de riesgo y SL cruzado) |
+| 2026-11-10 | Comparación con TradingView confirmada; congelar el preregistro y seguir con la corrida única |
 
-**Pendiente del dueño:** confirmar la comparación con TradingView. No se congela ni se corre nada antes.
+**Congelado.** Lo que sigue (conectar los candidatos a `scripts/run_backtest.py`, la corrida única y el informe) se
+anota en `docs/historial/PROGRESS.md` y no modifica este documento.

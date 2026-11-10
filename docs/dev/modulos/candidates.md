@@ -4,7 +4,7 @@
 
 ## Qué hace el paquete
 
-Los **candidatos de la v2** del [preregistro](../../v2/PREREGISTRO_V2.md) (todavía un borrador): `sfp_reversal_5_1`,
+Los **candidatos de la v2** del [preregistro](../../v2/PREREGISTRO_V2.md) (congelado el 2026-11-10): `sfp_reversal_5_1`,
 `camarilla_s3_r3`, `range_filter_flip_ema144` y el control `control_sfp_random_dir_seed42`. Heredan de
 `app/strategies/base.py` (misma interfaz que las estrategias de la v1) y usan los indicadores de la v2
 (`app/indicators/structure.py`, `levels.py`, `trend_filters.py`), especificados en
