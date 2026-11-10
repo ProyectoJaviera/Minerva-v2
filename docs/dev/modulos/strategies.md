@@ -90,7 +90,7 @@ backtest recalculaba cada indicador desde cero en cada vela.
 
 - **Referencia pdoc:** [`api/app/strategies/base.html`](../api/app/strategies/base.html)
 - **Importa (internos):** ninguno
-- **Lo importan:** 15 módulos (backtesting 1, candidates 4, strategies 7, trading 3)
+- **Lo importan:** 17 módulos (backtesting 2, candidates 4, scripts 1, strategies 7, trading 3)
 - **Configuración que lee:** ninguno
 - **Tablas que lee:** ninguno
 - **Tablas que escribe:** ninguno
@@ -266,7 +266,7 @@ ventana de 720 velas).
 - **Tablas que lee:** ninguno
 - **Tablas que escribe:** ninguno
 - **Tablas que crea o altera:** ninguno
-- **Pruebas que lo importan o citan:** `tests/e2e/series.py`, `tests/unit/test_analyze_risk_script.py`, `tests/unit/test_backtest_v1_regression.py`, `tests/unit/test_run_backtest_script.py`, `tests/unit/test_run_full_backtest_smoke.py`, `tests/unit/test_strategies_v2.py`
+- **Pruebas que lo importan o citan:** `tests/e2e/series.py`, `tests/unit/test_analyze_risk_script.py`, `tests/unit/test_backtest_v1_regression.py`, `tests/unit/test_run_backtest_script.py`, `tests/unit/test_run_backtest_v2_script.py`, `tests/unit/test_run_full_backtest_smoke.py`, `tests/unit/test_strategies_v2.py`
 <!-- /hechos:app/strategies/registry.py -->
 
 ### `app/strategies/trend_atr_stop.py`

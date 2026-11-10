@@ -907,3 +907,37 @@ UTC; con otro exchange los precios difieren un poco.
 - **Tablas que crea o altera:** ninguno
 - **Pruebas que lo importan o citan:** `tests/unit/test_check_measurement_safety.py`
 <!-- /hechos:scripts/check_measurement_safety.py -->
+
+### `scripts/run_backtest_v2.py`
+
+**Responsabilidad.** La corrida única de la Fase 2 de la v2: corre los cuatro candidatos de `app/candidates/` en 1h y 4h,
+cada marco como una combinación con su propio veredicto (`sfp_reversal_5_1_1h`, …), con el motor, el universo, la fecha
+final y los criterios de la Fase 2, y aplica las reglas propias del preregistro congelado (`docs/v2/PREREGISTRO_V2.md`).
+
+**Funciones y clases clave.**
+- `build_combinations()` (una entrada por candidato y marco), `apply_preregistration_rules()` (el SFP solo se aprueba si
+  su PF OOS supera al del control en el mismo marco; el control nunca se aprueba y, si pasa los criterios, la ronda queda
+  sospechosa), `CrossedSlCounter` (cuenta las omisiones por SL cruzado que el motor solo anota en su log) y `main()`.
+- Usa `run_full_backtest(..., strategies=, timeframes_by_strategy=, experimental=)`; sin esos argumentos la función corre
+  las 6 estrategias de la v1 como siempre.
+
+**Invariantes — no romper.** Sin red: lee universo, specs, velas y funding de SQLite (llenada antes con
+`scripts/download_history.py`). Exige `DATABASE_PATH` con una base distinta de la de por defecto y BORRA las corridas
+anteriores del backtest de esa base. La fecha final es `BACKTEST_OFFICIAL_END_DATE` (2026-10-01): las velas posteriores
+están reservadas y no entran.
+
+**Trampas conocidas.** El universo es el top-10 de CoinGecko del día en que se corrió `download_history.py` (sesgo de
+supervivencia, como en la Fase 2 de la v1); por eso se reporta también el PF del grupo de control BTC/ETH.
+
+<!-- hechos:scripts/run_backtest_v2.py -->
+**Hechos derivados del código** (los escribe `scripts/build_dev_docs.py`; no se editan):
+
+- **Referencia pdoc:** [`api/scripts/run_backtest_v2.html`](../api/scripts/run_backtest_v2.html)
+- **Importa (internos):** `app.backtesting.report`, `app.candidates`, `app.config`, `app.core.logging`, `app.market.ohlcv_history`, `app.persistence.database`, `app.persistence.repositories.universe_repo`, `app.strategies.base`
+- **Lo importan:** ninguno
+- **Configuración que lee:** `DATABASE_PATH`, `backtest_control_symbols_list`, `backtest_official_end_ms`
+- **Tablas que lee:** `asset_universe`, `backtest_skipped_entries`
+- **Tablas que escribe:** ninguno
+- **Tablas que crea o altera:** ninguno
+- **Pruebas que lo importan o citan:** `tests/unit/test_run_backtest_v2_script.py`
+<!-- /hechos:scripts/run_backtest_v2.py -->

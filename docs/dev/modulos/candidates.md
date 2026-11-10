@@ -42,12 +42,12 @@ opcional `skip_entry_if_sl_crossed` (ver [backtesting](backtesting.md#appbacktes
 
 - **Referencia pdoc:** [`api/app/candidates.html`](../api/app/candidates.html)
 - **Importa (internos):** `app.candidates.camarilla_s3_r3`, `app.candidates.range_filter_flip`, `app.candidates.sfp_reversal`, `app.strategies.base`
-- **Lo importan:** ninguno
+- **Lo importan:** `scripts.run_backtest_v2`
 - **Configuración que lee:** ninguno
 - **Tablas que lee:** ninguno
 - **Tablas que escribe:** ninguno
 - **Tablas que crea o altera:** ninguno
-- **Pruebas que lo importan o citan:** `tests/unit/test_backtest_engine_v2.py`, `tests/unit/test_strategies_v2.py`
+- **Pruebas que lo importan o citan:** `tests/unit/test_backtest_engine_v2.py`, `tests/unit/test_run_backtest_v2_script.py`, `tests/unit/test_strategies_v2.py`
 <!-- /hechos:app/candidates/__init__.py -->
 
 ### `app/candidates/common.py`

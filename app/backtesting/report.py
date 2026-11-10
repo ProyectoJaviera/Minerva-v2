@@ -26,6 +26,7 @@ from app.market.ohlcv_history import (
 from app.persistence.database import Database
 from app.persistence.models import BacktestRun, BacktestSkippedEntry, BacktestTrade, BacktestVerdict
 from app.persistence.repositories import backtest_repo
+from app.strategies.base import BaseStrategy
 from app.strategies.registry import EXPERIMENTAL_STRATEGIES, STRATEGIES, STRATEGY_TIMEFRAMES
 
 logger = get_logger(__name__)
@@ -154,6 +155,7 @@ def _build_verdict(
     end_ms: int,
     combos_tested: int,
     settings: Settings,
+    experimental: frozenset[str] | set[str] = EXPERIMENTAL_STRATEGIES,
 ) -> BacktestVerdict:
     oos_trades = [t for t in all_trades if _is_oos(t, oos_boundary_ms) == "OOS"]
     is_trades = [t for t in all_trades if _is_oos(t, oos_boundary_ms) == "IS"]
@@ -192,7 +194,7 @@ def _build_verdict(
     oos_metrics = m.compute_metrics(oos_trades, settings.backtest_initial_capital)
     concentration = m.concentration_pct(oos_trades)
 
-    is_experimental = strategy_name in EXPERIMENTAL_STRATEGIES
+    is_experimental = strategy_name in experimental
     evidence_insufficient = len(all_trades) < settings.backtest_min_trades_total
 
     discard_reasons = _evaluate_discard_criteria(
@@ -314,6 +316,9 @@ async def run_full_backtest(
     symbols: list[str],
     start_ms: int,
     end_ms: int,
+    strategies: dict[str, BaseStrategy] | None = None,
+    timeframes_by_strategy: dict[str, list[str]] | None = None,
+    experimental: frozenset[str] | set[str] | None = None,
 ) -> list[StrategyResult]:
     """Corre todas las estrategias sobre todos los simbolos y timeframes y calcula sus veredictos.
 
@@ -333,6 +338,12 @@ async def run_full_backtest(
         symbols: simbolos del universo; se les suman los de control (`BACKTEST_CONTROL_SYMBOLS`).
         start_ms: inicio del rango, en ms Unix.
         end_ms: fin del rango, en ms Unix.
+        strategies: estrategias a correr por nombre; `None` usa `STRATEGIES` (las 6 de la v1,
+            el comportamiento de siempre). La v2 pasa sus candidatos (`scripts/run_backtest_v2.py`).
+        timeframes_by_strategy: timeframes de cada nombre; `None` usa `STRATEGY_TIMEFRAMES`.
+            Un nombre sin entrada se corre en 4h.
+        experimental: nombres que no participan del descarte; `None` usa
+            `EXPERIMENTAL_STRATEGIES`.
 
     Returns:
         Un `StrategyResult` por estrategia.
@@ -355,9 +366,14 @@ async def run_full_backtest(
     await backtest_repo.clear_results(db)
 
     results: list[StrategyResult] = []
+    strategies = STRATEGIES if strategies is None else strategies
+    timeframes_by_strategy = (
+        STRATEGY_TIMEFRAMES if timeframes_by_strategy is None else timeframes_by_strategy
+    )
+    experimental = EXPERIMENTAL_STRATEGIES if experimental is None else experimental
 
-    for strategy_name, strategy in STRATEGIES.items():
-        timeframes = STRATEGY_TIMEFRAMES.get(strategy_name, ["4h"])
+    for strategy_name, strategy in strategies.items():
+        timeframes = timeframes_by_strategy.get(strategy_name, ["4h"])
         strategy_trades: list[RawTrade] = []
         combos_tested = 0
 
@@ -378,7 +394,7 @@ async def run_full_backtest(
 
         verdict = _build_verdict(
             strategy_name, strategy_trades, oos_boundary_ms, start_ms, end_ms,
-            combos_tested, settings,
+            combos_tested, settings, experimental,
         )
         await backtest_repo.insert_verdict(db, verdict)
 

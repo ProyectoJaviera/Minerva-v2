@@ -1,9 +1,9 @@
-"""Candidatos de la v2 (`docs/v2/PREREGISTRO_V2.md`): implementados, todavia SIN conectar.
+"""Candidatos de la v2 (`docs/v2/PREREGISTRO_V2.md`, congelado el 2026-11-10).
 
 Viven fuera de `app/strategies/` a proposito: ese directorio es la zona protegida de las seis
 estrategias de la v1. `CANDIDATES` y `CANDIDATE_TIMEFRAMES` no son `STRATEGIES`: ni el scheduler
-ni `scripts/run_backtest.py` los leen. Conectarlos al backtest es un paso posterior, recien con
-el preregistro congelado.
+ni `scripts/run_backtest.py` los leen. Solo los corre `scripts/run_backtest_v2.py`, la corrida
+unica de la Fase 2 de la v2, con un veredicto por candidato y marco.
 """
 
 from __future__ import annotations

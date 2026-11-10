@@ -2361,3 +2361,11 @@ Pedido: el dueño confirmó la comparación con TradingView y ordenó congelar e
 
 - **Cambios de comportamiento respecto de la v1.0:** ninguno.
 - **Siguiente:** conectar los candidatos a `scripts/run_backtest.py`, preparar los datos de la Fase 2 y la corrida única.
+
+## v2: candidatos conectados al backtest (2026-11-10)
+
+Pedido: seguir tras congelar el preregistro. **Todavía sin corrida.**
+
+- `app/backtesting/report.py::run_full_backtest` acepta `strategies`, `timeframes_by_strategy` y `experimental` (y `_build_verdict`, el conjunto de experimentales). Sin esos argumentos corre exactamente lo de antes (las 6 estrategias de la v1 con `STRATEGY_TIMEFRAMES` y `EXPERIMENTAL_STRATEGIES`): el smoke test de la v1 sigue igual. **Sin cambio de comportamiento respecto de la v1.0.**
+- `scripts/run_backtest_v2.py` (nuevo): la corrida única de la Fase 2 de la v2. Una combinación por candidato y marco (`sfp_reversal_5_1_1h`, …), cada una con su veredicto; aplica el criterio adicional del SFP contra el control del mismo marco y la regla de ronda sospechosa; reporta las omisiones por tope de riesgo (`backtest_skipped_entries`) y por SL cruzado (contadas desde el log del motor). Sin red, exige `DATABASE_PATH` con una base temporal. Tests en `tests/unit/test_run_backtest_v2_script.py` (incluida una corrida de punta a punta con velas sintéticas).
+- **Datos:** el historial se descarga con `scripts/download_history.py` a una base temporal del scratchpad (nunca a `data/`). El universo es el top-10 de CoinGecko del 2026-11-10: BTC, ETH, BNB, XRP, SOL, TRX, ZEC, HYPE, XMR y DOGE (más el grupo de control BTC/ETH). La configuración efectiva coincide con el preregistro (OOS 30 %, fecha final 2026-10-01, TP de respaldo 10 %, tope de riesgo 50 %).
