@@ -2413,3 +2413,11 @@ Corrida de `scripts/v2_round3.py` (66 min, 372 variantes en 4h, base temporal de
 - **Cautelas:** la salida explica casi todo (22 de 23 señales eligieron el trailing de 3 ATR; varios controles al azar quedan sobre 1 con ella; el finalista del Range Filter no supera de verdad a su control); el tope de riesgo del 5 % deja operar casi solo en BTC, TRX, BNB, ETH y XRP; 23 juicios sobre un OOS ya usado en dos rondas.
 - **Pendiente (decisión del dueño):** preregistrar los finalistas y mirarlos una vez en los datos reservados desde el 2026-10-01, y paper trading.
 - **Cambios de comportamiento respecto de la v1.0:** ninguno.
+
+## v2: examen de los finalistas de la ronda 3 con los datos reservados — los tres pierden (2026-11-10)
+
+Pedido: el dueño aprobó preregistrar los finalistas y mirarlos una vez en los datos reservados. Preregistro `docs/v2/PREREGISTRO_V2_RONDA3.md` congelado (commit `a31d3f9`) y script `scripts/v2_round3_reserved.py` subido (commit `63dcd75`) **antes** de correr. Solo lectura sobre la base temporal.
+
+- **Resultado (2026-10-01 a 2026-11-10):** VIDYA + régimen de BTC, 15 operaciones, PF 0.31 («sin información suficiente»); FVG + EMA 144, 28 operaciones, PF 0.52 («fracaso claro»); Range Filter + EMA 144, 26 operaciones, PF 0.62 («fracaso claro»). Las tres por debajo de su control al azar (1.57, 0.86 y 0.85). Detalle al final de `docs/v2/RONDA3_V2.md`.
+- **Los datos reservados ya están usados:** cualquier ronda futura necesita datos nuevos (paper o historial posterior al 2026-11-10).
+- **Cambios de comportamiento respecto de la v1.0:** ninguno.

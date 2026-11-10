@@ -56,3 +56,23 @@ ronda miró:
 1. preregistrar los finalistas tal cual (sin tocar nada) y correrlos **una vez** sobre los datos reservados desde el
    2026-10-01 (son pocas semanas: sirve para detectar un fracaso claro, no para confirmar);
 2. dejarlos en **paper trading** varios meses.
+
+## Examen con los datos reservados (2026-11-10)
+
+Corrida única según el [preregistro congelado](PREREGISTRO_V2_RONDA3.md) (commit `a31d3f9`), con
+`scripts/v2_round3_reserved.py` (commit `63dcd75`): operaciones abiertas entre el 2026-10-01 y el 2026-11-10 (UTC).
+
+| Finalista | Operaciones | PF neto | PnL neto | Ganadoras | Lectura fijada | Control al azar (n / PF) |
+|---|---|---|---|---|---|---|
+| Giro de VIDYA + régimen de BTC | 15 | 0.31 | −9.07 USDT | 20 % | sin información suficiente (< 20 operaciones) | 20 / 1.57 |
+| FVG + EMA 144 | 28 | 0.52 | −9.98 USDT | 25 % | **alerta: fracaso claro** | 44 / 0.86 |
+| Giro del Range Filter + EMA 144 | 26 | 0.62 | −5.87 USDT | 31 % | **alerta: fracaso claro** | 34 / 0.85 |
+
+**Las tres pierden en los datos que ninguna ronda había mirado, y las tres quedan por debajo de su propio control con
+dirección al azar.** Dos dan «fracaso claro»; la tercera no llega a 20 operaciones, pero con PF 0.31 tampoco da motivo
+para seguir. Son solo seis semanas (un tramo bajista y sin tendencias largas), así que no prueba que nunca funcionen;
+sí confirma la sospecha de la ronda: el resultado del OOS venía del periodo y de la salida, no de una ventaja estable.
+
+**Conclusión de la ronda 3:** ningún finalista pasa a paper trading por mérito propio. Después de 6 estrategias en la
+v1, 3 candidatos preregistrados, 176 combinaciones y 23 señales con salidas optimizadas, no hay ninguna regla basada en
+estos indicadores con ventaja demostrada fuera de la muestra.
