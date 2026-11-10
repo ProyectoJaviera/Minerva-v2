@@ -2388,3 +2388,11 @@ Pedido: el dueño quiere una sección donde elegir indicadores (solos o combinad
 - **Decisión: nunca se usan velas desde el 2026-10-01**, fijo en el código (`RESERVED_FROM`), para no gastar los datos reservados de las rondas preregistradas.
 - **Exploratorio:** nada se guarda en la base ni pasa por los criterios de la Fase 2; la pestaña lo advierte (sesgo de selección). Una corrida a la vez, en un hilo aparte con su propia conexión, para no frenar el bucle del bot; caché de las últimas 32 corridas. `FastComboStrategy` lee la fila de la señal de arrays en vez de `df.iloc[-1]` (mismas operaciones, probado operación por operación): con datos reales, una moneda en 1h tarda ~7 s y en 4h ~2 s.
 - **Cambios de comportamiento respecto de la v1.0:** ninguno en la medición, las estrategias, el riesgo ni el esquema. Se agregan una pestaña, dos rutas de solo lectura, el ajuste `EXPLORER_HISTORY_DB` y un montaje de solo lectura de `./history` en `docker-compose.yml` (las pruebas de Docker ahora lo admiten junto a `docs/`).
+
+## v2: exploración de todas las herramientas y combinaciones — ninguna pasa (2026-11-10)
+
+Pedido: el dueño pidió usar todas las herramientas de HeatMap y Frost y combinarlas, con todos los datos desde 2022. **Exploratorio, no preregistrado**; regla de finalistas fijada antes de correr (commit `0a7dad0`). Resultado en `docs/v2/EXPLORACION_V2.md`.
+
+- 8 gatillos × 11 variantes de filtros (EMA 144, Range Filter, VIDYA, WaveTrend, solos y de a dos) + 8 controles al azar, en 1h y 4h: 176 combinaciones reales, **ninguna pasa los criterios de la Fase 2; sin finalistas**. Mediana de PF OOS 0.89. La más cercana, SFP + EMA + Range Filter en 4h (PF OOS 1.27, estresado 1.14), falla por concentración (46 %) y pierde en IS (0.87).
+- Corrida de 105 min sobre una base temporal del scratchpad (copia de la de la Fase 2). Monte Carlo informativo con 20 repeticiones.
+- **Cambios de comportamiento respecto de la v1.0:** ninguno.
