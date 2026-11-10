@@ -2404,3 +2404,12 @@ Pedido: el dueño aprobó una ronda con costos más bajos, salidas mejores (dio 
 - **Motor (`app/backtesting/engine.py`), cambio opcional:** `entry_mode = "limit"` (orden límite al cierre de la vela de señal, llenado solo si la vela siguiente atraviesa el precio, comisión maker, sin slippage de entrada; en la vela de entrada solo se evalúa el lado adverso). Ninguna estrategia de la v1 ni del preregistro lo declara: la regresión de la v1 pasa igual. **Sin cambio de comportamiento respecto de la v1.0.**
 - **`app/research/round3.py`:** gatillo `fvg` (definición estándar de 3 velas; no viene en HeatMap ni en Frost), filtros `fund`, `btc` y `rs`, 6 salidas y modo de entrada.
 - **`scripts/v2_round3.py`:** 23 señales × 6 salidas × 2 entradas + controles (372 variantes, solo 4h). **La salida de cada señal se elige solo con el IS** y esa única variante se juzga en el OOS: es la forma de «optimizar» sin sobreajustar. Regla de finalistas en el docstring, subida antes de correr.
+
+## v2: ronda 3 exploratoria — 3 finalistas, sin aprobar nada (2026-11-10)
+
+Corrida de `scripts/v2_round3.py` (66 min, 372 variantes en 4h, base temporal del scratchpad). Resultado en `docs/v2/RONDA3_V2.md`.
+
+- Con la salida y la entrada elegidas solo en IS, **4 de 23 señales pasan los criterios de la Fase 2** en el OOS. Finalistas por la regla fija: giro de VIDYA + régimen de BTC (PF OOS 1.54, estresado 1.40, control al azar 0.98), FVG + EMA 144 (1.34 / 1.21 / 1.05) y giro del Range Filter + EMA 144 (1.31 / 1.20 / 1.29), las tres con SL y trailing de 3 ATR y orden límite.
+- **Cautelas:** la salida explica casi todo (22 de 23 señales eligieron el trailing de 3 ATR; varios controles al azar quedan sobre 1 con ella; el finalista del Range Filter no supera de verdad a su control); el tope de riesgo del 5 % deja operar casi solo en BTC, TRX, BNB, ETH y XRP; 23 juicios sobre un OOS ya usado en dos rondas.
+- **Pendiente (decisión del dueño):** preregistrar los finalistas y mirarlos una vez en los datos reservados desde el 2026-10-01, y paper trading.
+- **Cambios de comportamiento respecto de la v1.0:** ninguno.
