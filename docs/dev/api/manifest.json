@@ -203,6 +203,7 @@
     "scripts/update_history_file.py": "132db2882c678f08878f877701db914170f990032ca5c2ccc6c487037f6415f5",
     "scripts/v2_explore.py": "de269bffaee6a1e04b51e5857b96dd49ea342f58039d219baa2c4a2f44a7eec6",
     "scripts/v2_round3.py": "3d1f6f3d5e45f92c9237160be29e6d74fad2a6007a40749ee99558e36df1bfec",
+    "scripts/v2_round3_reserved.py": "91ce61afa4275fc7a5e000376a17ba0d9293a9dcc8c08111eacddaf0672a5529",
     "scripts/v2_tradingview_check.py": "c890267e808e55e8ff6897796ab6debc476171f1f5352498537d222a5fcfe8dc"
   },
   "generador": "scripts/build_dev_docs.py",
@@ -368,8 +369,8 @@
     "app/trading/slippage.html": "16247e493c851d586b76e86e31708a6d153158ae3aec0fdf48a65f4747c01155",
     "app/trading/stop_engine.html": "f6569285d01184c62e32a0ceb25e97c37958b95e1aaaeb9c85ab023b629ac6a5",
     "app/trading/verdict_record.html": "cc6ebbb3d597842bb275e8b0dbf9da2f04b5f92d1239285c0106def795f5ef2b",
-    "index.html": "c5fc6d84919cd8f260609e56b12d51b2d5a2c3de6c51b2560b0e7d46863984ca",
-    "scripts.html": "35febde6e76a13345fb6eaffd5be92ebe845d5911478a263f25ce80cb582cfa6",
+    "index.html": "e73920ae4dcab525f1c1d65dbb35faf2bf18e7510570337a864524c9d836b1cf",
+    "scripts.html": "13abcad1354ee9ba32d847b57615d55d7ab85855daa30909fce5f5306af8d135",
     "scripts/ai_value_report.html": "5d1e24480b2924067ea037f0470a156523853a799dccc87be29cf16d0c913697",
     "scripts/analyze_risk.html": "b5502544e7cc3a9a9c5745e3e9de47b57522965612cfd2f21466286ae04b0b1a",
     "scripts/backup_db.html": "2d95c586336b36cc826d8dfdff385c1d1face0f3a35f7c8cf68f6120f22e0d7c",
@@ -406,6 +407,7 @@
     "scripts/update_history_file.html": "4ec1d7b8389a9d4607c8bc8a7f756bd04d11c8b4ff549f318406a6c51a3e664c",
     "scripts/v2_explore.html": "b078ff494f02832ef7b507881b17d2366f568e207f45c17fbff5c8902300ba27",
     "scripts/v2_round3.html": "0616e78193f9906617ec85ac6e8009dd38868bcebc2c8dd0d4dd47c2f329a273",
+    "scripts/v2_round3_reserved.html": "344f75a6fab601b3f63858e3a83f700cdc429390dfa5849112885b9a9fefeb3d",
     "scripts/v2_tradingview_check.html": "a4784c1d4dc20ea368d746d5d6349e60405fcf2beb92898251d7ac9037cfedda"
   }
 }

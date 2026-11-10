@@ -1025,3 +1025,29 @@ juzga la variante ya elegida. Sin red; exige `DATABASE_PATH` con una base tempor
 - **Tablas que crea o altera:** ninguno
 - **Pruebas que lo importan o citan:** ninguno
 <!-- /hechos:scripts/v2_round3.py -->
+
+### `scripts/v2_round3_reserved.py`
+
+**Responsabilidad.** El examen único de los tres finalistas de la ronda 3 con los datos reservados (2026-10-01 a
+2026-11-10), según `docs/v2/PREREGISTRO_V2_RONDA3.md`: corre cada finalista y su control al azar con todo el historial
+y cuenta solo las operaciones abiertas dentro del tramo.
+
+**Funciones y clases clave.** `reading()` (la lectura fija del preregistro), `describe()` y `main()`.
+
+**Invariantes — no romper.** Solo lectura: no escribe en la base ni usa la red. Los finalistas, el tramo y la lectura
+son los del preregistro congelado; no se cambian.
+
+**Trampas conocidas.** Seis semanas son muy pocas operaciones: el resultado solo sirve para detectar un fracaso claro.
+
+<!-- hechos:scripts/v2_round3_reserved.py -->
+**Hechos derivados del código** (los escribe `scripts/build_dev_docs.py`; no se editan):
+
+- **Referencia pdoc:** [`api/scripts/v2_round3_reserved.html`](../api/scripts/v2_round3_reserved.html)
+- **Importa (internos):** `app.backtesting.engine`, `app.backtesting.metrics`, `app.config`, `app.market.ohlcv_history`, `app.persistence.database`, `app.persistence.repositories.universe_repo`, `app.research.round3`
+- **Lo importan:** ninguno
+- **Configuración que lee:** `DATABASE_PATH`, `backtest_control_symbols_list`
+- **Tablas que lee:** `asset_universe`
+- **Tablas que escribe:** ninguno
+- **Tablas que crea o altera:** ninguno
+- **Pruebas que lo importan o citan:** ninguno
+<!-- /hechos:scripts/v2_round3_reserved.py -->

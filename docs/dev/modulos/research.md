@@ -96,7 +96,7 @@ caché de columnas.
 
 - **Referencia pdoc:** [`api/app/research/round3.html`](../api/app/research/round3.html)
 - **Importa (internos):** `app.candidates.common`, `app.candidates.sfp_reversal`, `app.indicators._pine`, `app.research.combos`, `app.strategies.base`
-- **Lo importan:** `scripts.v2_round3`
+- **Lo importan:** `scripts.v2_round3`, `scripts.v2_round3_reserved`
 - **Configuración que lee:** ninguno
 - **Tablas que lee:** ninguno
 - **Tablas que escribe:** ninguno
