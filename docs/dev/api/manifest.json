@@ -121,6 +121,8 @@
     "app/persistence/repositories/timeutil.py": "6ff5ef34a7572a9c6768f5254b553b4edc3ff01b2e78af44433d0846e01e8063",
     "app/persistence/repositories/trades_repo.py": "57b20d660cb71a091aa3336d5e6eeac5fc5ab123a99249c4fb44210be8f66a5d",
     "app/persistence/repositories/universe_repo.py": "b489ff5970425211136a387d179a3f243a855af38843ad401e7e091a01d7c08a",
+    "app/research/__init__.py": "5c6c45ccaa9b94599e3f01632cac8d62fc7c1e7c7f4ed2bd4af4ef9fe270aa10",
+    "app/research/combos.py": "dcce1a7a4db4c4342c2a285eecd26dc4bef8ea2f589e538df402126f8e762c36",
     "app/strategies/__init__.py": "c985b9fb612b91ddecf3f3f3c66371df6b2e5eee42cbea5810b9edd58ea15869",
     "app/strategies/base.py": "5d26c7abf714e358dc7609790099269a0cd7e040327729b9223ca8c535704bf9",
     "app/strategies/donchian_breakout.py": "02642ad878162da170d63cadd612f5d3698bf8f1c46c4b88f64c655881f6e0a0",
@@ -194,11 +196,12 @@
     "scripts/shadow_report.py": "4cf541952b9a13636347e061b4934d1725fdded8a9b977cfa7c5b54095ce036d",
     "scripts/telegram_alert.py": "420a0d2512756461f3d9983afe0f7f3169126f2e78fa5821c55bd725bf9156ab",
     "scripts/telegram_daily.py": "53731284bd82370fece668cfc3ab7c35abd559ae6589162844fd2ecd8833b521",
+    "scripts/v2_explore.py": "de269bffaee6a1e04b51e5857b96dd49ea342f58039d219baa2c4a2f44a7eec6",
     "scripts/v2_tradingview_check.py": "c890267e808e55e8ff6897796ab6debc476171f1f5352498537d222a5fcfe8dc"
   },
   "generador": "scripts/build_dev_docs.py",
   "paginas": {
-    "app.html": "f14c8f7976aa229b3df289c056f855fe4f029dbd9793eb6d75b5c414aafdace0",
+    "app.html": "05a8e6ece20c232c2c8bfcf9a002ae975061d4b5910e41181929182416a2923b",
     "app/api.html": "ab433be77cf06d5a109392765e027c4f27c809e5ee11a6455e4d7dd217ffa7ba",
     "app/api/deps.html": "91ac2f7fe04475249006081382b0e34f41fd04222f48e78e6a71c0fba192b76e",
     "app/api/routes.html": "fcd0b92c7922e2da6ec37ce3dacf93a8d3309e00e56aee906e5e5f210567a7b6",
@@ -313,6 +316,8 @@
     "app/persistence/repositories/timeutil.html": "7511d0a21e65a431fcc18a70d1f65837776332914e6f5541d3d7f9318672788d",
     "app/persistence/repositories/trades_repo.html": "1400ae69a6cc075eed97394b98f24c9cfc547f18c9591998e0c87bad99ef4e87",
     "app/persistence/repositories/universe_repo.html": "73ffc402ea5681bc50acdf8a76430f15f8dc738f0d29b86c3584931a2cd78ae5",
+    "app/research.html": "6e7161662b45d5f6bd380a1a409a324e6547b022fc6b5fa5844d03e2b86b5aee",
+    "app/research/combos.html": "d80093f3ff0b478135cdcc74b5b3cd86403def139ba5bfdbda52f27a3bd45b1f",
     "app/strategies.html": "fa9ef346a445716a504fd10b42182595a6cb2f75428442445cad720cb3709242",
     "app/strategies/base.html": "147f422eed4ab2b74f259342327aafc869d10f760526e21b3d65a5b71db20939",
     "app/strategies/donchian_breakout.html": "6074f90350a8f238bbbb3656e39548743fd72d04c0127a83ec318c69a240eeda",
@@ -353,8 +358,8 @@
     "app/trading/slippage.html": "16247e493c851d586b76e86e31708a6d153158ae3aec0fdf48a65f4747c01155",
     "app/trading/stop_engine.html": "f6569285d01184c62e32a0ceb25e97c37958b95e1aaaeb9c85ab023b629ac6a5",
     "app/trading/verdict_record.html": "cc6ebbb3d597842bb275e8b0dbf9da2f04b5f92d1239285c0106def795f5ef2b",
-    "index.html": "9367d8e69b53e6a4ed947f981ecc4b95458110687c82dc79da4291b0b0749cb8",
-    "scripts.html": "8e901a2677aa4588bee7d709371d5ec72f02dc760f87ce7e645d538350f3114d",
+    "index.html": "bae966d9a23c72406c56fb592bfe7c40a57a3d1224ab7495b2e8f0d9d27dcd3a",
+    "scripts.html": "563c7c5a5058c05daa676716df1d82d1435b5c1dc47a5254de489e4cc5f7625d",
     "scripts/ai_value_report.html": "5d1e24480b2924067ea037f0470a156523853a799dccc87be29cf16d0c913697",
     "scripts/analyze_risk.html": "b5502544e7cc3a9a9c5745e3e9de47b57522965612cfd2f21466286ae04b0b1a",
     "scripts/backup_db.html": "2d95c586336b36cc826d8dfdff385c1d1face0f3a35f7c8cf68f6120f22e0d7c",
@@ -388,6 +393,7 @@
     "scripts/shadow_report.html": "9923ed7e104eda324c172a26522c48d385a8fba83f3f585e45d00cb284f204a4",
     "scripts/telegram_alert.html": "8f93a90aa01cc9213a84518ca27f3f6269f759c7d01956f03ed447b42959c587",
     "scripts/telegram_daily.html": "e4a136fa55d0602545d01bb28050ddd6c2d779efd201a9611e1385502f1c182b",
+    "scripts/v2_explore.html": "b078ff494f02832ef7b507881b17d2366f568e207f45c17fbff5c8902300ba27",
     "scripts/v2_tradingview_check.html": "a4784c1d4dc20ea368d746d5d6349e60405fcf2beb92898251d7ac9037cfedda"
   }
 }

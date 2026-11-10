@@ -110,7 +110,7 @@ al calentamiento. No mezclar con `engine.ema`, que arranca con el primer valor (
 
 - **Referencia pdoc:** sin página (módulo privado)
 - **Importa (internos):** ninguno
-- **Lo importan:** `app.candidates.range_filter_flip`, `app.candidates.sfp_reversal`, `app.indicators.levels`, `app.indicators.oscillators`, `app.indicators.structure`, `app.indicators.trend_filters`, `scripts.v2_tradingview_check`
+- **Lo importan:** `app.candidates.range_filter_flip`, `app.candidates.sfp_reversal`, `app.indicators.levels`, `app.indicators.oscillators`, `app.indicators.structure`, `app.indicators.trend_filters`, `app.research.combos`, `scripts.v2_tradingview_check`
 - **Configuración que lee:** ninguno
 - **Tablas que lee:** ninguno
 - **Tablas que escribe:** ninguno
@@ -167,7 +167,7 @@ de Frost).
 
 - **Referencia pdoc:** [`api/app/indicators/oscillators.html`](../api/app/indicators/oscillators.html)
 - **Importa (internos):** `app.indicators._pine`
-- **Lo importan:** ninguno
+- **Lo importan:** `app.research.combos`
 - **Configuración que lee:** ninguno
 - **Tablas que lee:** ninguno
 - **Tablas que escribe:** ninguno
@@ -200,7 +200,7 @@ confirmación) y zonas de liquidez deterministas emitidas al confirmarse el pivo
 
 - **Referencia pdoc:** [`api/app/indicators/structure.html`](../api/app/indicators/structure.html)
 - **Importa (internos):** `app.indicators._pine`
-- **Lo importan:** `app.candidates.sfp_reversal`, `scripts.v2_tradingview_check`
+- **Lo importan:** `app.candidates.sfp_reversal`, `app.research.combos`, `scripts.v2_tradingview_check`
 - **Configuración que lee:** ninguno
 - **Tablas que lee:** ninguno
 - **Tablas que escribe:** ninguno
@@ -229,7 +229,7 @@ queda «bajista» hasta el primer cruce real (comportamiento del original, con p
 
 - **Referencia pdoc:** [`api/app/indicators/trend_filters.html`](../api/app/indicators/trend_filters.html)
 - **Importa (internos):** `app.indicators._pine`
-- **Lo importan:** `app.candidates.range_filter_flip`, `scripts.v2_tradingview_check`
+- **Lo importan:** `app.candidates.range_filter_flip`, `app.research.combos`, `scripts.v2_tradingview_check`
 - **Configuración que lee:** ninguno
 - **Tablas que lee:** ninguno
 - **Tablas que escribe:** ninguno

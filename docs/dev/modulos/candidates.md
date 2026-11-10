@@ -19,7 +19,7 @@ cambio, son los del preregistro: cambiarlos después de congelarlo invalida la p
 
 ## Cómo se conecta
 
-**Todavía con nada.** `CANDIDATES` no es `STRATEGIES`: ni el scheduler ni `scripts/run_backtest.py` lo leen. Del motor
+**Solo con `scripts/run_backtest_v2.py`**, la corrida única de la Fase 2 de la v2. `CANDIDATES` no es `STRATEGIES`: ni el scheduler ni `scripts/run_backtest.py` lo leen. Del motor
 de backtest usan dos cosas agregadas para la v2: la columna `open_time` del DataFrame de `precompute` y el atributo
 opcional `skip_entry_if_sl_crossed` (ver [backtesting](backtesting.md#appbacktestingenginepy)).
 
@@ -69,7 +69,7 @@ nunca se pasa el calentamiento y no hay señal (a propósito: es conservador).
 
 - **Referencia pdoc:** [`api/app/candidates/common.html`](../api/app/candidates/common.html)
 - **Importa (internos):** ninguno
-- **Lo importan:** `app.candidates.camarilla_s3_r3`, `app.candidates.range_filter_flip`, `app.candidates.sfp_reversal`
+- **Lo importan:** `app.candidates.camarilla_s3_r3`, `app.candidates.range_filter_flip`, `app.candidates.sfp_reversal`, `app.research.combos`
 - **Configuración que lee:** ninguno
 - **Tablas que lee:** ninguno
 - **Tablas que escribe:** ninguno
@@ -99,7 +99,7 @@ interfaz de las estrategias no los recibe.
 
 - **Referencia pdoc:** [`api/app/candidates/sfp_reversal.html`](../api/app/candidates/sfp_reversal.html)
 - **Importa (internos):** `app.candidates.common`, `app.indicators._pine`, `app.indicators.structure`, `app.strategies.base`
-- **Lo importan:** `app.candidates`
+- **Lo importan:** `app.candidates`, `app.research.combos`
 - **Configuración que lee:** ninguno
 - **Tablas que lee:** ninguno
 - **Tablas que escribe:** ninguno
@@ -123,7 +123,7 @@ interfaz de las estrategias no los recibe.
 
 - **Referencia pdoc:** [`api/app/candidates/camarilla_s3_r3.html`](../api/app/candidates/camarilla_s3_r3.html)
 - **Importa (internos):** `app.candidates.common`, `app.indicators.levels`, `app.strategies.base`
-- **Lo importan:** `app.candidates`
+- **Lo importan:** `app.candidates`, `app.research.combos`
 - **Configuración que lee:** ninguno
 - **Tablas que lee:** ninguno
 - **Tablas que escribe:** ninguno

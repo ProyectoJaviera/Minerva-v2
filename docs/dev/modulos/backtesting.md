@@ -201,7 +201,7 @@ veredicto global por estrategia aplicando los criterios de descarte.
 
 - **Referencia pdoc:** [`api/app/backtesting/report.html`](../api/app/backtesting/report.html)
 - **Importa (internos):** `app.backtesting.engine`, `app.backtesting.metrics`, `app.config`, `app.core.logging`, `app.market.ohlcv_history`, `app.persistence.database`, `app.persistence.models`, `app.persistence.repositories.backtest_repo`, `app.strategies.base`, `app.strategies.registry`
-- **Lo importan:** `scripts.run_backtest`, `scripts.run_backtest_v2`
+- **Lo importan:** `scripts.run_backtest`, `scripts.run_backtest_v2`, `scripts.v2_explore`
 - **Configuración que lee:** `BACKTEST_CONCENTRATION_LIMIT_PCT`, `BACKTEST_INITIAL_CAPITAL`, `BACKTEST_MAX_DRAWDOWN_PCT`, `BACKTEST_MIN_PCT_FOLDS_POSITIVE`, `BACKTEST_MIN_PCT_SYMBOLS_PF_GT1`, `BACKTEST_MIN_PROFIT_FACTOR`, `BACKTEST_MIN_TRADES_PER_CELL`, `BACKTEST_MIN_TRADES_TOTAL`, `BACKTEST_OOS_SPLIT_PCT`, `BACKTEST_PORTFOLIO_SIM_RUNS`, `BACKTEST_STRESS_FEE_MULTIPLIER`, `BACKTEST_STRESS_SLIPPAGE_MULTIPLIER`, `BACKTEST_WALK_FORWARD_FOLD_MONTHS`, `BACKTEST_WALK_FORWARD_STEP_MONTHS`, `DEFAULT_MARGIN_USDT`, `MAX_SIMULTANEOUS_POSITIONS`, `backtest_control_symbols_list`
 - **Tablas que lee:** ninguno
 - **Tablas que escribe:** `backtest_runs`, `backtest_skipped_entries`, `backtest_trades`, `backtest_verdicts`

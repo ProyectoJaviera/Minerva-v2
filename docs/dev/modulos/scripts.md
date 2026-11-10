@@ -941,3 +941,33 @@ supervivencia, como en la Fase 2 de la v1); por eso se reporta también el PF de
 - **Tablas que crea o altera:** ninguno
 - **Pruebas que lo importan o citan:** `tests/unit/test_run_backtest_v2_script.py`
 <!-- /hechos:scripts/run_backtest_v2.py -->
+
+### `scripts/v2_explore.py`
+
+**Responsabilidad.** La exploración de la v2: corre las 96 combinaciones de `app/research/combos.py` en 1h y 4h con el
+motor, el universo, los costos, la fecha final y los criterios de la Fase 2 y elige como máximo 4 finalistas con una
+regla fijada en su docstring antes de correr (pasa la Fase 2, supera al control al azar de su gatillo y marco, PF
+BTC/ETH > 1; orden por PF estresado).
+
+**Funciones y clases clave.** `build_entries()`, `control_key()`, `summarize()` y `main()` (guarda la tabla completa en
+el JSON de `--out`).
+
+**Invariantes — no romper.** Exploratorio: no es un preregistro. Sin red; exige `DATABASE_PATH` con una base temporal
+y borra los resultados de backtest de esa base.
+
+**Trampas conocidas.** Con tantas combinaciones, pasar los criterios no prueba ventaja: los finalistas necesitan un
+preregistro nuevo y validación hacia adelante.
+
+
+<!-- hechos:scripts/v2_explore.py -->
+**Hechos derivados del código** (los escribe `scripts/build_dev_docs.py`; no se editan):
+
+- **Referencia pdoc:** [`api/scripts/v2_explore.html`](../api/scripts/v2_explore.html)
+- **Importa (internos):** `app.backtesting.report`, `app.config`, `app.core.logging`, `app.persistence.database`, `app.persistence.repositories.universe_repo`, `app.research.combos`, `app.strategies.base`
+- **Lo importan:** ninguno
+- **Configuración que lee:** `DATABASE_PATH`, `backtest_official_end_ms`
+- **Tablas que lee:** `asset_universe`
+- **Tablas que escribe:** ninguno
+- **Tablas que crea o altera:** ninguno
+- **Pruebas que lo importan o citan:** ninguno
+<!-- /hechos:scripts/v2_explore.py -->

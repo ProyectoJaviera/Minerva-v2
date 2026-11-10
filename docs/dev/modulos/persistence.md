@@ -85,7 +85,7 @@ reescribir sus filas no. Ver [Sombras](../ZONAS_PROTEGIDAS.md#sombras) y
 
 - **Referencia pdoc:** [`api/app/persistence/database.html`](../api/app/persistence/database.html)
 - **Importa (internos):** ninguno
-- **Lo importan:** 83 módulos (api 15, backtesting 2, core 1, execution 1, llm 5, main 1, market 4, memory 8, news 4, persistence 16, scripts 11, telegram 3, trading 12)
+- **Lo importan:** 84 módulos (api 15, backtesting 2, core 1, execution 1, llm 5, main 1, market 4, memory 8, news 4, persistence 16, scripts 12, telegram 3, trading 12)
 - **Configuración que lee:** ninguno
 - **Tablas que lee:** ninguno
 - **Tablas que escribe:** ninguno
@@ -596,7 +596,7 @@ más reciente.
 
 - **Referencia pdoc:** [`api/app/persistence/repositories/universe_repo.html`](../api/app/persistence/repositories/universe_repo.html)
 - **Importa (internos):** `app.persistence.database`, `app.persistence.models`
-- **Lo importan:** `app.api.routes.universe`, `app.core.scheduler`, `app.market.universe`, `app.news.collector`, `app.telegram.push`, `app.trading.signal_generator`, `scripts.run_backtest`, `scripts.run_backtest_v2`
+- **Lo importan:** `app.api.routes.universe`, `app.core.scheduler`, `app.market.universe`, `app.news.collector`, `app.telegram.push`, `app.trading.signal_generator`, `scripts.run_backtest`, `scripts.run_backtest_v2`, `scripts.v2_explore`
 - **Configuración que lee:** ninguno
 - **Tablas que lee:** `asset_universe`
 - **Tablas que escribe:** `asset_universe`
