@@ -97,7 +97,7 @@ tolerarlo.
 
 - **Referencia pdoc:** [`api/app/api/deps.html`](../api/app/api/deps.html)
 - **Importa (internos):** `app.config`, `app.core.heartbeat`, `app.core.scheduler`, `app.news.collector`, `app.persistence.database`, `app.telegram.push`, `app.trading.paper_execution`, `app.trading.shadow_live_labeler`
-- **Lo importan:** 16 módulos (api 16)
+- **Lo importan:** 17 módulos (api 17)
 - **Configuración que lee:** ninguno
 - **Tablas que lee:** ninguno
 - **Tablas que escribe:** ninguno
@@ -534,7 +534,7 @@ nada de resultados.
 
 - **Referencia pdoc:** [`api/app/api/security.html`](../api/app/api/security.html)
 - **Importa (internos):** `app.api.deps`, `app.config`
-- **Lo importan:** 14 módulos (api 12, main 1, scripts 1)
+- **Lo importan:** 15 módulos (api 13, main 1, scripts 1)
 - **Configuración que lee:** `JWT_SECRET`
 - **Tablas que lee:** ninguno
 - **Tablas que escribe:** ninguno
@@ -572,3 +572,33 @@ nada de resultados.
 - **Tablas que crea o altera:** ninguno
 - **Pruebas que lo importan o citan:** `tests/unit/test_paper_account_results_hidden.py`, `tests/unit/test_phase5_read_api.py`, `tests/unit/test_serializers.py`
 <!-- /hechos:app/api/serializers.py -->
+
+### `app/api/routes/explorer.py`
+
+**Responsabilidad.** Rutas de la sección «Indicadores», con `require_auth`: `GET /api/explorer/options` y
+`GET /api/explorer/run` (es `GET` a propósito: no escribe nada, y las únicas rutas que escriben siguen siendo login,
+logout y los controles).
+
+**Funciones y clases clave.**
+- `options()` (gatillos, filtros, marcos y series, o el aviso de que falta el archivo), y `run()` (parámetros de consulta;
+  `symbols` y `filters` se repiten).
+
+**Invariantes — no romper.** Solo lectura: delegan todo en `app/explorer/service.py`. 400 si los parámetros no
+valen; 404 si no hay archivo de historial.
+
+**Trampas conocidas.** El 404 por falta de archivo se ve en el frontend igual que una ruta inexistente; por eso
+`options()` responde 200 con `available: false` y el texto de cómo crearlo.
+
+
+<!-- hechos:app/api/routes/explorer.py -->
+**Hechos derivados del código** (los escribe `scripts/build_dev_docs.py`; no se editan):
+
+- **Referencia pdoc:** [`api/app/api/routes/explorer.html`](../api/app/api/routes/explorer.html)
+- **Importa (internos):** `app.api.deps`, `app.api.security`, `app.config`, `app.explorer.service`, `app.research.combos`
+- **Lo importan:** `app.main`
+- **Configuración que lee:** `EXPLORER_HISTORY_DB`
+- **Tablas que lee:** ninguno
+- **Tablas que escribe:** ninguno
+- **Tablas que crea o altera:** ninguno
+- **Pruebas que lo importan o citan:** `tests/unit/test_explorer.py`
+<!-- /hechos:app/api/routes/explorer.py -->

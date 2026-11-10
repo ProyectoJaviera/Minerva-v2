@@ -69,7 +69,7 @@ nunca se pasa el calentamiento y no hay señal (a propósito: es conservador).
 
 - **Referencia pdoc:** [`api/app/candidates/common.html`](../api/app/candidates/common.html)
 - **Importa (internos):** ninguno
-- **Lo importan:** `app.candidates.camarilla_s3_r3`, `app.candidates.range_filter_flip`, `app.candidates.sfp_reversal`, `app.research.combos`
+- **Lo importan:** `app.candidates.camarilla_s3_r3`, `app.candidates.range_filter_flip`, `app.candidates.sfp_reversal`, `app.explorer.service`, `app.research.combos`
 - **Configuración que lee:** ninguno
 - **Tablas que lee:** ninguno
 - **Tablas que escribe:** ninguno

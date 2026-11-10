@@ -187,11 +187,12 @@ flowchart LR
     HE --> OP["Alerta externa<br/>y comprobación de Docker"]
 ```
 
-- **API:** 22 rutas en total, **solo tres escriben**: login, logout y `POST /api/control/{pause|resume|kill}`.
+- **API:** 24 rutas en total, **solo tres escriben**: login, logout y `POST /api/control/{pause|resume|kill}`
+  (las dos de la sección «Indicadores» de la v2 son `GET`: calculan sobre un archivo de solo lectura).
   Sin login solo se sirven `GET /health`, `GET /positions` y `GET /trades` (con listas blancas de campos). Las rutas
   están en [`app/api/routes/`](../app/api/routes/).
-- **Dashboard:** cinco pestañas (*Resumen*, *Cuenta paper*, *Brazo ejecutado*, *Riesgo y controles* y *Universo y
-  backtest*). Ver [Uso diario](USO.md#el-dashboard).
+- **Dashboard:** seis pestañas (*Resumen*, *Cuenta paper*, *Brazo ejecutado*, *Riesgo y controles*, *Universo y
+  backtest* e *Indicadores*, esta última exploratoria, de la v2). Ver [Uso diario](USO.md#el-dashboard).
 - **Telegram:** siete comandos y avisos. Ver [Uso diario](USO.md#telegram).
 - **La puerta de resultados** ([`app/trading/reveal.py`](../app/trading/reveal.py)) decide si un canal puede mostrar PnL,
   saldo, precios de salida o motivos de cierre: solo si el *gate* de la medición está abierto **y** existe el registro

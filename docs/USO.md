@@ -92,7 +92,7 @@ pnl_neto=`): es una limitación conocida; evita abrir los logs sin necesidad.
 Se abre en <http://127.0.0.1:8001/> (solo desde el propio equipo) y pide el usuario y la contraseña de tu `.env`. La
 sesión dura 24 horas. Arriba muestra tu sesión y *Cerrar sesión*; si el scheduler está en pausa o el kill switch
 activo, aparece un **aviso rojo en todas las pestañas** ("LA MEDICION ESTA DETENIDA…"). Al pie, la atribución
-"Data provided by CoinGecko". Los datos se consultan periódicamente; no hay tiempo real por WebSocket. Tiene cinco
+"Data provided by CoinGecko". Los datos se consultan periódicamente; no hay tiempo real por WebSocket. Tiene seis
 pestañas:
 
 | Pestaña | Qué muestra |
@@ -102,6 +102,7 @@ pestañas:
 | **Brazo ejecutado** | Estado del brazo (activo, armado desde cuándo), abiertas y omitidas hoy y en total, margen por operación, retraso máximo de la decisión, estrategias elegibles, las **omitidas por motivo** (con su explicación) y las decisiones recientes del brazo. Nunca lleva PnL |
 | **Riesgo y controles** | Estado del scheduler, kill switch, *circuit breaker*, stop por drawdown, pérdida diaria, posiciones abiertas por dirección, último ciclo y límites; por qué están bloqueadas las entradas nuevas; los rechazos recientes del motor de riesgo; los **botones de control** (Pausar medición, Reanudar, Kill switch) y el registro de acciones de control. La racha de pérdidas y los cruces de drawdown quedan ocultos hasta el veredicto |
 | **Universo y backtest** | El universo vigente (candidatos de CoinGecko, cuáles se incluyen y por qué se excluyeron los demás, antigüedad y cambios recientes; un aviso rojo si está obsoleto) y los **veredictos del backtest por estrategia**. En una instalación nueva esa tabla de veredictos está vacía: los resultados del backtest de la Fase 2 se calcularon aparte y no vienen con el repositorio |
+| **Indicadores** | De la v2. Pruebas manuales y **exploratorias**: eliges monedas, marco (1h o 4h), un gatillo y hasta dos filtros, y en segundos ves el % de operaciones ganadoras, el profit factor, el PnL y el drawdown, el control con dirección al azar y los desgloses por moneda y por año. Usa el archivo de historial local (`scripts/update_history_file.py`) y nunca las velas desde el 2026-10-01 (reservadas). No se guarda ni cuenta como ronda preregistrada. Ver [la sección Indicadores](v2/SECCION_INDICADORES.md) |
 
 **Los controles** piden confirmación explícita: se abre un diálogo con la advertencia y hay que **escribir la palabra
 exacta** (`PAUSAR`, `REANUDAR` o `KILL`). Pausar o activar el kill switch **detiene la medición**. No abren ni cierran
@@ -585,6 +586,7 @@ reconoce el registro oficial al instante. Los informes **nunca** abren la base v
 | `v2_tradingview_check.py` | Para la v2: imprime los niveles Camarilla R3/R4/S3/S4 de tres días UTC y las últimas señales SFP en 1h de BTCUSDT y ETHUSDT, para compararlos a mano con TradingView antes de congelar el [preregistro](v2/PREREGISTRO_V2.md). Lee velas públicas de Bitunix; no abre la base ni el `.env` | Seguro (no abre la base) |
 | `run_backtest_v2.py` | Para la v2: la corrida única de la Fase 2 de los candidatos del [preregistro](v2/PREREGISTRO_V2.md) congelado, en 1h y 4h, con un veredicto por candidato y marco y las reglas del control. Sin red; exige `DATABASE_PATH` con una base temporal llenada antes con `download_history.py` y borra las corridas anteriores del backtest de esa base | Solo con una base temporal |
 | `v2_explore.py` | Para la v2: exploración de todas las herramientas de los indicadores y sus combinaciones (gatillo + filtros) en 1h y 4h con los criterios de la Fase 2; elige finalistas con una regla fija para un preregistro nuevo. Sin red; exige `DATABASE_PATH` con una base temporal y borra los resultados de backtest de esa base | Solo con una base temporal |
+| `update_history_file.py` | Para la v2: crea o actualiza el archivo de historial local de la pestaña «Indicadores» del dashboard (`history/history_v2.db`, aparte de la base del bot) con `download_history.py`. Red pública de CoinGecko y Bitunix; reanudable. Se niega a escribir en la base del bot o en `data/`. Ver [la sección Indicadores](v2/SECCION_INDICADORES.md) | Seguro (no toca la base del bot) |
 
 ## Archivos y carpetas
 

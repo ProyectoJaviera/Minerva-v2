@@ -85,12 +85,12 @@ reescribir sus filas no. Ver [Sombras](../ZONAS_PROTEGIDAS.md#sombras) y
 
 - **Referencia pdoc:** [`api/app/persistence/database.html`](../api/app/persistence/database.html)
 - **Importa (internos):** ninguno
-- **Lo importan:** 84 módulos (api 15, backtesting 2, core 1, execution 1, llm 5, main 1, market 4, memory 8, news 4, persistence 16, scripts 12, telegram 3, trading 12)
+- **Lo importan:** 85 módulos (api 15, backtesting 2, core 1, execution 1, explorer 1, llm 5, main 1, market 4, memory 8, news 4, persistence 16, scripts 12, telegram 3, trading 12)
 - **Configuración que lee:** ninguno
 - **Tablas que lee:** ninguno
 - **Tablas que escribe:** ninguno
 - **Tablas que crea o altera:** `asset_universe`, `backtest_runs`, `backtest_skipped_entries`, `backtest_trades`, `backtest_verdicts`, `contract_specs_cache`, `control_audit`, `data_source_health`, `fear_greed`, `funding_cache`, `lesson_applications`, `lessons`, `lessons_reports`, `llm_logs`, `memory_entries`, `news_fetch_state`, `news_items`, `ohlcv_cache`, `ohlcv_floor`, `ohlcv_series_complete`, `ohlcv_unrepairable_gaps`, `paper_execution_log`, `risk_rejections`, `shadow_trades`, `signals`, `signals_discarded_by_sl_cap`, `system_state`, `trades`
-- **Pruebas que lo importan o citan:** 31 archivos (e2e 1, tests/ 1, unit 29)
+- **Pruebas que lo importan o citan:** 32 archivos (e2e 1, tests/ 1, unit 30)
 <!-- /hechos:app/persistence/database.py -->
 
 ### `app/persistence/llm_log_fields.py`
@@ -141,7 +141,7 @@ FastAPI no protegería nada).
 - **Tablas que lee:** ninguno
 - **Tablas que escribe:** ninguno
 - **Tablas que crea o altera:** ninguno
-- **Pruebas que lo importan o citan:** 60 archivos (e2e 10, unit 50)
+- **Pruebas que lo importan o citan:** 61 archivos (e2e 10, unit 51)
 <!-- /hechos:app/persistence/models.py -->
 
 ### `app/persistence/repositories/__init__.py`
@@ -371,7 +371,7 @@ visto no existía para esa decisión. Solo título, URL, dominio y fecha (nunca 
 - **Tablas que lee:** `ohlcv_cache`, `ohlcv_floor`, `ohlcv_series_complete`, `ohlcv_unrepairable_gaps`
 - **Tablas que escribe:** `ohlcv_cache`, `ohlcv_floor`, `ohlcv_series_complete`, `ohlcv_unrepairable_gaps`
 - **Tablas que crea o altera:** ninguno
-- **Pruebas que lo importan o citan:** 17 archivos (e2e 2, unit 15)
+- **Pruebas que lo importan o citan:** 18 archivos (e2e 2, unit 16)
 <!-- /hechos:app/persistence/repositories/ohlcv_repo.py -->
 
 ### `app/persistence/repositories/paper_execution_repo.py`

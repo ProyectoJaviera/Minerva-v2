@@ -113,7 +113,7 @@ las etiquetas de `TABS` y la documentación de uso las contrasta con el código.
 <!-- hechos:frontend/src/DashboardView.tsx -->
 **Hechos derivados del código** (los escribe `scripts/build_dev_docs.py`; no se editan):
 
-- **Importa (de `frontend/src/`):** `frontend/src/AccountTab.tsx`, `frontend/src/ArmTab.tsx`, `frontend/src/RiskTab.tsx`, `frontend/src/SummaryTab.tsx`, `frontend/src/UniverseTab.tsx`, `frontend/src/api.ts`, `frontend/src/components/Attribution.tsx`, `frontend/src/components/Tabs.tsx`
+- **Importa (de `frontend/src/`):** `frontend/src/AccountTab.tsx`, `frontend/src/ArmTab.tsx`, `frontend/src/IndicatorsTab.tsx`, `frontend/src/RiskTab.tsx`, `frontend/src/SummaryTab.tsx`, `frontend/src/UniverseTab.tsx`, `frontend/src/api.ts`, `frontend/src/components/Attribution.tsx`, `frontend/src/components/Tabs.tsx`
 - **Lo importan:** `frontend/src/App.tsx`
 - **Rutas HTTP que cita:** ninguno
 - **Pruebas:** `frontend/src/DashboardView.test.tsx`
@@ -240,8 +240,8 @@ las etiquetas de `TABS` y la documentación de uso las contrasta con el código.
 **Hechos derivados del código** (los escribe `scripts/build_dev_docs.py`; no se editan):
 
 - **Importa (de `frontend/src/`):** ninguno
-- **Lo importan:** `frontend/src/AccountTab.tsx`, `frontend/src/App.tsx`, `frontend/src/ArmTab.tsx`, `frontend/src/DashboardView.tsx`, `frontend/src/LoginView.tsx`, `frontend/src/NewsMemoryCard.tsx`, `frontend/src/RiskTab.tsx`, `frontend/src/SummaryTab.tsx`, `frontend/src/UniverseTab.tsx`, `frontend/src/components/Unavailable.tsx`
-- **Rutas HTTP que cita:** `/api/account`, `/api/arm`, `/api/auth/login`, `/api/auth/logout`, `/api/auth/me`, `/api/backtest/verdicts`, `/api/control/${action}`, `/api/control/audit`, `/api/control/info`, `/api/llm/decisions/recent`, `/api/measurement/status`, `/api/memory/lessons`, `/api/memory/status`, `/api/news/recent`, `/api/news/status`, `/api/risk`, `/api/shadow-trades/recent`, `/api/universe`, `/health`
+- **Lo importan:** `frontend/src/AccountTab.tsx`, `frontend/src/App.tsx`, `frontend/src/ArmTab.tsx`, `frontend/src/DashboardView.tsx`, `frontend/src/IndicatorsTab.tsx`, `frontend/src/LoginView.tsx`, `frontend/src/NewsMemoryCard.tsx`, `frontend/src/RiskTab.tsx`, `frontend/src/SummaryTab.tsx`, `frontend/src/UniverseTab.tsx`, `frontend/src/components/Unavailable.tsx`
+- **Rutas HTTP que cita:** `/api/account`, `/api/arm`, `/api/auth/login`, `/api/auth/logout`, `/api/auth/me`, `/api/backtest/verdicts`, `/api/control/${action}`, `/api/control/audit`, `/api/control/info`, `/api/explorer/options`, `/api/explorer/run`, `/api/llm/decisions/recent`, `/api/measurement/status`, `/api/memory/lessons`, `/api/memory/status`, `/api/news/recent`, `/api/news/status`, `/api/risk`, `/api/shadow-trades/recent`, `/api/universe`, `/health`
 - **Pruebas:** ninguno
 <!-- /hechos:frontend/src/api.ts -->
 
@@ -300,7 +300,7 @@ las etiquetas de `TABS` y la documentación de uso las contrasta con el código.
 **Hechos derivados del código** (los escribe `scripts/build_dev_docs.py`; no se editan):
 
 - **Importa (de `frontend/src/`):** ninguno
-- **Lo importan:** `frontend/src/AccountTab.tsx`, `frontend/src/ArmTab.tsx`, `frontend/src/NewsMemoryCard.tsx`, `frontend/src/RiskTab.tsx`, `frontend/src/SummaryTab.tsx`, `frontend/src/UniverseTab.tsx`
+- **Lo importan:** `frontend/src/AccountTab.tsx`, `frontend/src/ArmTab.tsx`, `frontend/src/IndicatorsTab.tsx`, `frontend/src/NewsMemoryCard.tsx`, `frontend/src/RiskTab.tsx`, `frontend/src/SummaryTab.tsx`, `frontend/src/UniverseTab.tsx`
 - **Rutas HTTP que cita:** ninguno
 - **Pruebas:** ninguno
 <!-- /hechos:frontend/src/components/Card.tsx -->
@@ -360,7 +360,7 @@ las etiquetas de `TABS` y la documentación de uso las contrasta con el código.
 **Hechos derivados del código** (los escribe `scripts/build_dev_docs.py`; no se editan):
 
 - **Importa (de `frontend/src/`):** ninguno
-- **Lo importan:** `frontend/src/AccountTab.tsx`, `frontend/src/ArmTab.tsx`, `frontend/src/NewsMemoryCard.tsx`, `frontend/src/RiskTab.tsx`, `frontend/src/SummaryTab.tsx`, `frontend/src/UniverseTab.tsx`
+- **Lo importan:** `frontend/src/AccountTab.tsx`, `frontend/src/ArmTab.tsx`, `frontend/src/IndicatorsTab.tsx`, `frontend/src/NewsMemoryCard.tsx`, `frontend/src/RiskTab.tsx`, `frontend/src/SummaryTab.tsx`, `frontend/src/UniverseTab.tsx`
 - **Rutas HTTP que cita:** ninguno
 - **Pruebas:** ninguno
 <!-- /hechos:frontend/src/components/StatTile.tsx -->
@@ -400,7 +400,7 @@ las etiquetas de `TABS` y la documentación de uso las contrasta con el código.
 **Hechos derivados del código** (los escribe `scripts/build_dev_docs.py`; no se editan):
 
 - **Importa (de `frontend/src/`):** `frontend/src/api.ts`
-- **Lo importan:** `frontend/src/AccountTab.tsx`, `frontend/src/ArmTab.tsx`, `frontend/src/RiskTab.tsx`, `frontend/src/UniverseTab.tsx`
+- **Lo importan:** `frontend/src/AccountTab.tsx`, `frontend/src/ArmTab.tsx`, `frontend/src/IndicatorsTab.tsx`, `frontend/src/RiskTab.tsx`, `frontend/src/UniverseTab.tsx`
 - **Rutas HTTP que cita:** ninguno
 - **Pruebas:** ninguno
 <!-- /hechos:frontend/src/components/Unavailable.tsx -->
@@ -421,7 +421,7 @@ todavía no manda el campo.
 **Hechos derivados del código** (los escribe `scripts/build_dev_docs.py`; no se editan):
 
 - **Importa (de `frontend/src/`):** ninguno
-- **Lo importan:** `frontend/src/AccountTab.tsx`, `frontend/src/ArmTab.tsx`, `frontend/src/NewsMemoryCard.tsx`, `frontend/src/RiskTab.tsx`, `frontend/src/SummaryTab.tsx`, `frontend/src/UniverseTab.tsx`
+- **Lo importan:** `frontend/src/AccountTab.tsx`, `frontend/src/ArmTab.tsx`, `frontend/src/IndicatorsTab.tsx`, `frontend/src/NewsMemoryCard.tsx`, `frontend/src/RiskTab.tsx`, `frontend/src/SummaryTab.tsx`, `frontend/src/UniverseTab.tsx`
 - **Rutas HTTP que cita:** ninguno
 - **Pruebas:** ninguno
 <!-- /hechos:frontend/src/format.ts -->
@@ -481,5 +481,30 @@ todavía no manda el campo.
 - **Importa (de `frontend/src/`):** ninguno
 - **Lo importan:** ninguno
 - **Rutas HTTP que cita:** ninguno
-- **Pruebas:** `frontend/src/AccountTab.test.tsx`, `frontend/src/App.test.tsx`, `frontend/src/ArmTab.test.tsx`, `frontend/src/DashboardView.test.tsx`, `frontend/src/NewsMemoryCard.test.tsx`, `frontend/src/RiskTab.test.tsx`, `frontend/src/UniverseTab.test.tsx`
+- **Pruebas:** `frontend/src/AccountTab.test.tsx`, `frontend/src/App.test.tsx`, `frontend/src/ArmTab.test.tsx`, `frontend/src/DashboardView.test.tsx`, `frontend/src/IndicatorsTab.test.tsx`, `frontend/src/NewsMemoryCard.test.tsx`, `frontend/src/RiskTab.test.tsx`, `frontend/src/UniverseTab.test.tsx`
 <!-- /hechos:frontend/src/testUtils.tsx -->
+
+### `frontend/src/IndicatorsTab.tsx`
+
+**Responsabilidad.** La pestaña «Indicadores»: formulario de la prueba y tarjeta del resultado exploratorio.
+
+**Funciones y clases clave.**
+- `IndicatorsTab` (pide `useExplorerOptions` y muestra la nota exploratoria), `Form` (monedas, marco, gatillo, hasta
+  dos filtros, fechas con tope en la fecha reservada; llama a `useExplorerRun`), `ResultCard`, `SummaryGrid` y
+  `BreakdownTable`.
+
+**Invariantes — no romper.** La nota exploratoria del servidor siempre se ve; el control al azar se muestra junto al
+resultado.
+
+**Trampas conocidas.** El profit factor sin pérdidas llega como `null` y se muestra «sin pérdidas» (con 0 operaciones,
+«-»).
+
+
+<!-- hechos:frontend/src/IndicatorsTab.tsx -->
+**Hechos derivados del código** (los escribe `scripts/build_dev_docs.py`; no se editan):
+
+- **Importa (de `frontend/src/`):** `frontend/src/api.ts`, `frontend/src/components/Card.tsx`, `frontend/src/components/StatTile.tsx`, `frontend/src/components/Unavailable.tsx`, `frontend/src/format.ts`
+- **Lo importan:** `frontend/src/DashboardView.tsx`
+- **Rutas HTTP que cita:** ninguno
+- **Pruebas:** `frontend/src/IndicatorsTab.test.tsx`
+<!-- /hechos:frontend/src/IndicatorsTab.tsx -->

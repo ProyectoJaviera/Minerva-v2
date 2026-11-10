@@ -319,9 +319,10 @@ def test_the_compose_uses_named_volumes_for_data_and_logs_never_the_hosts_folder
     assert set(_compose()["volumes"]) == {"data", "logs"}
     # Ningun montaje de carpeta del host sobre los datos: abriria la base real de data/ (y SQLite
     # WAL no es fiable sobre el sistema de archivos compartido de Docker Desktop). Las UNICAS
-    # rutas del host son docs/ (solo lectura) y el archivo de credenciales (solo lectura).
+    # rutas del host son docs/ y history/ (el archivo de historial de la seccion «Indicadores» de la
+    # v2, que la app abre en modo immutable) de solo lectura, y el archivo de credenciales.
     host_binds = [v for v in strings if v.startswith(("./", "../", "/", "~"))]
-    assert host_binds == ["./docs:/app/docs:ro"]
+    assert host_binds == ["./docs:/app/docs:ro", "./history:/app/history:ro"]
     binds = [v for v in service["volumes"] if isinstance(v, dict) and v["type"] == "bind"]
     assert [b["target"] for b in binds] == ["/app/.env"]
     assert all(b["read_only"] is True for b in binds)
@@ -807,7 +808,7 @@ def test_docker_compose_accepts_the_file_and_resolves_the_v2_defaults(tmp_path):
         assert env[name] == "false", name
     assert env["LESSONS_MEMORY_ENABLED"] == "false" and env["AUTO_OPEN_WITHOUT_LLM"] == "false"
     binds = {b["target"]: b for b in service["volumes"] if b["type"] == "bind"}
-    assert set(binds) == {"/app/docs", "/app/.env"}
+    assert set(binds) == {"/app/docs", "/app/history", "/app/.env"}
     assert all(b["read_only"] for b in binds.values())
     assert binds["/app/.env"]["source"].endswith("fake.env")
 

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { AccountTab } from "./AccountTab";
 import { ArmTab } from "./ArmTab";
+import { IndicatorsTab } from "./IndicatorsTab";
 import { RiskTab } from "./RiskTab";
 import { SummaryTab } from "./SummaryTab";
 import { UniverseTab } from "./UniverseTab";
@@ -17,6 +18,8 @@ const TABS: TabDef[] = [
   { id: "arm", label: "Brazo ejecutado" },
   { id: "risk", label: "Riesgo y controles" },
   { id: "universe", label: "Universo y backtest" },
+  // v2: pruebas manuales y exploratorias de indicadores sobre el historial local.
+  { id: "indicators", label: "Indicadores" },
 ];
 
 function ActiveTab({ id }: { id: string }) {
@@ -29,6 +32,8 @@ function ActiveTab({ id }: { id: string }) {
       return <RiskTab />;
     case "universe":
       return <UniverseTab />;
+    case "indicators":
+      return <IndicatorsTab />;
     default:
       return <SummaryTab />;
   }

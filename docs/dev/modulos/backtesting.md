@@ -85,12 +85,12 @@ afectar la medición (aunque cambiar un criterio de descarte tras ver resultados
 
 - **Referencia pdoc:** [`api/app/backtesting/engine.html`](../api/app/backtesting/engine.html)
 - **Importa (internos):** 14 módulos (backtesting 2, config 1, core 1, execution 1, market 1, persistence 4, strategies 1, trading 3)
-- **Lo importan:** `app.backtesting.metrics`, `app.backtesting.report`
+- **Lo importan:** `app.backtesting.metrics`, `app.backtesting.report`, `app.explorer.service`
 - **Configuración que lee:** `BACKTEST_SLIPPAGE_BPS`, `DEFAULT_MARGIN_USDT`, `LEVERAGE`, `MAX_SL_MARGIN_LOSS_PCT`, `TAKER_FEE_PCT`
 - **Tablas que lee:** `contract_specs_cache`, `funding_cache`
 - **Tablas que escribe:** ninguno
 - **Tablas que crea o altera:** ninguno
-- **Pruebas que lo importan o citan:** `tests/unit/test_backtest_engine.py`, `tests/unit/test_backtest_engine_v2.py`, `tests/unit/test_backtest_metrics.py`, `tests/unit/test_backtest_report.py`, `tests/unit/test_backtest_sanity.py`, `tests/unit/test_backtest_v1_regression.py`, `tests/unit/test_funding_contrarian_percentile_strategy.py`, `tests/unit/test_portfolio_simulation.py`, `tests/unit/test_risk_analysis.py`, `tests/unit/test_sl_calc.py`, `tests/unit/test_slippage_and_funding_accrual.py`, `tests/unit/test_stop_engine.py`
+- **Pruebas que lo importan o citan:** 13 archivos (unit 13)
 <!-- /hechos:app/backtesting/engine.py -->
 
 ### `app/backtesting/funding.py`
@@ -171,7 +171,7 @@ cierre).
 
 - **Referencia pdoc:** [`api/app/backtesting/metrics.html`](../api/app/backtesting/metrics.html)
 - **Importa (internos):** `app.backtesting.engine`
-- **Lo importan:** `app.backtesting.report`, `app.trading.real_money_report`, `scripts.analyze_risk`
+- **Lo importan:** `app.backtesting.report`, `app.explorer.service`, `app.trading.real_money_report`, `scripts.analyze_risk`
 - **Configuración que lee:** ninguno
 - **Tablas que lee:** ninguno
 - **Tablas que escribe:** ninguno

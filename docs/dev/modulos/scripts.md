@@ -363,7 +363,7 @@ con `. (Join-Path $PSScriptRoot "docker_common.ps1")`.
 
 - **Referencia pdoc:** [`api/scripts/download_history.html`](../api/scripts/download_history.html)
 - **Importa (internos):** `app.config`, `app.core.logging`, `app.market.bitunix_rest`, `app.market.coingecko_client`, `app.market.contract_specs`, `app.market.funding_history`, `app.market.ohlcv_history`, `app.market.universe`, `app.persistence.database`, `app.persistence.repositories.ohlcv_repo`, `app.strategies.registry`
-- **Lo importan:** ninguno
+- **Lo importan:** `scripts.update_history_file`
 - **Configuración que lee:** `BITUNIX_RATE_LIMIT_PER_SEC`, `BITUNIX_REST_BASE_URL`, `COINGECKO_API_KEY`, `COINGECKO_BASE_URL`, `DATABASE_PATH`, `backtest_control_symbols_list`
 - **Tablas que lee:** `ohlcv_cache`, `ohlcv_floor`
 - **Tablas que escribe:** `ohlcv_series_complete`
@@ -971,3 +971,30 @@ preregistro nuevo y validación hacia adelante.
 - **Tablas que crea o altera:** ninguno
 - **Pruebas que lo importan o citan:** ninguno
 <!-- /hechos:scripts/v2_explore.py -->
+
+### `scripts/update_history_file.py`
+
+**Responsabilidad.** Crea o actualiza el archivo de historial de la sección «Indicadores» (`EXPLORER_HISTORY_DB`, por
+defecto `history/history_v2.db`) corriendo `download_history.main()` sobre ese archivo.
+
+**Funciones y clases clave.**
+- `check_target()` (valida el destino) y `main()` (fija `DATABASE_PATH` en el archivo y corre la descarga).
+
+**Invariantes — no romper.** Nunca escribe en la base del bot ni dentro de una carpeta `data/`; el destino debe
+terminar en `.db`.
+
+**Trampas conocidas.** Red pública de CoinGecko y Bitunix; la primera corrida tarda, pero es reanudable.
+
+
+<!-- hechos:scripts/update_history_file.py -->
+**Hechos derivados del código** (los escribe `scripts/build_dev_docs.py`; no se editan):
+
+- **Referencia pdoc:** [`api/scripts/update_history_file.html`](../api/scripts/update_history_file.html)
+- **Importa (internos):** `app.config`, `scripts.download_history`
+- **Lo importan:** ninguno
+- **Configuración que lee:** `DATABASE_PATH`
+- **Tablas que lee:** ninguno
+- **Tablas que escribe:** ninguno
+- **Tablas que crea o altera:** ninguno
+- **Pruebas que lo importan o citan:** `tests/unit/test_explorer.py`
+<!-- /hechos:scripts/update_history_file.py -->

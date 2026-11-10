@@ -243,6 +243,12 @@ class Settings(BaseSettings):
     backtest_official_end_date: str = Field(
         default="2026-10-01", alias="BACKTEST_OFFICIAL_END_DATE"
     )
+    # Seccion «Indicadores» (v2, exploratoria): archivo SQLite de historial, aparte de la base del
+    # bot, que se abre en solo lectura. Se crea con `scripts/download_history.py` y
+    # `DATABASE_PATH` apuntando a esta ruta (ver docs/v2/SECCION_INDICADORES.md).
+    explorer_history_db: str = Field(
+        default="./history/history_v2.db", alias="EXPLORER_HISTORY_DB"
+    )
 
     # --- Claude / Anthropic (usado desde Fase 3.6) ---
     anthropic_api_key: str = Field(default="", alias="ANTHROPIC_API_KEY")

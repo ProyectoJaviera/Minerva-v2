@@ -197,6 +197,7 @@ en la operación en vivo**, salvo las tres variables que se señalan. Los criter
 | `BACKTEST_FALLBACK_TP_PCT` | Ídem para el *take profit*. **También en vivo** | `0.10` | Al empezar una medición |
 | `BACKTEST_PORTFOLIO_SIM_RUNS` | Corridas Monte Carlo de la simulación de cartera (informativa) | `200` | Ídem |
 | `BACKTEST_OFFICIAL_END_DATE` | Fecha final fija (UTC, `AAAA-MM-DD`) del backtest "oficial": dos corridas con la misma caché dan exactamente los mismos números | `2026-10-01` | Ídem |
+| `EXPLORER_HISTORY_DB` | v2: archivo SQLite de historial de la pestaña «Indicadores» (exploratoria), aparte de la base del bot y abierto en solo lectura; lo crea `scripts/update_history_file.py` (ver `docs/v2/SECCION_INDICADORES.md`) | `./history/history_v2.db` | Solo la pestaña «Indicadores» |
 
 ### Claude (Anthropic)
 

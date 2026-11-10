@@ -84,6 +84,10 @@ services:
       # El registro oficial del veredicto (docs/VEREDICTO_3_6_REGISTRO*.txt) se lee en cada peticion:
       # al crearlo en el host se desbloquean los resultados sin reconstruir la imagen. Solo lectura.
       - ./docs:/app/docs:ro
+      # Seccion «Indicadores» (v2, exploratoria): el archivo de historial local
+      # (`scripts/update_history_file.py` lo crea en ./history/history_v2.db). Solo lectura: la app lo
+      # abre en modo `immutable`. Si la carpeta no existe, la seccion dice como crear el archivo.
+      - ./history:/app/history:ro
     healthcheck:
       test: ["CMD", "python", "docker/healthcheck.py"]
       interval: 60s

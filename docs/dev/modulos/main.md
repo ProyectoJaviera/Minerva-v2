@@ -94,7 +94,7 @@ reconciliar, o pasar otro `decision_service` al etiquetador). Qué se puede toca
 **Hechos derivados del código** (los escribe `scripts/build_dev_docs.py`; no se editan):
 
 - **Referencia pdoc:** [`api/app/main.html`](../api/app/main.html)
-- **Importa (internos):** 35 módulos (api 16, config 1, core 3, execution 1, market 4, memory 1, news 1, persistence 1, telegram 3, trading 4)
+- **Importa (internos):** 36 módulos (api 17, config 1, core 3, execution 1, market 4, memory 1, news 1, persistence 1, telegram 3, trading 4)
 - **Lo importan:** ninguno
 - **Configuración que lee:** `BITUNIX_RATE_LIMIT_PER_SEC`, `BITUNIX_REST_BASE_URL`, `BITUNIX_WS_PUBLIC_URL`, `COINGECKO_API_KEY`, `COINGECKO_BASE_URL`, `DATABASE_PATH`, `HEARTBEAT_SECONDS`
 - **Tablas que lee:** ninguno

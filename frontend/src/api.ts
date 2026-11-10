@@ -645,3 +645,94 @@ export function useControlAction() {
     },
   });
 }
+
+// --- Seccion «Indicadores» (v2, EXPLORATORIA): backtest a pedido sobre el historial local -------
+
+export interface ExplorerOptions {
+  available: boolean;
+  detail: string | null;
+  note: string;
+  reserved_from: string;
+  max_filters: number;
+  timeframes: string[];
+  triggers: { id: string; label: string; exit: "native" | "atr" }[];
+  filters: { id: string; label: string }[];
+  symbols: string[];
+  series: { symbol: string; timeframe: string; first_day: string; last_day: string; bars: number }[];
+}
+
+export interface ExplorerSummary {
+  trades: number;
+  winrate: number | null;
+  profit_factor: number | null;
+  net_pnl_usdt: number;
+  expectancy_usdt: number | null;
+  max_drawdown_pct: number | null;
+  avg_win_usdt: number | null;
+  avg_loss_usdt: number | null;
+  longs: number;
+  shorts: number;
+  close_reasons: Record<string, number>;
+}
+
+export interface ExplorerBreakdownRow {
+  key: string;
+  trades: number;
+  winrate: number | null;
+  profit_factor: number | null;
+  net_pnl_usdt: number;
+}
+
+export interface ExplorerResult {
+  exploratory: true;
+  note: string;
+  params: {
+    symbols: string[];
+    timeframe: string;
+    trigger: string;
+    filters: string[];
+    exit_mode: string;
+    name: string;
+  };
+  period: { start: string | null; end: string | null; reserved_from: string };
+  result: ExplorerSummary;
+  control: ExplorerSummary;
+  by_symbol: ExplorerBreakdownRow[];
+  by_year: ExplorerBreakdownRow[];
+  skipped_by_risk_cap: number;
+  missing: { symbol: string; reason: string }[];
+  engine: { margin_usdt: number; leverage: number; taker_fee_pct: number; slippage_bps: number };
+  elapsed_s: number;
+  cached?: boolean;
+}
+
+export interface ExplorerRunRequest {
+  symbols: string[];
+  timeframe: string;
+  trigger: string;
+  filters: string[];
+  start?: string | null;
+  end?: string | null;
+}
+
+export function useExplorerOptions() {
+  return useQuery({
+    queryKey: ["explorer-options"],
+    queryFn: () => apiFetch<ExplorerOptions>("/api/explorer/options"),
+    refetchInterval: false,
+  });
+}
+
+export function useExplorerRun() {
+  return useMutation({
+    // GET a proposito: solo calcula sobre un archivo de solo lectura, no escribe nada.
+    mutationFn: (body: ExplorerRunRequest) => {
+      const q = new URLSearchParams({ timeframe: body.timeframe, trigger: body.trigger });
+      for (const s of body.symbols) q.append("symbols", s);
+      for (const f of body.filters) q.append("filters", f);
+      if (body.start) q.set("start", body.start);
+      if (body.end) q.set("end", body.end);
+      return apiFetch<ExplorerResult>(`/api/explorer/run?${q.toString()}`);
+    },
+  });
+}
