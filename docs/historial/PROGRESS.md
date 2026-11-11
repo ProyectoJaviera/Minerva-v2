@@ -2453,3 +2453,8 @@ Pedido: el dueño aprobó una ronda con la fuerza relativa entre monedas, el squ
 
 - **Motor, cambios opcionales:** `max_hold_bars` (cierre por tiempo, motivo `TIME`, sin TP de respaldo) y la columna `volume` (`quote_vol`) en el DataFrame de `precompute`, antes de `open_time`. Ninguna estrategia de la v1 los usa: la regresión de la v1 pasa igual. **Sin cambio de comportamiento respecto de la v1.0.**
 - **`app/research/round4.py`** y **`scripts/v2_round4.py`:** 21 señales nuevas en 4h (fuerza relativa semanal top 3 / bottom 3, squeeze TTM, filtros ADX, pico de volumen y VWAP semanal), salida y entrada elegidas solo en IS, regla de finalistas en el docstring. El tramo 2026-10-01 a 2026-11-10 no se usó con estas señales: los finalistas se mirarán una vez ahí, con preregistro propio.
+
+## v2: ronda 4 exploratoria — ninguna pasa (2026-11-11)
+
+Corrida de `scripts/v2_round4.py` (63 min, 324 variantes en 4h). Resultado en `docs/v2/RONDA4_V2.md`: **0 de 21 señales pasan; sin finalistas**. Lo más cercano: fuerza relativa semanal top 3 / bottom 3 (PF IS 1.11, OOS 1.25, estresado 1.17, sobre su control al azar 1.06), que falla solo por concentración (57 %). El squeeze se sobreajusta (IS 1.2-1.7, OOS < 1) y el volumen como filtro no mejora el OOS. Como no hubo finalistas, el tramo 2026-10-01 a 2026-11-10 sigue sin usarse para estas señales.
+- **Cambios de comportamiento respecto de la v1.0:** ninguno.
