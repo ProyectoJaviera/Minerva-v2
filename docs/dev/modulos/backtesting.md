@@ -90,7 +90,7 @@ afectar la medición (aunque cambiar un criterio de descarte tras ver resultados
 
 - **Referencia pdoc:** [`api/app/backtesting/engine.html`](../api/app/backtesting/engine.html)
 - **Importa (internos):** 14 módulos (backtesting 2, config 1, core 1, execution 1, market 1, persistence 4, strategies 1, trading 3)
-- **Lo importan:** `app.backtesting.metrics`, `app.backtesting.report`, `app.explorer.service`, `scripts.v2_round3_reserved`
+- **Lo importan:** `app.backtesting.metrics`, `app.backtesting.report`, `app.explorer.service`, `scripts.v2_forward_test`, `scripts.v2_round3_reserved`
 - **Configuración que lee:** `BACKTEST_SLIPPAGE_BPS`, `DEFAULT_MARGIN_USDT`, `LEVERAGE`, `MAKER_FEE_PCT`, `MAX_SL_MARGIN_LOSS_PCT`, `TAKER_FEE_PCT`
 - **Tablas que lee:** `contract_specs_cache`, `funding_cache`
 - **Tablas que escribe:** ninguno
@@ -176,7 +176,7 @@ cierre).
 
 - **Referencia pdoc:** [`api/app/backtesting/metrics.html`](../api/app/backtesting/metrics.html)
 - **Importa (internos):** `app.backtesting.engine`
-- **Lo importan:** `app.backtesting.report`, `app.explorer.service`, `app.trading.real_money_report`, `scripts.analyze_risk`, `scripts.v2_round3_reserved`
+- **Lo importan:** `app.backtesting.report`, `app.explorer.service`, `app.trading.real_money_report`, `scripts.analyze_risk`, `scripts.v2_forward_test`, `scripts.v2_round3_reserved`
 - **Configuración que lee:** ninguno
 - **Tablas que lee:** ninguno
 - **Tablas que escribe:** ninguno

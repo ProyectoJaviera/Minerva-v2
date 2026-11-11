@@ -366,7 +366,7 @@ visto no existía para esa decisión. Solo título, URL, dominio y fecha (nunca 
 
 - **Referencia pdoc:** [`api/app/persistence/repositories/ohlcv_repo.html`](../api/app/persistence/repositories/ohlcv_repo.html)
 - **Importa (internos):** `app.persistence.database`, `app.persistence.models`
-- **Lo importan:** `app.llm.market_features`, `app.market.funding_history`, `app.market.ohlcv_history`, `app.trading.position_monitor`, `app.trading.signal_generator`, `scripts.download_history`, `scripts.repair_ohlcv_gaps`
+- **Lo importan:** `app.explorer.service`, `app.llm.market_features`, `app.market.funding_history`, `app.market.ohlcv_history`, `app.trading.position_monitor`, `app.trading.signal_generator`, `scripts.download_history`, `scripts.repair_ohlcv_gaps`, `scripts.v2_forward_test`
 - **Configuración que lee:** ninguno
 - **Tablas que lee:** `ohlcv_cache`, `ohlcv_floor`, `ohlcv_series_complete`, `ohlcv_unrepairable_gaps`
 - **Tablas que escribe:** `ohlcv_cache`, `ohlcv_floor`, `ohlcv_series_complete`, `ohlcv_unrepairable_gaps`

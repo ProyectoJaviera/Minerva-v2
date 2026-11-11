@@ -594,7 +594,7 @@ valen; 404 si no hay archivo de historial.
 **Hechos derivados del código** (los escribe `scripts/build_dev_docs.py`; no se editan):
 
 - **Referencia pdoc:** [`api/app/api/routes/explorer.html`](../api/app/api/routes/explorer.html)
-- **Importa (internos):** `app.api.deps`, `app.api.security`, `app.config`, `app.explorer.service`, `app.research.combos`
+- **Importa (internos):** `app.api.deps`, `app.api.security`, `app.config`, `app.explorer.service`, `app.research.round3`
 - **Lo importan:** `app.main`
 - **Configuración que lee:** `EXPLORER_HISTORY_DB`
 - **Tablas que lee:** ninguno

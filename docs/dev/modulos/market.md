@@ -255,7 +255,7 @@ estaba 100 % cubierto: cientos de solicitudes desperdiciadas por reintento. Un h
 
 - **Referencia pdoc:** [`api/app/market/ohlcv_history.html`](../api/app/market/ohlcv_history.html)
 - **Importa (internos):** `app.core.logging`, `app.market.bitunix_rest`, `app.persistence.database`, `app.persistence.models`, `app.persistence.repositories.ohlcv_repo`
-- **Lo importan:** 13 módulos (backtesting 2, explorer 1, llm 1, market 1, scripts 6, trading 2)
+- **Lo importan:** 14 módulos (backtesting 2, explorer 1, llm 1, market 1, scripts 7, trading 2)
 - **Configuración que lee:** ninguno
 - **Tablas que lee:** `ohlcv_cache`, `ohlcv_floor`, `ohlcv_series_complete`, `ohlcv_unrepairable_gaps`
 - **Tablas que escribe:** `ohlcv_cache`, `ohlcv_floor`, `ohlcv_unrepairable_gaps`

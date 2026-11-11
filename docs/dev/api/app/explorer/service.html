@@ -50,6 +50,18 @@
                     <a class="variable" href="#FILTER_LABELS">FILTER_LABELS</a>
             </li>
             <li>
+                    <a class="variable" href="#TRIGGERS">TRIGGERS</a>
+            </li>
+            <li>
+                    <a class="variable" href="#FILTERS">FILTERS</a>
+            </li>
+            <li>
+                    <a class="variable" href="#ROUND3_ONLY">ROUND3_ONLY</a>
+            </li>
+            <li>
+                    <a class="variable" href="#BTC_SYMBOL">BTC_SYMBOL</a>
+            </li>
+            <li>
                     <a class="variable" href="#NOTE">NOTE</a>
             </li>
             <li>
@@ -82,11 +94,20 @@
             <li>
                     <a class="class" href="#FastComboStrategy">FastComboStrategy</a>
                             <ul class="memberlist">
-                        <li>
-                                <a class="function" href="#FastComboStrategy.precompute">precompute</a>
-                        </li>
                 </ul>
 
+            </li>
+            <li>
+                    <a class="class" href="#FastRound3Strategy">FastRound3Strategy</a>
+                            <ul class="memberlist">
+                </ul>
+
+            </li>
+            <li>
+                    <a class="function" href="#build_strategy">build_strategy</a>
+            </li>
+            <li>
+                    <a class="function" href="#load_btc_context">load_btc_context</a>
             </li>
             <li>
                     <a class="class" href="#ExplorerRequest">ExplorerRequest</a>
@@ -240,7 +261,7 @@ por vez, para no frenar el bucle del bot.</p>
                     <div class="attr variable">
             <span class="name">TRIGGER_LABELS</span>        =
 <input id="TRIGGER_LABELS-view-value" class="view-value-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
-            <label class="view-value-button pdoc-button" for="TRIGGER_LABELS-view-value"></label><span class="default_value">{&#39;sfp&#39;: &#39;SFP del HeatMap (barrida de swing con cierre de vuelta)&#39;, &#39;camarilla&#39;: &#39;Camarilla: rechazo de S3 (largo) o R3 (corto)&#39;, &#39;rf_flip&#39;: &#39;Giro del Range Filter (Frost)&#39;, &#39;vidya_flip&#39;: &#39;Giro de la banda VIDYA (F. Trail de Frost)&#39;, &#39;bb_reversal&#39;: &#39;Reversion del BB%B (sale de sobreventa/sobrecompra)&#39;, &#39;wt_cross&#39;: &#39;Cruce de WaveTrend en zona extrema (+-72)&#39;, &#39;zone_reject&#39;: &#39;Rechazo de una zona de liquidez&#39;, &#39;grab&#39;: &#39;Liquidity Grab de Frost (agotamiento)&#39;}</span>
+            <label class="view-value-button pdoc-button" for="TRIGGER_LABELS-view-value"></label><span class="default_value">{&#39;sfp&#39;: &#39;SFP del HeatMap (barrida de swing con cierre de vuelta)&#39;, &#39;camarilla&#39;: &#39;Camarilla: rechazo de S3 (largo) o R3 (corto)&#39;, &#39;rf_flip&#39;: &#39;Giro del Range Filter (Frost)&#39;, &#39;vidya_flip&#39;: &#39;Giro de la banda VIDYA (F. Trail de Frost)&#39;, &#39;bb_reversal&#39;: &#39;Reversion del BB%B (sale de sobreventa/sobrecompra)&#39;, &#39;wt_cross&#39;: &#39;Cruce de WaveTrend en zona extrema (+-72)&#39;, &#39;zone_reject&#39;: &#39;Rechazo de una zona de liquidez&#39;, &#39;grab&#39;: &#39;Liquidity Grab de Frost (agotamiento)&#39;, &#39;fvg&#39;: &#39;FVG: retesteo de un Fair Value Gap de 3 velas&#39;}</span>
 
         
     </div>
@@ -253,11 +274,60 @@ por vez, para no frenar el bucle del bot.</p>
                     <div class="attr variable">
             <span class="name">FILTER_LABELS</span>        =
 <input id="FILTER_LABELS-view-value" class="view-value-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
-            <label class="view-value-button pdoc-button" for="FILTER_LABELS-view-value"></label><span class="default_value">{&#39;ema&#39;: &#39;Cierre sobre/bajo la EMA 144&#39;, &#39;rf&#39;: &#39;Estado del Range Filter&#39;, &#39;vidya&#39;: &#39;Tendencia de la banda VIDYA&#39;, &#39;wt&#39;: &#39;WaveTrend: wt1 sobre/bajo wt2&#39;}</span>
+            <label class="view-value-button pdoc-button" for="FILTER_LABELS-view-value"></label><span class="default_value">{&#39;ema&#39;: &#39;Cierre sobre/bajo la EMA 144&#39;, &#39;rf&#39;: &#39;Estado del Range Filter&#39;, &#39;vidya&#39;: &#39;Tendencia de la banda VIDYA&#39;, &#39;wt&#39;: &#39;WaveTrend: wt1 sobre/bajo wt2&#39;, &#39;fund&#39;: &#39;Funding bajo/sobre su mediana de 30 dias (en contra del lado saturado)&#39;, &#39;btc&#39;: &#39;Regimen de BTC: cierre sobre/bajo su EMA 200&#39;, &#39;rs&#39;: &#39;Fuerza relativa contra BTC (retorno de 180 velas)&#39;}</span>
 
         
     </div>
     <a class="headerlink" href="#FILTER_LABELS"></a>
+    
+    
+
+                </section>
+                <section id="TRIGGERS">
+                    <div class="attr variable">
+            <span class="name">TRIGGERS</span>        =
+<input id="TRIGGERS-view-value" class="view-value-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
+            <label class="view-value-button pdoc-button" for="TRIGGERS-view-value"></label><span class="default_value">(&#39;sfp&#39;, &#39;camarilla&#39;, &#39;rf_flip&#39;, &#39;vidya_flip&#39;, &#39;bb_reversal&#39;, &#39;wt_cross&#39;, &#39;zone_reject&#39;, &#39;grab&#39;, &#39;fvg&#39;)</span>
+
+        
+    </div>
+    <a class="headerlink" href="#TRIGGERS"></a>
+    
+    
+
+                </section>
+                <section id="FILTERS">
+                    <div class="attr variable">
+            <span class="name">FILTERS</span>        =
+<span class="default_value">(&#39;ema&#39;, &#39;rf&#39;, &#39;vidya&#39;, &#39;wt&#39;, &#39;fund&#39;, &#39;btc&#39;, &#39;rs&#39;)</span>
+
+        
+    </div>
+    <a class="headerlink" href="#FILTERS"></a>
+    
+    
+
+                </section>
+                <section id="ROUND3_ONLY">
+                    <div class="attr variable">
+            <span class="name">ROUND3_ONLY</span>        =
+<span class="default_value">{&#39;btc&#39;, &#39;fvg&#39;, &#39;rs&#39;, &#39;fund&#39;}</span>
+
+        
+    </div>
+    <a class="headerlink" href="#ROUND3_ONLY"></a>
+    
+    
+
+                </section>
+                <section id="BTC_SYMBOL">
+                    <div class="attr variable">
+            <span class="name">BTC_SYMBOL</span>        =
+<span class="default_value">&#39;BTCUSDT&#39;</span>
+
+        
+    </div>
+    <a class="headerlink" href="#BTC_SYMBOL"></a>
     
     
 
@@ -398,48 +468,16 @@ lectura en Docker).</p>
                     <div class="attr class">
             
     <span class="def">class</span>
-    <span class="name">FastComboStrategy</span><wbr>(<span class="base"><a href="../research/combos.html#ComboStrategy">app.research.combos.ComboStrategy</a></span>):
+    <span class="name">FastComboStrategy</span><wbr>(<span class="base"><a href="#_FastRowMixin">_FastRowMixin</a></span>, <span class="base"><a href="../research/combos.html#ComboStrategy">app.research.combos.ComboStrategy</a></span>):
 
         
     </div>
     <a class="headerlink" href="#FastComboStrategy"></a>
     
-            <div class="docstring"><p><code>ComboStrategy</code> con la fila de la senal leida de arrays en vez de <code>df.iloc[-1]</code>.</p>
-
-<p>Mismas senales, SL, TP y trailing (<code>tests/unit/test_explorer.py</code> lo compara operacion por
-operacion); solo evita construir una <code>pd.Series</code> por vela, que era mas de la mitad del tiempo
-de una corrida. Las columnas se guardan en <code><a href="#FastComboStrategy.precompute">precompute</a></code>, que el motor llama una vez por
-corrida antes de evaluar ventanas de ese mismo DataFrame.</p>
+            <div class="docstring"><p><code>ComboStrategy</code> con la fila leida de arrays (mismas operaciones, ver <code>_FastRowMixin</code>).</p>
 </div>
 
 
-                            <div id="FastComboStrategy.precompute" class="classattr">
-                                <div class="attr function">
-            
-        <span class="def">def</span>
-        <span class="name">precompute</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">df</span></span><span class="return-annotation">):</span></span>
-
-        
-    </div>
-    <a class="headerlink" href="#FastComboStrategy.precompute"></a>
-    
-            <div class="docstring"><p><code>ComboStrategy.precompute</code> y, ademas, guarda sus columnas como arrays numpy.</p>
-
-<h6 id="arguments">Arguments:</h6>
-
-<ul>
-<li><strong>df:</strong>  velas de toda la serie (con <code>open_time</code>).</li>
-</ul>
-
-<h6 id="returns">Returns:</h6>
-
-<blockquote>
-  <p>El mismo DataFrame que <code>ComboStrategy.precompute</code>.</p>
-</blockquote>
-</div>
-
-
-                            </div>
                             <div class="inherited">
                                 <h5>Inherited Members</h5>
                                 <dl>
@@ -459,8 +497,121 @@ corrida antes de evaluar ventanas de ese mismo DataFrame.</p>
                 <dd id="FastComboStrategy.trailing_distance" class="function"><a href="../research/combos.html#ComboStrategy.trailing_distance">trailing_distance</a></dd>
 
             </div>
+            <div><dt><a href="#_FastRowMixin">_FastRowMixin</a></dt>
+                                <dd id="FastComboStrategy.precompute" class="function"><a href="#_FastRowMixin.precompute">precompute</a></dd>
+
+            </div>
                                 </dl>
                             </div>
+                </section>
+                <section id="FastRound3Strategy">
+                    <div class="attr class">
+            
+    <span class="def">class</span>
+    <span class="name">FastRound3Strategy</span><wbr>(<span class="base"><a href="#_FastRowMixin">_FastRowMixin</a></span>, <span class="base"><a href="../research/round3.html#Round3Strategy">app.research.round3.Round3Strategy</a></span>):
+
+        
+    </div>
+    <a class="headerlink" href="#FastRound3Strategy"></a>
+    
+            <div class="docstring"><p><code>Round3Strategy</code> con la fila leida de arrays (mismas operaciones, ver <code>_FastRowMixin</code>).</p>
+</div>
+
+
+                            <div class="inherited">
+                                <h5>Inherited Members</h5>
+                                <dl>
+                                    <div><dt><a href="../research/round3.html#Round3Strategy">app.research.round3.Round3Strategy</a></dt>
+                                <dd id="FastRound3Strategy.__init__" class="function"><a href="../research/round3.html#Round3Strategy.__init__">Round3Strategy</a></dd>
+                <dd id="FastRound3Strategy.filters" class="variable"><a href="../research/round3.html#Round3Strategy.filters">filters</a></dd>
+                <dd id="FastRound3Strategy.trigger" class="variable"><a href="../research/round3.html#Round3Strategy.trigger">trigger</a></dd>
+                <dd id="FastRound3Strategy.exit_name" class="variable"><a href="../research/round3.html#Round3Strategy.exit_name">exit_name</a></dd>
+                <dd id="FastRound3Strategy.exit_mode" class="variable"><a href="../research/round3.html#Round3Strategy.exit_mode">exit_mode</a></dd>
+                <dd id="FastRound3Strategy.entry_mode" class="variable"><a href="../research/round3.html#Round3Strategy.entry_mode">entry_mode</a></dd>
+                <dd id="FastRound3Strategy.random_dir" class="variable"><a href="../research/round3.html#Round3Strategy.random_dir">random_dir</a></dd>
+                <dd id="FastRound3Strategy.warmup" class="variable"><a href="../research/round3.html#Round3Strategy.warmup">warmup</a></dd>
+                <dd id="FastRound3Strategy.name" class="variable"><a href="../research/round3.html#Round3Strategy.name">name</a></dd>
+                <dd id="FastRound3Strategy.evaluate" class="function"><a href="../research/round3.html#Round3Strategy.evaluate">evaluate</a></dd>
+                <dd id="FastRound3Strategy.take_profit_price" class="function"><a href="../research/round3.html#Round3Strategy.take_profit_price">take_profit_price</a></dd>
+                <dd id="FastRound3Strategy.trailing_distance" class="function"><a href="../research/round3.html#Round3Strategy.trailing_distance">trailing_distance</a></dd>
+
+            </div>
+            <div><dt><a href="#_FastRowMixin">_FastRowMixin</a></dt>
+                                <dd id="FastRound3Strategy.precompute" class="function"><a href="#_FastRowMixin.precompute">precompute</a></dd>
+
+            </div>
+            <div><dt><a href="../research/combos.html#ComboStrategy">app.research.combos.ComboStrategy</a></dt>
+                                <dd id="FastRound3Strategy.skip_entry_if_sl_crossed" class="variable"><a href="../research/combos.html#ComboStrategy.skip_entry_if_sl_crossed">skip_entry_if_sl_crossed</a></dd>
+                <dd id="FastRound3Strategy.natural_side" class="function"><a href="../research/combos.html#ComboStrategy.natural_side">natural_side</a></dd>
+                <dd id="FastRound3Strategy.stop_price" class="function"><a href="../research/combos.html#ComboStrategy.stop_price">stop_price</a></dd>
+
+            </div>
+                                </dl>
+                            </div>
+                </section>
+                <section id="build_strategy">
+                    <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">build_strategy</span><span class="signature pdoc-code condensed">(<span class="param"><span class="n">trigger</span><span class="p">:</span> <span class="nb">str</span>, </span><span class="param"><span class="n">filters</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>, </span><span class="param"><span class="o">*</span>, </span><span class="param"><span class="n">random_dir</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span></span><span class="return-annotation">):</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#build_strategy"></a>
+    
+            <div class="docstring"><p>La estrategia de una combinacion: <code>ComboStrategy</code> salvo que use una pieza de la ronda 3.</p>
+
+<h6 id="arguments">Arguments:</h6>
+
+<ul>
+<li><strong>trigger:</strong>  gatillo.</li>
+<li><strong>filters:</strong>  filtros.</li>
+<li><strong>random_dir:</strong>  sortea la direccion (control).</li>
+</ul>
+
+<h6 id="returns">Returns:</h6>
+
+<blockquote>
+  <p><code><a href="#FastComboStrategy">FastComboStrategy</a></code> o <code><a href="#FastRound3Strategy">FastRound3Strategy</a></code> (salida <code>base</code>, entrada a mercado).</p>
+</blockquote>
+</div>
+
+
+                </section>
+                <section id="load_btc_context">
+                    <div class="attr function">
+            
+        <span class="def">async def</span>
+        <span class="name">load_btc_context</span><span class="signature pdoc-code condensed">(<span class="param"><span class="n">db</span><span class="p">:</span> <span class="n"><a href="../persistence/database.html#Database">app.persistence.database.Database</a></span>, </span><span class="param"><span class="n">timeframe</span><span class="p">:</span> <span class="nb">str</span></span><span class="return-annotation">) -> <span class="nb">bool</span>:</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#load_btc_context"></a>
+    
+            <div class="docstring"><p>Registra la serie de BTC del marco para los filtros <code>btc</code> y <code>rs</code> de la ronda 3.</p>
+
+<h6 id="arguments">Arguments:</h6>
+
+<ul>
+<li><strong>db:</strong>  el archivo de historial abierto.</li>
+<li><strong>timeframe:</strong>  marco.</li>
+</ul>
+
+<h6 id="returns">Returns:</h6>
+
+<blockquote>
+  <p>Si habia velas de BTC (sin ellas, <code>btc</code> y <code>rs</code> quedan siempre en falso).</p>
+</blockquote>
+
+<h6 id="efectos">Efectos:</h6>
+
+<blockquote>
+  <p>Lee <code>ohlcv_cache</code>. Cambia el contexto de BTC del modulo <code>round3</code> (las corridas de la
+  seccion son de a una por vez).</p>
+</blockquote>
+</div>
+
+
                 </section>
                 <section id="ExplorerRequest">
                     <div class="attr class">
@@ -480,8 +631,8 @@ corrida antes de evaluar ventanas de ese mismo DataFrame.</p>
 <ul>
 <li><strong>symbols:</strong>  simbolos (1 a <code><a href="#MAX_SYMBOLS">MAX_SYMBOLS</a></code>).</li>
 <li><strong>timeframe:</strong>  <code>1h</code> o <code>4h</code>.</li>
-<li><strong>trigger:</strong>  uno de <code>TRIGGERS</code>.</li>
-<li><strong>filters:</strong>  0 a <code><a href="#MAX_FILTERS">MAX_FILTERS</a></code> de <code>FILTERS</code>, ordenados.</li>
+<li><strong>trigger:</strong>  uno de <code><a href="#TRIGGERS">TRIGGERS</a></code>.</li>
+<li><strong>filters:</strong>  0 a <code><a href="#MAX_FILTERS">MAX_FILTERS</a></code> de <code><a href="#FILTERS">FILTERS</a></code>, ordenados.</li>
 <li><strong>start_ms:</strong>  inicio pedido (ms UTC) o <code>None</code> = desde el comienzo del historial.</li>
 <li><strong>end_ms:</strong>  fin pedido (ms UTC) o <code>None</code> = hasta el limite reservado.</li>
 </ul>

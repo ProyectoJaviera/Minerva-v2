@@ -1051,3 +1051,31 @@ son los del preregistro congelado; no se cambian.
 - **Tablas que crea o altera:** ninguno
 - **Pruebas que lo importan o citan:** ninguno
 <!-- /hechos:scripts/v2_round3_reserved.py -->
+
+### `scripts/v2_forward_test.py`
+
+**Responsabilidad.** La prueba hacia adelante de los tres finalistas de la ronda 3 y sus controles al azar: los corre
+con el motor de backtest sobre el archivo de historial local y cuenta solo las operaciones abiertas desde el 2026-11-10
+(`docs/v2/PAPER_V2_RONDA3.md`).
+
+**Funciones y clases clave.** `last_closed_ms()` (hasta dónde hay velas de 4h de cada símbolo), `summarize()` y
+`main()` (`--trades` lista cada operación).
+
+**Invariantes — no romper.** Solo lectura (`ReadOnlyDatabase`, modo inmutable) y sin red. Las combinaciones, el
+universo (`SYMBOLS`), la fecha de inicio y el criterio de revisión (60 operaciones o el 2027-05-10) están congelados.
+
+**Trampas conocidas.** Solo ve las velas que tenga el archivo: hay que correr antes `scripts/update_history_file.py`.
+Un símbolo que deje de actualizarse se informa como atrasado.
+
+<!-- hechos:scripts/v2_forward_test.py -->
+**Hechos derivados del código** (los escribe `scripts/build_dev_docs.py`; no se editan):
+
+- **Referencia pdoc:** [`api/scripts/v2_forward_test.html`](../api/scripts/v2_forward_test.html)
+- **Importa (internos):** `app.backtesting.engine`, `app.backtesting.metrics`, `app.config`, `app.explorer.service`, `app.market.ohlcv_history`, `app.persistence.repositories.ohlcv_repo`, `app.research.round3`
+- **Lo importan:** ninguno
+- **Configuración que lee:** `EXPLORER_HISTORY_DB`
+- **Tablas que lee:** `ohlcv_cache`
+- **Tablas que escribe:** ninguno
+- **Tablas que crea o altera:** ninguno
+- **Pruebas que lo importan o citan:** ninguno
+<!-- /hechos:scripts/v2_forward_test.py -->

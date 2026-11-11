@@ -140,13 +140,13 @@ El diagrama muestra solo las flechas con 3 o más imports; no dibuja las que lle
 
 | Paquete | Archivos | Líneas | Importa de (imports) | Lo importan |
 |---|---:|---:|---|---|
-| `api` | 21 | 2352 | persistence 36, trading 16, config 12, core 7, news 7, llm 4, market 3, memory 3, telegram 2, explorer 1, research 1 | main, scripts, telegram |
+| `api` | 21 | 2353 | persistence 36, trading 16, config 12, core 7, news 7, llm 4, market 3, memory 3, telegram 2, explorer 1, research 1 | main, scripts, telegram |
 | `backtesting` | 7 | 2131 | persistence 9, strategies 3, trading 3, config 2, core 2, market 2, execution 1 | explorer, scripts, trading |
 | `candidates` | 5 | 610 | indicators 5, strategies 4 | explorer, research, scripts |
 | `config` | 1 | 429 | ninguno | api, backtesting, core, execution, explorer, llm, main, market, memory, news, scripts, telegram, trading |
 | `core` | 5 | 593 | trading 5, persistence 4, config 2, market 2, execution 1 | api, backtesting, execution, llm, main, market, memory, news, scripts, telegram, trading |
 | `execution` | 5 | 666 | persistence 7, trading 5, config 1, core 1, market 1 | backtesting, core, main, trading |
-| `explorer` | 2 | 448 | backtesting 2, candidates 1, config 1, market 1, persistence 1, research 1 | api |
+| `explorer` | 2 | 512 | backtesting 2, persistence 2, research 2, candidates 1, config 1, market 1 | api, scripts |
 | `indicators` | 7 | 1146 | ninguno | candidates, research, scripts, strategies |
 | `llm` | 9 | 1478 | persistence 16, config 5, memory 3, core 1, market 1, news 1 | api, scripts, telegram, trading |
 | `main` | 2 | 280 | api 17, market 4, trading 4, core 3, telegram 3, config 1, execution 1, memory 1, news 1, persistence 1 | ninguno |
@@ -155,7 +155,7 @@ El diagrama muestra solo las flechas con 3 o más imports; no dibuja las que lle
 | `news` | 11 | 1703 | persistence 11, core 4, config 3 | api, llm, main, memory, scripts |
 | `persistence` | 22 | 5016 | ninguno | api, backtesting, core, execution, explorer, llm, main, market, memory, news, scripts, telegram, trading |
 | `research` | 3 | 732 | candidates 5, indicators 5, strategies 2 | api, explorer, scripts |
-| `scripts` | 38 | 10019 | persistence 27, trading 26, config 25, market 13, backtesting 8, core 6, llm 6, strategies 6, indicators 4, research 3, memory 2, news 2, api 1, candidates 1 | ninguno |
+| `scripts` | 39 | 10183 | persistence 28, config 26, trading 26, market 14, backtesting 10, core 6, llm 6, strategies 6, indicators 4, research 4, memory 2, news 2, api 1, candidates 1, explorer 1 | ninguno |
 | `strategies` | 9 | 807 | indicators 4 | backtesting, candidates, research, scripts, trading |
 | `telegram` | 8 | 1903 | persistence 12, trading 7, core 5, config 4, market 2, api 1, llm 1 | api, main |
 | `trading` | 23 | 7441 | persistence 57, config 9, market 8, core 6, execution 5, llm 5, backtesting 4, strategies 4 | api, backtesting, core, execution, main, memory, scripts, telegram |
