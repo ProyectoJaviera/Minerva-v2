@@ -1,4 +1,4 @@
-# Minerva: ¿mejora un LLM las señales técnicas de trading?
+# Minerva v2: investigación de indicadores técnicos y del filtro de IA (paper trading)
 
 ![Licencia MIT](https://img.shields.io/badge/licencia-MIT-green)
 ![Python 3.11 y 3.12](https://img.shields.io/badge/python-3.11%20%7C%203.12-blue)
@@ -22,16 +22,22 @@
 > `minerva-v2`, imagen `minerva-v2:local`, volúmenes `minerva-v2_data` y `minerva-v2_logs`, puerto `8001` (el `8000` es de la v1),
 > tareas programadas con prefijo `MinervaV2` y marca `MIGRADO_A_DOCKER_V2.txt`. Además arranca **sin** etiquetado del LLM,
 > Telegram, brazo ejecutado, noticias ni avisos (`MINERVA_REAL_BOT=false` por defecto). **Nunca copies el `.env` real de la
-> v1 a la v2.** La mayor parte de esta documentación se heredó de la v1 y todavía habla en sus términos (por ejemplo, de «la
-> medición» y del «bot real»): donde difiera de esta nota, manda esta nota y el código.
+> v1 a la v2.**
 
 ## Qué es
 
-Minerva evalúa, en cada cierre de vela, un universo dinámico de las principales criptomonedas con seis estrategias por
-reglas; cada señal se simula como una *operación sombra* y Claude (Anthropic) la etiqueta `APROBADA` o `RECHAZADA` con un
-prompt **congelado**, mientras una cuenta de papel opera solo las aprobadas a través de un motor de riesgo.
-Su único objetivo es **medir con rigor estadístico, y a ciegas, si el filtro de IA aporta valor** sobre las señales por
-reglas, antes de que cualquiera piense en dinero real.
+Minerva es un bot de investigación de trading de futuros cripto, **100 % paper trading**. Tiene dos partes:
+
+- **Lo heredado de la v1:** en cada cierre de vela evalúa un universo dinámico de las principales criptomonedas con seis
+  estrategias por reglas; cada señal se simula como una *operación sombra* que Claude (Anthropic) puede etiquetar
+  `APROBADA` o `RECHAZADA` con un prompt **congelado**, y una cuenta de papel opera solo las aprobadas a través de un
+  motor de riesgo. En la v1 sirve para medir, a ciegas, si el filtro de IA aporta valor; en la v2 está apagado por
+  defecto.
+- **Lo nuevo de la v2:** la **investigación de indicadores técnicos** (los de PunkAlgo HeatMap y Frost Trader
+  reimplementados, más FVG, fuerza relativa, volumen y otros) con preregistros, controles al azar y los mismos criterios
+  de la Fase 2; la pestaña **Indicadores** del dashboard para probar combinaciones a mano sobre el historial local; y la
+  **captura de datos hacia adelante** (libro de órdenes, funding y Fear & Greed) con tareas programadas.
+
 Incluye un simulador con comisiones, funding, deslizamiento y liquidación, un dashboard web, un bot de Telegram y todo
 empaquetado en Docker.
 
@@ -48,15 +54,19 @@ Explicado paso a paso y sin jerga: [Metodología](docs/METODOLOGIA.md).
 
 ### Estado actual
 
-- **Backtest de las estrategias por reglas (Fase 2): ninguna mostró ventaja demostrable.** Ninguna superó los criterios
-  fijados de antemano. Se conservan como *generadores de señales* para la medición, no como estrategias rentables.
-- **Medición del valor del LLM: en curso, ciega, con el veredicto pendiente.** Llegar a los 300 conglomerados por lado
-  que exige el diseño toma **meses**, y si el efecto real es pequeño lo esperable es un veredicto `INCONCLUSO`.
-- **No hay resultados publicados**: la medición es ciega a propósito y este repositorio no incluye ninguno.
+- **Investigación de indicadores de la v2: ninguna estrategia pasó los criterios.** Ni los tres candidatos del
+  [preregistro](docs/v2/PREREGISTRO_V2.md) ([resultado](docs/v2/RESULTADO_FASE2_V2.md)), ni las 176 combinaciones de la
+  [exploración](docs/v2/EXPLORACION_V2.md), ni las rondas [3](docs/v2/RONDA3_V2.md) y [4](docs/v2/RONDA4_V2.md). Los tres
+  finalistas de la ronda 3 perdieron en los datos reservados; la fuerza relativa semanal es la idea más estable.
+- **Prueba hacia adelante en curso:** esos tres finalistas y la fuerza relativa semanal se siguen en paper desde el
+  2026-11-10/11 con un criterio de revisión fijado de antemano ([detalle](docs/v2/PAPER_V2_RONDA3.md)).
+- **Captura de datos en curso:** libro de órdenes cada 5 minutos, funding cada hora y Fear & Greed diario, para tener
+  historial propio de lo que no se consigue gratis hacia atrás.
+- **Medición del valor del LLM (v1): en curso, ciega, en el otro repositorio.** El veredicto se espera para comienzos
+  de 2027 y es lo que más pesa para el rumbo de la v2.
+- **Las seis estrategias por reglas de la v1 tampoco mostraron ventaja** en su backtest; se usan como generadores de
+  señales, no como estrategias rentables.
 - **No hay base para pasar a dinero real.** Y esta versión no tiene ejecución real: solo una interfaz documentada y desactivada.
-
-El último resumen de lo construido, lo verificado y lo no verificado está en el [informe final](docs/INFORME_FINAL.md)
-(fotografía del 2026-10-18).
 
 ## Cómo funciona
 
@@ -80,6 +90,10 @@ flowchart LR
 Todo corre en **un solo proceso** (FastAPI + asyncio) con una base SQLite, y expone una API con login, un dashboard web y
 un bot de Telegram. Detalle de componentes, flujo y decisiones de diseño: [Arquitectura](docs/ARQUITECTURA.md).
 
+El diagrama es el bot heredado de la v1. Lo nuevo de la v2 corre aparte del bot: la investigación y la pestaña
+Indicadores usan el motor de backtest sin red sobre un archivo de historial local (`history/history_v2.db`), y la captura
+de datos son scripts que lanzan las tareas programadas `MinervaV2*` (ver [Arquitectura](docs/ARQUITECTURA.md#la-v2-investigación-y-captura-de-datos)).
+
 ## Funcionalidades
 
 - **Universo dinámico:** las mayores criptomonedas por capitalización (CoinGecko) con perpetuo USDT en Bitunix, sin
@@ -94,12 +108,20 @@ un bot de Telegram. Detalle de componentes, flujo y decisiones de diseño: [Arqu
 - **Medición del valor del LLM:** sombras, etiquetas inmutables, prompt congelado con hash vigilado en cada ciclo, registro
   completo de cada llamada, presupuesto diario con corte duro, placebo y veredicto de tres estados.
 - **Resultados ocultos por código** hasta el registro oficial del veredicto, en la API, el dashboard, Telegram y los informes.
-- **Dashboard web** de cinco pestañas (resumen, cuenta paper, brazo ejecutado, riesgo y controles, universo) y **API** con
-  sesión, de solo lectura salvo tres controles con confirmación.
+- **Dashboard web** de seis pestañas (resumen, cuenta paper, brazo ejecutado, riesgo y controles, universo e
+  indicadores) y **API** con sesión, de solo lectura salvo tres controles con confirmación.
+- **Pestaña Indicadores (v2):** 14 indicadores como casillas combinables, temporalidades de 15m a 1 semana, salida en ATR
+  o en porcentaje, % de operaciones ganadoras, profit factor y control al azar en segundos, sobre el historial local de
+  Bitunix ([guía](docs/v2/SECCION_INDICADORES.md)). Es exploratoria: no cuenta como evidencia.
+- **Investigación con preregistro (v2):** indicadores causales probados contra TradingView, candidatos y rondas
+  exploratorias con selección solo en el periodo de entrenamiento y controles con dirección al azar
+  ([especificación](docs/v2/ESPECIFICACION_INDICADORES.md)).
+- **Captura de datos hacia adelante (v2):** libro de órdenes, funding y Fear & Greed en `history/market_v2.db`, con tareas
+  programadas `MinervaV2*` que también mantienen al día el historial de velas.
 - **Bot de Telegram:** comandos, avisos de posiciones y riesgo, resumen diario y alerta de caída.
 - **Noticias gratuitas y memoria de lecciones** (apagadas durante la medición y fuera del prompt congelado).
 - **Operación:** Docker (imagen sin privilegios, puerto solo en `127.0.0.1`), respaldos consistentes, mudanza de
-  nativo a Docker con vuelta atrás y más de 2.100 pruebas automáticas de Python y más de 100 del frontend.
+  nativo a Docker con vuelta atrás y más de 2.800 pruebas automáticas de Python y más de 100 del frontend.
 
 ## Requisitos
 
@@ -158,7 +180,9 @@ docker run --rm -it minerva-v2:local python scripts/hash_password.py    # imprim
 | [Seguridad](docs/SEGURIDAD.md) | Secretos, puertos, autenticación y cómo reportar un problema |
 | [Costos y límites](docs/COSTOS_Y_LIMITES.md) | Costo medido, fuentes gratuitas y lo no verificado |
 | [Glosario](docs/GLOSARIO.md) | Los términos del proyecto |
-| [Informe final](docs/INFORME_FINAL.md) | Qué se construyó, qué está verificado y qué no |
+| [Pestaña Indicadores](docs/v2/SECCION_INDICADORES.md) | Probar combinaciones de indicadores a mano (v2) |
+| [Investigación de la v2](docs/README.md#investigación-de-la-v2) | Preregistros, resultados de cada ronda y prueba hacia adelante |
+| [Informe final de la v1](docs/INFORME_FINAL.md) | Qué se construyó en la v1, qué está verificado y qué no (fotografía del 2026-10-18) |
 | [Historial de desarrollo](docs/historial/README.md) | Cómo se construyó, fase por fase, con ayuda de IA |
 
 ## Estructura del repositorio
@@ -169,7 +193,8 @@ frontend/       Dashboard (React + Vite + Tailwind) con pruebas de Vitest
 scripts/        Arranque y parada, respaldos, informes de la medición y del veredicto, mudanza a Docker
 tests/          unit/, integration/, e2e/ y support/ (pruebas unitarias, de integración y de punta a punta)
 docker/         Healthcheck, versiones exactas de dependencias y certificados opcionales
-docs/           Documentación; docs/historial/ es el registro del desarrollo
+docs/           Documentación; docs/v2/ es la investigación de la v2 y docs/historial/ el registro del desarrollo
+history/        Archivos locales de la v2 (historial de velas y datos capturados); fuera de git
 .github/        Plantillas de issues y de pull requests
 ```
 
@@ -199,8 +224,11 @@ una; las instrucciones que se le dieron están en [`CLAUDE.md`](CLAUDE.md).
 
 ### About
 
-**Minerva** is an experimental research bot that asks one question: *does an LLM filter improve the average result of
-rule-based technical trading signals?* On every candle close it evaluates a dynamic universe of the largest crypto
+**Minerva v2** is an experimental, paper-trading-only research bot. It inherits from v1 a blind measurement of one
+question, *does an LLM filter improve the average result of rule-based technical trading signals?* (still running in
+the v1 repository), and adds a pre-registered study of technical indicators, a dashboard tab to backtest any combination
+of 14 indicators on local Bitunix history, and forward recording of order book, funding and Fear & Greed data. So far no
+indicator strategy passed the pre-registered criteria. In v1, on every candle close it evaluates a dynamic universe of the largest crypto
 perpetuals (Bitunix, ranked by CoinGecko) with six rule-based strategies. Each signal becomes a simulated *shadow trade*;
 Claude (Anthropic) labels it `APROBADA` (approved) or `RECHAZADA` (rejected) with a **frozen** prompt; and a paper account
 trades only the approved ones through a risk engine. The measurement is **blind**: no channel shows results until a single,

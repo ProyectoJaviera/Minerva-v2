@@ -18,6 +18,10 @@ Minerva es **un solo proceso** de Python (FastAPI + `asyncio`) con una base de d
    un **motor de riesgo**, y las vigila con un **monitor** de SL, TP, trailing y liquidación.
 6. Expone todo por una **API con login**, un **dashboard** web, un **bot de Telegram** y **avisos push**.
 
+En la v2, los pasos 4 a 6 que dependen de Claude, Telegram y la cuenta paper están **apagados por defecto**
+(`MINERVA_REAL_BOT=false`), y se suma lo descrito en
+[La v2: investigación y captura de datos](#la-v2-investigación-y-captura-de-datos).
+
 Pila: Python 3.11–3.12, FastAPI, `aiosqlite`, `pandas` (indicadores), `httpx` y `websockets`, SDK oficial de Anthropic;
 frontend con React 18, Vite, Tailwind y TanStack Query; Docker para empaquetarlo.
 
@@ -231,6 +235,39 @@ monta el `.env` y `docs/` de solo lectura y define un *healthcheck* sobre `/heal
 10. **Fuentes externas solo gratuitas y con sus términos verificados.** Lo único que cuesta dinero es la API de
     Anthropic, con tope diario y corte duro. Las fuentes gratuitas se tratan como poco fiables: caché local, reintentos
     con espera, salud por fuente y bloqueo de nuevas entradas ante datos críticos obsoletos.
+
+## La v2: investigación y captura de datos
+
+Lo nuevo de la v2 **no toca el bucle del bot**: corre sin red sobre archivos locales o en scripts aparte.
+
+```mermaid
+flowchart LR
+    BX["Bitunix<br/>velas, funding, libro"] --> UH["update_history_file.py<br/>(tarea cada 6 h)"]
+    UH --> HF[("history/history_v2.db<br/>velas 15m a 1w y funding")]
+    BX --> RM["record_market_data.py<br/>(tareas 5 min, 1 h, diaria)"]
+    FG["alternative.me<br/>Fear & Greed"] --> RM
+    RM --> MD[("history/market_v2.db<br/>libro, funding, F&G")]
+    HF --> EX["Pestaña Indicadores<br/>app/explorer"]
+    HF --> RS["Rondas de investigación<br/>app/research + scripts/v2_*"]
+    HF --> FW["Prueba hacia adelante<br/>scripts/v2_forward_test.py"]
+    EX --> BT["Motor de backtest<br/>app/backtesting"]
+    RS --> BT
+    FW --> BT
+```
+
+| Pieza | Qué hace |
+|---|---|
+| `app/indicators/` (v2) | Indicadores causales reimplementados: SFP y zonas de liquidez, Range Filter, VIDYA, Camarilla, BB%B, WaveTrend ([especificación](v2/ESPECIFICACION_INDICADORES.md)) |
+| `app/candidates/` | Los tres candidatos del preregistro y su control con dirección al azar |
+| `app/research/` | Las rondas exploratorias: combinaciones de gatillo y filtros (`combos.py`), ronda 3 (`round3.py`, FVG, funding, régimen de BTC, orden límite) y ronda 4 (`round4.py`, fuerza relativa, squeeze, volumen, salida por tiempo) |
+| `app/explorer/` + `app/api/routes/explorer.py` | La pestaña Indicadores: confluencia de los indicadores elegidos (`confluence.py`) y backtest a pedido sobre el historial local, en un hilo aparte y de a una prueba por vez ([guía](v2/SECCION_INDICADORES.md)) |
+| `app/backtesting/` | El mismo motor de la Fase 2, con tres opciones nuevas que la v1 no usa: omitir la entrada si el `open` ya cruzó el SL, entrada con orden límite y salida por tiempo |
+| `scripts/update_history_file.py` | Mantiene `history/history_v2.db` (copia y reemplazo para no escribir en el archivo que se está leyendo) |
+| `scripts/record_market_data.py` | Graba hacia adelante el libro de órdenes (50 niveles), el funding vigente y el Fear & Greed en `history/market_v2.db` |
+| `scripts/register_v2_data_tasks.ps1` | Registra las tareas `MinervaV2OrderBook`, `MinervaV2Funding`, `MinervaV2FearGreed` y `MinervaV2HistoryUpdate` |
+
+El archivo de historial se abre en modo inmutable de solo lectura, y en Docker la carpeta `history/` se monta de solo
+lectura. Ninguna de estas piezas escribe en la base del bot.
 
 ## Qué no hace
 

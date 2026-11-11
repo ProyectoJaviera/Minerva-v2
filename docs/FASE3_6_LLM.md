@@ -1,5 +1,9 @@
 # Diseño de la medición del valor del LLM (subfase 3.6)
 
+> **Documento de la v1.** Describe la medición del filtro de IA de la v1, que sigue su curso en el repositorio
+> Minerva-v1. En la v2 ese código sigue presente pero apagado por defecto (`MINERVA_REAL_BOT=false`); lo propio de
+> la v2 está en [Investigación de la v2](README.md#investigación-de-la-v2).
+
 > **Referencia técnica escrita durante el desarrollo.** Es el diseño detallado de cómo se mide si la decisión del LLM
 > aporta valor: qué recibe el modelo (a), el prompt y el esquema de salida (b), la tabla `llm_logs` (c), la etiqueta
 > inmutable (d), el control de costo (e), el placebo (f), la regla de decisión de tres veredictos (i), la potencia

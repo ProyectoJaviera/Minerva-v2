@@ -34,6 +34,12 @@ evalúan en cada cierre.
 **Conglomerado** — Grupo de operaciones sombra del mismo símbolo y dirección cuyas vidas se solapan; cuenta como una
 sola unidad estadística porque se mueven juntas. Ver [Conglomerados y N efectivo](METODOLOGIA.md#conglomerados-y-n-efectivo).
 
+**Confluencia** — En la pestaña Indicadores (v2), la regla que combina los indicadores marcados: cada uno vota alcista
+o bajista y se entra cuando todos (o al menos N) coinciden.
+
+**Control al azar** — En la investigación de la v2, la misma estrategia con la dirección de cada entrada sorteada. Si
+una estrategia no supera claramente a su control, sus indicadores no aportan información de dirección.
+
 **Contrafactual** — "Qué habría pasado si…". Las operaciones sombra dan el contrafactual de las señales rechazadas.
 
 **Cuenta paper** — La cuenta simulada (capital inicial de 100 USDT por defecto) donde se abren las posiciones del
@@ -53,6 +59,9 @@ defecto).
 
 **Etiqueta** — El resultado del juicio del LLM sobre una señal (`APROBADA`, `RECHAZADA` o `SIN_LLM`).
 
+**Exploratorio** — En la v2, lo que se prueba para buscar ideas sin un preregistro: la pestaña Indicadores y las
+rondas exploratorias. No cuenta como evidencia; una idea buena pasa a un preregistro nuevo.
+
 **Factor de beneficio (profit factor, PF)** — Ganancias brutas totales divididas entre pérdidas brutas totales. Mayor que
 1 gana más de lo que pierde; el backtest exigió al menos 1,2 fuera de muestra.
 
@@ -65,12 +74,18 @@ evaluarla (en el backtest, el 30 % más reciente).
 **Funding (tasa de financiación)** — Pago periódico entre posiciones largas y cortas de un contrato perpetuo, que mantiene
 el precio del perpetuo cerca del precio real. Según su signo, una posición paga o cobra funding.
 
+**FVG (*Fair Value Gap*)** — Hueco de precio que dejan tres velas seguidas cuando la tercera no toca el extremo de la
+primera. La v2 lo usa como gatillo: entrada cuando el precio vuelve al hueco.
+
 **Gate (compuerta)** — La condición "ya hay 300 conglomerados efectivos de cada lado". Abrirla **no** muestra
 resultados: hace falta además el registro oficial del veredicto.
 
 **Hash congelado** — La huella SHA-256 del texto del prompt y de la versión de las *features*. El código compara su hash
 actual con el congelado en cada ciclo; si difieren, el etiquetado se detiene. Se ve en `/health` como
 `llm_labeling.frozen_hash_ok`.
+
+**Historial local** — El archivo `history/history_v2.db` con las velas y el funding de Bitunix que usan la pestaña
+Indicadores, la investigación y la prueba hacia adelante de la v2. Se actualiza con `scripts/update_history_file.py`.
 
 **HOLD** — "No hacer nada": una evaluación de una estrategia que no produjo señal. También se registran.
 
@@ -79,6 +94,9 @@ aprobadas y rechazadas, dada la muestra.
 
 **Kill switch** — Interruptor de emergencia que bloquea las entradas nuevas. En Minerva (`/kill`) además **pausa el
 scheduler**, lo que detiene la medición. Se levanta con `/resume`.
+
+**Libro de órdenes (*order book*)** — Las órdenes de compra y venta que esperan en el exchange. La v2 graba una foto
+de los 50 primeros niveles cada 5 minutos en `history/market_v2.db`, porque no hay historial gratuito hacia atrás.
 
 **Liquidación** — Cierre forzado de una posición apalancada cuando la pérdida consume el margen. Minerva la simula en
 margen aislado.
@@ -112,6 +130,12 @@ procedimiento no inventa un efecto. Ver [El placebo](METODOLOGIA.md#el-placebo).
 **PnL** — *Profit and loss*: ganancia o pérdida. El PnL neto descuenta comisiones, funding y deslizamiento.
 
 **Post-mortem** — Resumen determinista que se genera tras una racha de pérdidas, con lo que tuvieron en común.
+
+**Preregistro** — Documento que fija, **antes** de mirar resultados, qué se prueba, con qué datos y qué criterio
+decide. La v2 congela cada preregistro en un commit propio antes de correr.
+
+**Prueba hacia adelante** — Seguir una estrategia en datos que no existían cuando se fijaron sus reglas. En la v2 se
+hace por repetición sobre el historial local (`scripts/v2_forward_test.py`).
 
 **Prompt (congelado)** — El texto de instrucciones que se le da a Claude para juzgar cada señal. El de la medición está
 congelado: ver [El prompt congelado](METODOLOGIA.md#el-prompt-congelado-y-por-qué).

@@ -7,6 +7,32 @@ de su autor. El detalle commit por commit está en `git log`, y la bitácora com
 
 Las fechas son las de los commits (2026). **Nada de lo que hay aquí envía órdenes reales**: todo es paper trading.
 
+## Minerva v2: captura de datos y documentación — 2026-11-11
+
+- `scripts/record_market_data.py` graba hacia adelante el libro de órdenes de Bitunix (50 niveles), el funding vigente y
+  el Fear & Greed en `history/market_v2.db`; `scripts/register_v2_data_tasks.ps1` registra las tareas
+  `MinervaV2OrderBook`, `MinervaV2Funding`, `MinervaV2FearGreed` y `MinervaV2HistoryUpdate`.
+- `scripts/update_history_file.py --via-copy` actualiza el historial en una copia y la cambia al final.
+- Documentación actualizada a la v2: README, índice, arquitectura, guía de instalación, glosario y avisos en los
+  documentos que solo describen la medición de la v1.
+
+## Minerva v2: pestaña Indicadores — 2026-11-10 y 2026-11-11
+
+- Pestaña **Indicadores** del dashboard (exploratoria): 14 indicadores como casillas combinables por confluencia
+  («todos» o «al menos N»), temporalidades 15m, 1h, 4h, 1D y 1S, salida en ATR o en porcentaje y control con dirección
+  al azar, sobre el archivo de historial local `history/history_v2.db` (solo lectura). API `GET /api/explorer/options` y
+  `GET /api/explorer/run`.
+
+## Minerva v2: investigación de indicadores — 2026-11-08 a 2026-11-11
+
+- Indicadores causales reimplementados (SFP y zonas de liquidez del HeatMap, Range Filter, VIDYA, Camarilla, BB%B,
+  WaveTrend), comparados con TradingView.
+- Preregistro congelado y corrida única de la Fase 2: los tres candidatos descartados. Exploración de 176 combinaciones,
+  rondas 3 y 4: nada pasa los criterios; los finalistas de la ronda 3 perdieron en los datos reservados.
+- Prueba hacia adelante de los finalistas y de la fuerza relativa semanal (`scripts/v2_forward_test.py`).
+- Motor de backtest: omitir la entrada si el `open` ya cruzó el SL, entrada con orden límite y salida por tiempo
+  (opcionales; las operaciones de las estrategias de la v1 no cambian).
+
 ## Minerva v2: inicio y aislamiento de la v1 — 2026-11-05
 
 - La v2 parte de la etiqueta `v1.0` del repositorio Minerva-v1 (mismo código e historial); la medición ciega de la v1

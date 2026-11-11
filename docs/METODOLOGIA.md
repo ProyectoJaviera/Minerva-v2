@@ -1,5 +1,9 @@
 # Metodología
 
+> **Documento de la v1.** Describe la medición del filtro de IA de la v1, que sigue su curso en el repositorio
+> Minerva-v1. En la v2 ese código sigue presente pero apagado por defecto (`MINERVA_REAL_BOT=false`); lo propio de
+> la v2 está en [Investigación de la v2](README.md#investigación-de-la-v2).
+
 Cómo intenta Minerva responder **una** pregunta con honestidad, explicado sin suponer que sepas estadística. Si
 algún término te suena a jerga, mira el [glosario](GLOSARIO.md). El diseño técnico completo (con las cifras de
 potencia, la regla de decisión y los pilotos del prompt) está en [`FASE3_6_LLM.md`](FASE3_6_LLM.md) y el

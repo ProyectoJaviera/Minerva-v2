@@ -1,5 +1,9 @@
 # Reporte de paso a dinero real (subfase 3.8)
 
+> **Documento de la v1.** Describe la medición del filtro de IA de la v1, que sigue su curso en el repositorio
+> Minerva-v1. En la v2 ese código sigue presente pero apagado por defecto (`MINERVA_REAL_BOT=false`); lo propio de
+> la v2 está en [Investigación de la v2](README.md#investigación-de-la-v2).
+
 > **Minerva es 100 % paper trading, experimental y no es asesoría financiera.** Este documento describe un reporte que
 > *recomienda* y los riesgos de un eventual paso a dinero real; no es una invitación a hacerlo. Con la evidencia actual
 > no hay base para ello.

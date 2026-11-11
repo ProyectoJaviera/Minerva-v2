@@ -6,17 +6,20 @@ qué problema investiga) y sigue por la columna que te corresponda.
 > **Minerva es 100 % paper trading, experimental y no es asesoría financiera.** Nada de lo que hay aquí envía órdenes
 > reales. La medición del valor de la IA es *ciega* y está en curso: no hay resultados publicados.
 
-> **Esta es la documentación de la versión 2**, heredada de la v1.0 (etiqueta `v1.0` del repositorio Minerva-v1), cuya
-> medición sigue su curso en ese otro repositorio. Los nombres de la v2 son otros para que no pueda tocar el bot vivo de
-> la v1 (proyecto `minerva-v2`, imagen `minerva-v2:local`, puerto `8001`, tareas `MinervaV2…`; ver el
-> [README](../README.md)); el texto que describe «la medición» y «el bot real» sigue hablando en términos de la v1.
+> **Esta es la documentación de la versión 2.** La v2 parte de la v1.0 (etiqueta `v1.0` del repositorio Minerva-v1),
+> cuya medición ciega del filtro de IA sigue su curso en ese otro repositorio. Los nombres de la v2 son otros para que no
+> pueda tocar el bot vivo de la v1 (proyecto `minerva-v2`, imagen `minerva-v2:local`, puerto `8001`, tareas `MinervaV2…`;
+> ver el [README](../README.md)). Lo nuevo de la v2 está en [Investigación de la v2](#investigación-de-la-v2); los
+> documentos marcados **(v1)** describen la medición de la v1 y se conservan como referencia: el código que mide sigue
+> en la v2, pero apagado por defecto (`MINERVA_REAL_BOT=false`).
 
 ## Por dónde empezar
 
 | Quiero… | Lee, en este orden |
 |---|---|
 | **Instalarlo y verlo funcionar** | [Guía de instalación](GUIA_INSTALACION.md) → [Configuración](CONFIGURACION.md) → [Uso diario](USO.md) |
-| **Entender qué es y qué mide** | [README](../README.md) → [Metodología](METODOLOGIA.md) → [Arquitectura](ARQUITECTURA.md) → [Informe final](INFORME_FINAL.md) |
+| **Entender qué es y qué mide** | [README](../README.md) → [Arquitectura](ARQUITECTURA.md) → [Investigación de la v2](#investigación-de-la-v2) → [Metodología (v1)](METODOLOGIA.md) |
+| **Probar indicadores a mano** | [Pestaña Indicadores](v2/SECCION_INDICADORES.md) → [Uso diario](USO.md#el-dashboard) |
 | **Operarlo día a día** | [Uso diario](USO.md) → [Solución de problemas](SOLUCION_PROBLEMAS.md) → [Seguridad](SEGURIDAD.md) |
 | **Saber cuánto cuesta y qué no está verificado** | [Costos y límites](COSTOS_Y_LIMITES.md) |
 | **Contribuir al código** | [CONTRIBUTING](../CONTRIBUTING.md) → [Arquitectura](ARQUITECTURA.md) → [Esquema de la base](ESQUEMA_BD.md) |
@@ -29,15 +32,35 @@ qué problema investiga) y sigue por la columna que te corresponda.
 |---|---|
 | [GUIA_INSTALACION.md](GUIA_INSTALACION.md) | Instalar desde cero en Windows (con notas para Linux y macOS): requisitos, `.env`, cada credencial paso a paso (Anthropic con límite de gasto, Telegram, usuario y contraseña, `JWT_SECRET`, CoinGecko), primer arranque con Docker, verificación con `/health` y la alternativa sin Docker |
 | [CONFIGURACION.md](CONFIGURACION.md) | Referencia de **todas** las variables de `.env.example` (qué hace cada una, su valor por defecto y cuándo cambiarla), los interruptores y las variables de Docker Compose |
-| [USO.md](USO.md) | Manual de uso diario: el dashboard pestaña por pestaña, los comandos de Telegram, rutinas, arranque y parada, reinicios seguros, respaldos, actualizar, mudar de equipo, tareas programadas y qué hacer cuando se abra el *gate* |
+| [USO.md](USO.md) | Manual de uso diario: el dashboard pestaña por pestaña (incluida la de Indicadores), las tareas de captura de datos, los comandos de Telegram, rutinas, arranque y parada, reinicios seguros, respaldos, actualizar, mudar de equipo, tareas programadas y qué hacer cuando se abra el *gate* |
 | [SOLUCION_PROBLEMAS.md](SOLUCION_PROBLEMAS.md) | Preguntas frecuentes y errores comunes con su solución |
 | [MUDANZA_DOCKER.md](MUDANZA_DOCKER.md) | Para quien ya tiene un bot nativo en Windows: pasarlo a Docker conservando su base, y volver atrás |
+
+## Investigación de la v2
+
+Investigación de indicadores técnicos con preregistro: cada ronda fija su diseño y su regla de selección **antes** de
+correr, usa los criterios de la Fase 2 y compara con un control de dirección al azar. Hasta ahora **nada pasó**.
+
+| Documento | Qué contiene |
+|---|---|
+| [v2/ESPECIFICACION_INDICADORES.md](v2/ESPECIFICACION_INDICADORES.md) | Los indicadores reimplementados (SFP y zonas de liquidez del HeatMap, Range Filter, VIDYA, Camarilla, BB%B, WaveTrend) con fórmulas propias, y su comparación con TradingView |
+| [v2/PREREGISTRO_V2.md](v2/PREREGISTRO_V2.md) | El preregistro congelado de los tres candidatos y su control |
+| [v2/RESULTADO_FASE2_V2.md](v2/RESULTADO_FASE2_V2.md) | La corrida única de la Fase 2: los tres candidatos descartados |
+| [v2/EXPLORACION_V2.md](v2/EXPLORACION_V2.md) | Exploración de 176 combinaciones de gatillo y filtros: ninguna pasa |
+| [v2/RONDA3_V2.md](v2/RONDA3_V2.md) | Ronda 3: FVG, funding, régimen de BTC, salidas y orden límite; tres finalistas y su examen con los datos reservados |
+| [v2/PREREGISTRO_V2_RONDA3.md](v2/PREREGISTRO_V2_RONDA3.md) | El preregistro de los finalistas de la ronda 3 |
+| [v2/RONDA4_V2.md](v2/RONDA4_V2.md) | Ronda 4: fuerza relativa, squeeze con ADX y volumen; ninguna pasa |
+| [v2/PAPER_V2_RONDA3.md](v2/PAPER_V2_RONDA3.md) | La prueba hacia adelante en curso y su criterio de revisión |
+| [v2/SECCION_INDICADORES.md](v2/SECCION_INDICADORES.md) | La pestaña Indicadores del dashboard (exploratoria) y el archivo de historial local |
+
+La **captura de datos hacia adelante** (libro de órdenes, funding y Fear & Greed) y sus tareas programadas están en
+[Uso diario](USO.md#tareas-programadas).
 
 ## Conceptos
 
 | Documento | Qué contiene |
 |---|---|
-| [METODOLOGIA.md](METODOLOGIA.md) | La pregunta, las sombras, las etiquetas, el prompt congelado, los conglomerados, el punto de análisis de 300 por lado, la regla de «una sola mirada», el placebo, el veredicto, δ = 3 %, por qué los resultados se ocultan y qué conclusiones permite y cuáles no |
+| [METODOLOGIA.md](METODOLOGIA.md) | **(v1)** La pregunta, las sombras, las etiquetas, el prompt congelado, los conglomerados, el punto de análisis de 300 por lado, la regla de «una sola mirada», el placebo, el veredicto, δ = 3 %, por qué los resultados se ocultan y qué conclusiones permite y cuáles no |
 | [ARQUITECTURA.md](ARQUITECTURA.md) | Componentes, flujo de datos con diagramas, base de datos, aislamiento entre tareas y decisiones de diseño |
 | [GLOSARIO.md](GLOSARIO.md) | Los términos del proyecto, de *APROBADA* a *WAL* |
 | [SEGURIDAD.md](SEGURIDAD.md) | Manejo de secretos, puertos solo en `127.0.0.1`, autenticación, qué nunca subir y cómo reportar un problema |
@@ -48,10 +71,10 @@ qué problema investiga) y sigue por la columna que te corresponda.
 | Documento | Qué contiene |
 |---|---|
 | [ESQUEMA_BD.md](ESQUEMA_BD.md) | Esquema de la base de datos, tabla por tabla. **Se genera desde el código** (`python scripts/export_schema_doc.py`); no se edita a mano |
-| [FASE3_6_LLM.md](FASE3_6_LLM.md) | Diseño detallado de la medición del valor del LLM: qué recibe el modelo, el prompt, `llm_logs`, la etiqueta inmutable, el control de costo, el placebo, la regla de decisión, la potencia estadística y los pilotos. Referencia técnica escrita durante el desarrollo |
-| [VEREDICTO_3_6.md](VEREDICTO_3_6.md) | El procedimiento del veredicto, paso a paso, con los códigos de salida de cada herramienta |
-| [PASO_DINERO_REAL.md](PASO_DINERO_REAL.md) | Criterios y riesgos de un eventual paso a dinero real (el reporte solo recomienda) y los puntos de Bitunix sin verificar |
-| [INFORME_FINAL.md](INFORME_FINAL.md) | Qué se construyó por fase, el cumplimiento de la especificación, las decisiones clave, lo verificado y lo no verificado, los riesgos y los próximos pasos (fotografía del 2026-10-18) |
+| [FASE3_6_LLM.md](FASE3_6_LLM.md) | **(v1)** Diseño detallado de la medición del valor del LLM: qué recibe el modelo, el prompt, `llm_logs`, la etiqueta inmutable, el control de costo, el placebo, la regla de decisión, la potencia estadística y los pilotos. Referencia técnica escrita durante el desarrollo |
+| [VEREDICTO_3_6.md](VEREDICTO_3_6.md) | **(v1)** El procedimiento del veredicto, paso a paso, con los códigos de salida de cada herramienta |
+| [PASO_DINERO_REAL.md](PASO_DINERO_REAL.md) | **(v1)** Criterios y riesgos de un eventual paso a dinero real (el reporte solo recomienda) y los puntos de Bitunix sin verificar |
+| [INFORME_FINAL.md](INFORME_FINAL.md) | **(v1)** Qué se construyó por fase, el cumplimiento de la especificación, las decisiones clave, lo verificado y lo no verificado, los riesgos y los próximos pasos (fotografía del 2026-10-18) |
 
 ## Documentación técnica para desarrolladores
 

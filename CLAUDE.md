@@ -6,7 +6,7 @@
 - Todo desarrollo nuevo (incluidos los indicadores de TradingView) se hace **aquí**. Los cambios de la v1 se limitan a documentación, correcciones fuera de las zonas protegidas y el registro oficial del veredicto, y se hacen en el repositorio de la v1.
 
 ## Contexto
-Especificación de la v1 en docs/historial/SPEC.md y base previa en docs/historial/openspec.md (nunca probada: evalúala críticamente, no la copies a ciegas). El índice de la documentación vigente está en docs/README.md; la técnica, en docs/dev/. Esa documentación se heredó de la v1 y todavía habla en sus términos: donde difiera del README o de este archivo, manda el código y la nota de la v2 del README.
+Especificación de la v1 en docs/historial/SPEC.md y base previa en docs/historial/openspec.md (nunca probada: evalúala críticamente, no la copies a ciegas). El índice de la documentación vigente está en docs/README.md; la técnica, en docs/dev/. La documentación está actualizada a la v2 (2026-11-11); los documentos marcados como «de la v1» describen la medición de la v1 y se conservan como referencia. Donde algo difiera, manda el código.
 
 ## Idioma
 Todas las respuestas, resúmenes y documentos para este proyecto deben estar en español. Los identificadores de código (variables, funciones, clases, tablas, columnas) siguen en inglés.

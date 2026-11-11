@@ -2481,3 +2481,15 @@ Pedido: el dueño pidió grabar el order book y tareas programadas que capturen 
 - **`scripts/update_history_file.py --via-copy`**: actualiza una copia y la cambia por el archivo al final (reintenta si la pestaña lo tiene abierto), para no escribir en el archivo que se está leyendo en modo inmutable.
 - **Tareas registradas en el PC del dueño** con `scripts/register_v2_data_tasks.ps1` (usuario actual, sin administrador, `conhost --headless`): `MinervaV2OrderBook` (5 min), `MinervaV2Funding` (1 h), `MinervaV2FearGreed` (diaria 02:10) y `MinervaV2HistoryUpdate` (6 h). Probadas a mano: código 0 y datos en `history/market_v2.db` (10 fotos del libro, 10 fundings, Fear & Greed 29 «Fear»).
 - **Cambios de comportamiento respecto de la v1.0:** ninguno.
+
+## v2: documentación actualizada a la v2 (2026-11-11)
+
+Pedido: el dueño pidió limpiar la documentación y actualizarla a la v2.
+
+- **README:** título, «Qué es» (lo heredado de la v1 y lo nuevo de la v2), «Estado actual» con los resultados de la investigación, la prueba hacia adelante y la captura de datos, funcionalidades (seis pestañas, Indicadores, investigación con preregistro, captura de datos), tabla de documentos, estructura (`history/`) y resumen en inglés.
+- **Índice (`docs/README.md`):** sección nueva «Investigación de la v2» con todos los documentos de `docs/v2/`, y los documentos que solo describen la medición de la v1 marcados **(v1)**.
+- **Arquitectura:** sección «La v2: investigación y captura de datos» con diagrama y tabla de piezas.
+- **Guía de instalación, glosario y registro de cambios:** lo propio de la v2 (historial local, tareas de captura, términos como confluencia, control al azar, preregistro, FVG, libro de órdenes, prueba hacia adelante).
+- **Avisos «Documento de la v1»** en Metodología, Veredicto, Diseño de la medición del LLM y Paso a dinero real. El Informe final ya se presentaba como fotografía de la v1.
+- No se movieron ni se borraron documentos (las pruebas de la documentación vigilan sus rutas y enlaces).
+- **Cambios de comportamiento respecto de la v1.0:** ninguno.

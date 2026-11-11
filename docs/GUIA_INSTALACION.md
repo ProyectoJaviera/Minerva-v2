@@ -307,6 +307,14 @@ puerto 8000 ocupado, el login que no entra, `status: stale` y los errores de cer
 
 ## 6. Qué esperar los próximos días
 
+> **En la v2, con `MINERVA_REAL_BOT=false` (por defecto)**, el bot genera señales y sombras pero no etiqueta con Claude,
+> así que el avance de la medición no se mueve: lo de abajo describe la medición de la v1 y aplica solo si la
+> enciendes. Lo propio de la v2 es la [pestaña Indicadores](v2/SECCION_INDICADORES.md), que necesita el archivo de
+> historial local (`.\.venv\Scripts\python.exe scripts\update_history_file.py`), y, si quieres capturar datos hacia
+> adelante (libro de órdenes, funding, Fear & Greed), las [tareas programadas de captura](USO.md#tareas-programadas).
+> Después de crear el archivo por primera vez, recrea el contenedor (`docker compose up -d --force-recreate`) para que
+> tome la carpeta `history/`.
+
 - **No hay resultados que ver, y es a propósito.** La medición del valor de la IA es *ciega*: hasta que se junten 300
   "conglomerados efectivos" por lado **y** exista un registro oficial del veredicto, ningún canal muestra PnL, saldo,
   precios de salida ni motivos de cierre. La pestaña *Resumen* muestra el avance (x/300 por lado), la salud y el

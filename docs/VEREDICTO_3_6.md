@@ -1,5 +1,9 @@
 # Procedimiento del veredicto de valor de la IA (subfase 3.6)
 
+> **Documento de la v1.** Describe la medición del filtro de IA de la v1, que sigue su curso en el repositorio
+> Minerva-v1. En la v2 ese código sigue presente pero apagado por defecto (`MINERVA_REAL_BOT=false`); lo propio de
+> la v2 está en [Investigación de la v2](README.md#investigación-de-la-v2).
+
 Cómo producir, una sola vez, el veredicto de `docs/FASE3_6_LLM.md` sección (i)
 cuando la medición en vivo junte **300 conglomerados efectivos por lado**. La
 herramienta es `scripts/ai_value_report.py` (lógica en
