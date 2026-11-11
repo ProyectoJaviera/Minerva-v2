@@ -2434,3 +2434,22 @@ Pedido: el dueño pidió dejar igual los finalistas en paper. Decisión: en vez 
 
 - Probado contra una copia temporal del archivo de historial (0 operaciones: todavía no hay velas posteriores al corte).
 - **Cambios de comportamiento respecto de la v1.0:** ninguno (no toca el bot).
+
+### Sección «Indicadores»: todos los indicadores como casillas y 5 temporalidades (2026-11-11)
+
+Pedido: el dueño quiere combinar uno, dos, tres o todos los indicadores a la vez, que el gatillo sea una casilla más (todos son indicadores, cada uno en su línea) y las temporalidades 15m, 1h, 4h, 1D y 1S.
+
+- **Decisión: regla de confluencia** (`app/explorer/confluence.py`). Cada indicador vota alcista o bajista en cada vela: los de estado (Range Filter, VIDYA, WaveTrend wt1/wt2, EMA 144, funding, régimen de BTC, fuerza relativa) siempre; los de evento (SFP, Camarilla, FVG, zona de liquidez, Liquidity Grab, BB%B, cruce de WaveTrend extremo) durante una ventana elegible desde su señal (5 velas por defecto). Se entra en la vela en que todos los marcados pasan a coincidir. Motivo: trata a todos los indicadores por igual y con uno solo reproduce el gatillo original (probado: el Range Filter solo da exactamente sus giros).
+- **Decisión: salida elegible en ATR** (las de la ronda 3: SL 2 ATR/TP 2R por defecto, 1 ATR/2R, 1,5 ATR/3R, 2 ATR/1R, trailing de 2 y 3 ATR). Las salidas propias de cada gatillo (mecha del SFP, S4/R4 de Camarilla, hueco del FVG) dejan de usarse en la pestaña porque con varios indicadores no hay un nivel único; los resultados de la pestaña ya no son comparables con los de la exploración ni la ronda 3 para esos gatillos.
+- **Temporalidades:** 15m y 1w se bajan de Bitunix (intervalos verificados contra la API pública el 2026-11-11; la semanal abre el lunes 00:00 UTC) con `scripts/update_history_file.py` (`--only-extra`). Calentamiento de 500 velas en 15m/1h/4h, 300 en 1D y 100 en 1S (desde 2022 hay ~230 velas semanales). El funding, el régimen de BTC y la fuerza relativa se calculan en la confluencia con las fórmulas de la ronda 3 pero para cualquier marco (la ronda 3 solo acepta 1h, 4h y 1d).
+- **Decisión: opción «Deben coincidir»** (`min_agree`): con los 14 indicadores marcados casi nunca coinciden todos (en BTC 4h, 0 operaciones), así que se puede pedir «al menos N»; el lado ganador necesita al menos N votos y más votos que el contrario. Por defecto, todos.
+- La API cambia a `indicators` (repetible), `window`, `exit` y `min_agree`; se retiran `trigger` y `filters`, y con ellos `FastComboStrategy`/`FastRound3Strategy`.
+- **Cambios de comportamiento respecto de la v1.0:** ninguno (solo la pestaña exploratoria).
+- **Salida personalizada en %** (pedido del dueño, 2026-11-11): `exit=pct` con `sl_pct` (obligatorio, hasta 50), `tp_pct` (opcional, hasta 500) y `trail_pct` (opcional, hasta 50), en % del precio de entrada; el trailing se fija sobre el cierre de la vela de señal. Sin TP ni trailing aplica el TP de respaldo del motor. La pantalla avisa cuando el SL supera `MAX_SL_MARGIN_LOSS_PCT / LEVERAGE` (5 % a 10x), porque el motor omite esas entradas por el tope de riesgo.
+
+## v2: ronda 4 exploratoria — diseño fijado antes de correr (2026-11-11)
+
+Pedido: el dueño aprobó una ronda con la fuerza relativa entre monedas, el squeeze con ADX y el volumen; preguntó además por el order book (sin historial gratis: solo se podría grabar hacia adelante; se ofreció para después). **Exploratoria.**
+
+- **Motor, cambios opcionales:** `max_hold_bars` (cierre por tiempo, motivo `TIME`, sin TP de respaldo) y la columna `volume` (`quote_vol`) en el DataFrame de `precompute`, antes de `open_time`. Ninguna estrategia de la v1 los usa: la regresión de la v1 pasa igual. **Sin cambio de comportamiento respecto de la v1.0.**
+- **`app/research/round4.py`** y **`scripts/v2_round4.py`:** 21 señales nuevas en 4h (fuerza relativa semanal top 3 / bottom 3, squeeze TTM, filtros ADX, pico de volumen y VWAP semanal), salida y entrada elegidas solo en IS, regla de finalistas en el docstring. El tramo 2026-10-01 a 2026-11-10 no se usó con estas señales: los finalistas se mirarán una vez ahí, con preregistro propio.

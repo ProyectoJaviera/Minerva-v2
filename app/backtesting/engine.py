@@ -231,6 +231,7 @@ async def run_backtest(
     highs = [p[0].high for p in aligned]
     lows = [p[0].low for p in aligned]
     closes = [p[0].close for p in aligned]
+    volumes = [p[0].quote_vol for p in aligned]
     mark_highs = [p[1].high for p in aligned]
     mark_lows = [p[1].low for p in aligned]
 
@@ -248,12 +249,13 @@ async def run_backtest(
     )
     bar_duration_hours = step_ms / 3_600_000
 
-    # `open_time` (ms UTC de apertura) va al final: las estrategias de la v1 no lo leen y no les
-    # cambia nada (tests/unit/test_backtest_v1_regression.py); las de la v2 lo necesitan para
-    # saber a que dia UTC pertenece cada vela (niveles Camarilla).
+    # `volume` (volumen en USDT, `quote_vol`) y `open_time` (ms UTC de apertura, al final):
+    # las estrategias de la v1 no los leen y no les cambia nada
+    # (tests/unit/test_backtest_v1_regression.py). Las de la v2 usan `open_time` para saber a
+    # que dia UTC pertenece cada vela (niveles Camarilla); la investigacion usa `volume`.
     df = pd.DataFrame({"open": opens, "high": highs, "low": lows, "close": closes,
                         "funding_rate": funding_rates, "funding_is_approximated": funding_approx,
-                        "open_time": open_times})
+                        "volume": volumes, "open_time": open_times})
     df = strategy.precompute(df)
     # Opcional, solo para estrategias que lo declaran (ninguna de la v1): si el `open` de la vela
     # de entrada ya cruzo el SL que pide la estrategia, la entrada se omite en vez de abrirse con
@@ -267,6 +269,12 @@ async def run_backtest(
     # entrada solo se evalua el lado adverso (no se sabe si el TP se toco antes del llenado).
     limit_entry = getattr(strategy, "entry_mode", "market") == "limit"
     unfilled_limits = 0
+    # Opcional (solo investigacion de la v2): `max_hold_bars = N` cierra la posicion al cierre de
+    # su N-esima vela (contando la de entrada), motivo `TIME`, y no le pone el TP de respaldo: es la
+    # salida de las estrategias de rebalanceo periodico. Al cerrarse, esa misma vela ya puede dar
+    # la senal siguiente.
+    max_hold_bars = getattr(strategy, "max_hold_bars", None)
+    entry_index = -1
 
     margin_usdt = settings.default_margin_usdt
     leverage = settings.leverage
@@ -403,7 +411,7 @@ async def run_backtest(
                     sl = fallback_sl
                 trailing = strategy.trailing_distance(sub_df)
                 tp = strategy.take_profit_price(sub_df, side, fill_price)
-                if tp is None and trailing is None:
+                if tp is None and trailing is None and not max_hold_bars:
                     tp = fallback_tp
 
                 sl_margin_loss_pct = margin_loss_pct(fill_price, sl, leverage)
@@ -429,12 +437,16 @@ async def run_backtest(
                         slippage_entry_usdt=slippage_entry, sl_margin_loss_pct=sl_margin_loss_pct,
                     )
                     just_opened = True
+                    entry_index = i
             pending_signal = None
 
         if just_opened and position is not None:
             # Tarea 4a: la propia vela de entrada tambien puede cerrar la
             # posicion (SL/TP/liquidacion/funding dentro de su mismo rango).
             process_bar(i, adverse_only=limit_entry)
+
+        if position is not None and max_hold_bars and i - entry_index + 1 >= max_hold_bars:
+            finalize(closes[i], i, "TIME")
 
         if position is None:
             sub_df_signal = df.iloc[max(0, i + 1 - MAX_LOOKBACK_BARS) : i + 1]
