@@ -1,7 +1,7 @@
 """Seccion «Indicadores» (v2): backtest EXPLORATORIO a pedido sobre el archivo de historial local.
 
 No es la medicion en vivo ni una ronda preregistrada: no escribe en la base ni pasa por la puerta
-de resultados. Nunca usa velas desde el 2026-10-01. Protegido con `require_auth` a nivel de router.
+de resultados. Protegido con `require_auth` a nivel de router.
 """
 
 from __future__ import annotations
@@ -33,14 +33,13 @@ async def options(settings: Settings = Depends(get_settings)) -> dict:
     Returns:
         `available` (si existe el archivo), `detail`, `indicators` (id, etiqueta y tipo),
         `exits`, `default_exit`, `window` (por defecto y maximo), `timeframes` (id y etiqueta),
-        `symbols`, `series`, `reserved_from` y la nota exploratoria.
+        `symbols`, `series` y la nota exploratoria.
 
     Efectos:
         Lee el archivo de historial (solo lectura).
     """
     base = {
         "note": service.NOTE,
-        "reserved_from": service.RESERVED_FROM.strftime("%Y-%m-%d"),
         "timeframes": [{"id": t, "label": service.TIMEFRAME_LABELS[t]}
                        for t in service.TIMEFRAMES],
         "indicators": [{"id": k, "label": v[0], "kind": v[1]}

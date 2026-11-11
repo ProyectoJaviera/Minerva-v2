@@ -652,7 +652,6 @@ export interface ExplorerOptions {
   available: boolean;
   detail: string | null;
   note: string;
-  reserved_from: string;
   timeframes: { id: string; label: string }[];
   indicators: { id: string; label: string; kind: "estado" | "evento" }[];
   exits: { id: string; label: string }[];
@@ -700,7 +699,7 @@ export interface ExplorerResult {
     min_agree: number;
     name: string;
   };
-  period: { start: string | null; end: string | null; reserved_from: string };
+  period: { start: string | null; end: string | null };
   result: ExplorerSummary;
   control: ExplorerSummary;
   by_symbol: ExplorerBreakdownRow[];

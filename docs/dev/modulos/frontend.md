@@ -491,7 +491,7 @@ todavía no manda el campo.
 **Funciones y clases clave.**
 - `IndicatorsTab` (pide `useExplorerOptions` y muestra la nota exploratoria), `Form` (monedas, temporalidad con
   botones de radio, un indicador por línea como casilla con su tipo y «todos»/«ninguno», «Deben coincidir», ventana, salida (con SL, TP y trailing en % y el aviso de SL demasiado amplio)
-  y fechas con tope en el corte; llama a `useExplorerRun`), `ResultCard`, `SummaryGrid` y `BreakdownTable`.
+  y fechas opcionales; llama a `useExplorerRun`), `ResultCard`, `SummaryGrid` y `BreakdownTable`.
 
 **Invariantes — no romper.** La nota exploratoria del servidor siempre se ve; el control al azar se muestra junto al
 resultado. Sin monedas o sin indicadores el botón queda deshabilitado.

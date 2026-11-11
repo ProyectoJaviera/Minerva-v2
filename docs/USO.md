@@ -102,7 +102,7 @@ pestañas:
 | **Brazo ejecutado** | Estado del brazo (activo, armado desde cuándo), abiertas y omitidas hoy y en total, margen por operación, retraso máximo de la decisión, estrategias elegibles, las **omitidas por motivo** (con su explicación) y las decisiones recientes del brazo. Nunca lleva PnL |
 | **Riesgo y controles** | Estado del scheduler, kill switch, *circuit breaker*, stop por drawdown, pérdida diaria, posiciones abiertas por dirección, último ciclo y límites; por qué están bloqueadas las entradas nuevas; los rechazos recientes del motor de riesgo; los **botones de control** (Pausar medición, Reanudar, Kill switch) y el registro de acciones de control. La racha de pérdidas y los cruces de drawdown quedan ocultos hasta el veredicto |
 | **Universo y backtest** | El universo vigente (candidatos de CoinGecko, cuáles se incluyen y por qué se excluyeron los demás, antigüedad y cambios recientes; un aviso rojo si está obsoleto) y los **veredictos del backtest por estrategia**. En una instalación nueva esa tabla de veredictos está vacía: los resultados del backtest de la Fase 2 se calcularon aparte y no vienen con el repositorio |
-| **Indicadores** | De la v2. Pruebas manuales y **exploratorias**: eliges monedas, temporalidad (15m, 1h, 4h, 1D o 1S) y marcas uno, varios o todos los indicadores (cada uno es una casilla); se entra cuando todos coinciden. Ves el % de operaciones ganadoras, el profit factor, el PnL y el drawdown, el control con dirección al azar y los desgloses por moneda y por año. Usa el archivo de historial local (`scripts/update_history_file.py`) y no usa velas desde el 2026-10-01. No se guarda ni cuenta como ronda preregistrada. Ver [la sección Indicadores](v2/SECCION_INDICADORES.md) |
+| **Indicadores** | De la v2. Pruebas manuales y **exploratorias**: eliges monedas, temporalidad (15m, 1h, 4h, 1D o 1S) y marcas uno, varios o todos los indicadores (cada uno es una casilla); se entra cuando todos coinciden. Ves el % de operaciones ganadoras, el profit factor, el PnL y el drawdown, el control con dirección al azar y los desgloses por moneda y por año. Usa el archivo de historial local (`scripts/update_history_file.py`), completo hasta su última vela. No se guarda ni cuenta como ronda preregistrada. Ver [la sección Indicadores](v2/SECCION_INDICADORES.md) |
 
 **Los controles** piden confirmación explícita: se abre un diálogo con la advertencia y hay que **escribir la palabra
 exacta** (`PAUSAR`, `REANUDAR` o `KILL`). Pausar o activar el kill switch **detiene la medición**. No abren ni cierran
@@ -368,6 +368,16 @@ Viven **fuera** del bot a propósito: si el bot se cuelga, siguen avisando. Toda
 | `MinervaV2DailySummary` | El resumen diario por Telegram (solo conteos, nunca PnL) | Una vez al día |
 | `MinervaV2Backup` | Respaldo diario consistente (ver [Respaldos](#respaldos)) | Una vez al día |
 | `MinervaV2StartBot` | Solo para el arranque **nativo** en Windows: lanza `start_bot.ps1` al iniciar sesión. Con Docker no aplica (lo reemplaza `restart: unless-stopped`) | Al iniciar sesión |
+| `MinervaV2OrderBook` | Captura de datos (v2): foto del libro de órdenes de Bitunix de cada moneda del universo en `history/market_v2.db` (`scripts/record_market_data.py orderbook`) | Cada 5 min |
+| `MinervaV2Funding` | Captura de datos (v2): funding vigente de Bitunix (`record_market_data.py funding`) | Cada hora |
+| `MinervaV2FearGreed` | Captura de datos (v2): Fear & Greed Index del día, de alternative.me (`record_market_data.py feargreed`) | Diaria, 02:10 |
+| `MinervaV2HistoryUpdate` | Captura de datos (v2): actualiza el historial de velas y funding de la pestaña «Indicadores» y de la prueba hacia adelante (`update_history_file.py --via-copy`) | Cada 6 h |
+
+Las cuatro de captura de datos se registran (o se quitan con `-Remove`) de una vez, sin administrador:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\register_v2_data_tasks.ps1
+```
 
 ### Windows (Programador de tareas)
 
@@ -591,6 +601,8 @@ reconoce el registro oficial al instante. Los informes **nunca** abren la base v
 | `v2_round4.py` | Para la v2: ronda 4 exploratoria en 4h (fuerza relativa semanal entre monedas, squeeze TTM con ADX y el volumen como filtro: pico de volumen y VWAP semanal). Elige la salida de cada señal solo con la parte IS y la juzga en el OOS. Sin red; exige `DATABASE_PATH` con una base temporal y borra los resultados de backtest de esa base | Solo con una base temporal |
 | `v2_forward_test.py` | Para la v2: prueba hacia adelante (paper por repetición) de los tres finalistas de la ronda 3 y sus controles, contando solo las operaciones abiertas desde el 2026-11-10 ([criterio](v2/PAPER_V2_RONDA3.md)). Lee el archivo de historial local en modo inmutable; sin red. Actualizar antes ese archivo con `update_history_file.py` | Seguro (solo lectura) |
 | `update_history_file.py` | Para la v2: crea o actualiza el archivo de historial local de la pestaña «Indicadores» del dashboard (`history/history_v2.db`, aparte de la base del bot) con `download_history.py` más las velas de 15m y 1w (`--only-extra`: solo esas). Red pública de CoinGecko y Bitunix; reanudable. Se niega a escribir en la base del bot o en `data/`. Ver [la sección Indicadores](v2/SECCION_INDICADORES.md) | Seguro (no toca la base del bot) |
+| `record_market_data.py` | Para la v2: graba hacia adelante lo que no tiene historial gratis: el libro de órdenes de Bitunix (`orderbook`), el funding vigente (`funding`) y el Fear & Greed del día (`feargreed`), en `history/market_v2.db`. Una foto por llamada; lo usan las tareas `MinervaV2*` | Seguro (no toca la base del bot) |
+| `register_v2_data_tasks.ps1` | Para la v2: registra o quita (`-Remove`) las cuatro tareas programadas de captura de datos | — |
 
 ## Archivos y carpetas
 

@@ -40,9 +40,9 @@ local, con el motor `run_backtest` de la Fase 2.
   corrida a la vez, en un hilo con su propio bucle y conexión, con caché de las últimas 32 corridas que se
   invalida al cambiar el archivo).
 
-**Invariantes — no romper.** Nunca entra al cálculo una vela desde `RESERVED_FROM` (2026-10-01, fijo en el código,
-no configurable). Nada se escribe en el archivo de historial ni en la base del bot; el resultado no se guarda ni pasa
-por los criterios de la Fase 2.
+**Invariantes — no romper.** Nada se escribe en el archivo de historial ni en la base del bot; el resultado no se
+guarda ni pasa por los criterios de la Fase 2. Con fecha de inicio, el motor corre desde `inicio - calentamiento`
+y solo cuentan las operaciones (y omisiones) con entrada desde el inicio.
 
 **Trampas conocidas.** `immutable=1` supone que el archivo no cambia mientras se lee: actualizarlo con una corrida
 en curso puede dar un error en esa corrida (por eso conviene bajar datos nuevos en una copia y reemplazar el archivo

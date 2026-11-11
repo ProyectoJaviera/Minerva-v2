@@ -29,12 +29,6 @@
             <h2>API Documentation</h2>
                 <ul class="memberlist">
             <li>
-                    <a class="variable" href="#RESERVED_FROM">RESERVED_FROM</a>
-            </li>
-            <li>
-                    <a class="variable" href="#RESERVED_FROM_MS">RESERVED_FROM_MS</a>
-            </li>
-            <li>
                     <a class="variable" href="#TIMEFRAMES">TIMEFRAMES</a>
             </li>
             <li>
@@ -161,9 +155,11 @@ de mercado que usa el motor (velas LAST_PRICE y MARK_PRICE, funding y specs). Se
 todos votan alcista o bajista y se entra cuando todos coinciden, con una salida fija en ATR.</li>
 <li><strong>Motor:</strong> el mismo <code>run_backtest</code> de la Fase 2 (entrada en el open de la vela siguiente,
 comisiones, slippage, funding, liquidacion con MARK_PRICE).</li>
-<li><strong>Corte de datos:</strong> nunca se usan velas desde <code><a href="#RESERVED_FROM">RESERVED_FROM</a></code> (2026-10-01 UTC), que estaban
-reservadas para las rondas preregistradas (el examen de la ronda 3 ya las uso; quitar el corte es
-decision del dueno).</li>
+<li><strong>Sin corte de datos:</strong> usa todo el historial del archivo. El corte del 2026-10-01 se quito el
+2026-11-11 por pedido del dueno: esos datos ya se habian usado en el examen de la ronda 3.</li>
+<li><strong>Calentamiento previo:</strong> con una fecha de inicio, se cargan antes las velas de calentamiento de
+la estrategia y solo cuentan las operaciones que entran desde esa fecha (un rango corto ya no se
+queda sin senales).</li>
 <li><strong>Exploratorio:</strong> el resultado no se guarda en la base ni pasa por los criterios de la Fase 2.
 Con cada corrida va el control con direccion al azar (mismas velas de entrada y misma salida),
 la referencia «sin informacion de direccion».</li>
@@ -177,30 +173,6 @@ por vez, para no frenar el bucle del bot.</p>
                 
                 
             </section>
-                <section id="RESERVED_FROM">
-                    <div class="attr variable">
-            <span class="name">RESERVED_FROM</span>        =
-<span class="default_value">datetime.datetime(2026, 10, 1, 0, 0, tzinfo=datetime.timezone.utc)</span>
-
-        
-    </div>
-    <a class="headerlink" href="#RESERVED_FROM"></a>
-    
-    
-
-                </section>
-                <section id="RESERVED_FROM_MS">
-                    <div class="attr variable">
-            <span class="name">RESERVED_FROM_MS</span>        =
-<span class="default_value">1790812800000</span>
-
-        
-    </div>
-    <a class="headerlink" href="#RESERVED_FROM_MS"></a>
-    
-    
-
-                </section>
                 <section id="TIMEFRAMES">
                     <div class="attr variable">
             <span class="name">TIMEFRAMES</span>        =
@@ -253,7 +225,7 @@ por vez, para no frenar el bucle del bot.</p>
                     <div class="attr variable">
             <span class="name">NOTE</span>        =
 <input id="NOTE-view-value" class="view-value-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
-            <label class="view-value-button pdoc-button" for="NOTE-view-value"></label><span class="default_value">&#39;Prueba EXPLORATORIA: no es una ronda preregistrada ni evidencia de la Fase 2, y no se guarda. Probar muchas combinaciones y quedarse con la mejor sobreestima el resultado (sesgo de seleccion). Velas de Bitunix (coinciden con TradingView); sin datos desde el 2026-10-01.&#39;</span>
+            <label class="view-value-button pdoc-button" for="NOTE-view-value"></label><span class="default_value">&#39;Prueba EXPLORATORIA: no es una ronda preregistrada ni evidencia de la Fase 2, y no se guarda. Probar muchas combinaciones y quedarse con la mejor sobreestima el resultado (sesgo de seleccion). Velas de Bitunix (coinciden con TradingView).&#39;</span>
 
         
     </div>
@@ -403,7 +375,7 @@ lectura en Docker).</p>
 <li><strong>window:</strong>  velas que dura el voto de un indicador de evento.</li>
 <li><strong>exit_name:</strong>  clave de <code>EXITS</code>.</li>
 <li><strong>start_ms:</strong>  inicio pedido (ms UTC) o <code>None</code> = desde el comienzo del historial.</li>
-<li><strong>end_ms:</strong>  fin pedido (ms UTC) o <code>None</code> = hasta el corte.</li>
+<li><strong>end_ms:</strong>  fin pedido (ms UTC) o <code>None</code> = hasta el final del historial.</li>
 <li><strong>min_agree:</strong>  cuantos indicadores deben coincidir (<code>None</code> = todos).</li>
 <li><strong>pct_exit:</strong>  <code>(sl, tp, trailing)</code> en % si <code><a href="#ExplorerRequest.exit_name">exit_name</a></code> es <code>PCT_EXIT</code>, si no <code>None</code>.</li>
 </ul>
@@ -592,8 +564,8 @@ lectura en Docker).</p>
 <h6 id="returns">Returns:</h6>
 
 <blockquote>
-  <p>Lista de <code>{symbol, timeframe, first_day, last_day, first_ms, last_ms, bars}</code> (solo velas
-  antes del corte), ordenada por simbolo y marco.</p>
+  <p>Lista de <code>{symbol, timeframe, first_day, last_day, first_ms, last_ms, bars}</code>, ordenada
+  por simbolo y marco.</p>
 </blockquote>
 
 <h6 id="efectos">Efectos:</h6>
@@ -648,7 +620,7 @@ lectura en Docker).</p>
     </div>
     <a class="headerlink" href="#load_btc"></a>
     
-            <div class="docstring"><p>Velas de BTC del marco (para los indicadores <code>btc</code> y <code>rs</code>), hasta el corte.</p>
+            <div class="docstring"><p>Velas de BTC del marco (para los indicadores <code>btc</code> y <code>rs</code>).</p>
 
 <h6 id="arguments">Arguments:</h6>
 

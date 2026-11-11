@@ -14,7 +14,7 @@ Con el contenedor de la v2 corriendo no hace falta reiniciarlo: la seccion vuelv
 cuando cambia su fecha de modificacion (mejor correrlo cuando nadie esta usando la seccion).
 
 Uso:
-    python scripts/update_history_file.py [--path history/history_v2.db] [--only-extra]
+    python scripts/update_history_file.py [--path history/history_v2.db] [--only-extra] [--via-copy]
 """
 
 from __future__ import annotations
@@ -95,22 +95,70 @@ async def download_extra_timeframes(timeframes: tuple[str, ...] = EXTRA_TIMEFRAM
         await db.close()
 
 
+def replace_with_retries(src: Path, dst: Path, attempts: int = 6, wait_s: float = 10.0,
+                         sleep=None) -> bool:
+    """Reemplaza `dst` por `src` de forma atomica, reintentando si `dst` esta abierto.
+
+    En Windows no se puede reemplazar un archivo que otro proceso tiene abierto (la pestana
+    Indicadores lo abre solo mientras calcula): se reintenta unas veces y, si no se puede, se deja
+    `src` en su lugar para la proxima corrida.
+
+    Args:
+        src: archivo nuevo.
+        dst: archivo a reemplazar.
+        attempts: intentos.
+        wait_s: segundos entre intentos.
+        sleep: funcion de espera (para las pruebas); por defecto `time.sleep`.
+
+    Returns:
+        Si se reemplazo.
+
+    Efectos:
+        Disco: renombra `src` sobre `dst`.
+    """
+    import time
+
+    sleep = sleep or time.sleep
+    for n in range(attempts):
+        try:
+            os.replace(src, dst)
+            return True
+        except PermissionError:
+            if n < attempts - 1:
+                sleep(wait_s)
+    return False
+
+
 def main() -> None:
     """Valida el destino, fija `DATABASE_PATH` en ese archivo y corre la descarga.
 
+    Con `--via-copy` (lo usa la tarea programada) trabaja sobre una copia `<archivo>_next.db` y al
+    final la cambia por el archivo, para no escribir en el que la pestana puede estar leyendo.
+
     Efectos:
         Red: CoinGecko y Bitunix (publicas). Disco: crea la carpeta del archivo y escribe en ese
-        archivo SQLite (nunca en la base del bot). Cambia `DATABASE_PATH` solo en este proceso.
+        archivo SQLite o en su copia (nunca en la base del bot). Cambia `DATABASE_PATH` solo en
+        este proceso.
     """
+    import shutil
+
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--path", default=os.environ.get("EXPLORER_HISTORY_DB", DEFAULT_PATH))
     parser.add_argument("--only-extra", action="store_true",
                         help="solo los marcos extra (15m y 1w), sin pasar por download_history")
+    parser.add_argument("--via-copy", action="store_true",
+                        help="actualiza una copia y la cambia por el archivo al final")
     args = parser.parse_args()
     from app.config import settings  # el DATABASE_PATH del bot, antes de cambiarlo
 
-    target = check_target(args.path, settings.database_path)
-    target.parent.mkdir(parents=True, exist_ok=True)
+    final = check_target(args.path, settings.database_path)
+    final.parent.mkdir(parents=True, exist_ok=True)
+    target = final
+    if args.via_copy:
+        target = check_target(str(final.with_name(final.stem + "_next.db")),
+                              settings.database_path)
+        if final.is_file():
+            shutil.copy2(final, target)
     os.environ["DATABASE_PATH"] = str(target)
     settings.database_path = str(target)
     assert Path(settings.database_path).resolve() == target
@@ -121,6 +169,10 @@ def main() -> None:
     if not args.only_extra:
         asyncio.run(download_history.main())
     asyncio.run(download_extra_timeframes())
+    if args.via_copy:
+        ok = replace_with_retries(target, final)
+        print(f"Reemplazado {final}" if ok else f"No se pudo reemplazar {final} (abierto); "
+              f"queda la copia {target} para la proxima corrida")
 
 
 if __name__ == "__main__":

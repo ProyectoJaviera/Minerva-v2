@@ -337,8 +337,8 @@ function Form({ opts }: { opts: ExplorerOptions }) {
               <input type="date" className={inputCls} value={start} onChange={(e) => setStart(e.target.value)} />
             </label>
             <label className="flex flex-col text-sm text-gray-700 dark:text-gray-300">
-              Hasta (opcional, antes del {opts.reserved_from})
-              <input type="date" className={inputCls} value={end} max={opts.reserved_from} onChange={(e) => setEnd(e.target.value)} />
+              Hasta (opcional)
+              <input type="date" className={inputCls} value={end} onChange={(e) => setEnd(e.target.value)} />
             </label>
           </div>
           {exit === "pct" && (

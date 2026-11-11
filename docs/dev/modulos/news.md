@@ -222,7 +222,7 @@ elemento malo no tumba al resto.
 
 - **Referencia pdoc:** [`api/app/news/parsers.html`](../api/app/news/parsers.html)
 - **Importa (internos):** `app.news.text`
-- **Lo importan:** `app.news.collector`
+- **Lo importan:** `app.news.collector`, `scripts.record_market_data`
 - **Configuración que lee:** ninguno
 - **Tablas que lee:** ninguno
 - **Tablas que escribe:** ninguno

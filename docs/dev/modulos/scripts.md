@@ -89,6 +89,18 @@ escritura). **Nunca** lo uses contra el bot real para probarlo: usa `-Port 8001`
 
 **Trampas conocidas.** Solo ASCII y compatibles con Windows PowerShell 5.1 (sin `??`, ternario ni `&&`): lo vigilan las pruebas.
 
+### `scripts/register_v2_data_tasks.ps1`
+
+**Responsabilidad.** Registra (o quita con `-Remove`) las cuatro tareas de captura de datos de la v2:
+`MinervaV2OrderBook` (5 min), `MinervaV2Funding` (1 h), `MinervaV2FearGreed` (diaria 02:10) y
+`MinervaV2HistoryUpdate` (6 h, `update_history_file.py --via-copy`), del usuario actual y sin administrador.
+
+**Invariantes — no romper.** Habla con el Programador solo por la puerta `$script:SchtasksExe` de `docker_common.ps1`
+(en las pruebas es una trampa) y rechaza nombres sin el prefijo `MinervaV2` o de la v1 (`Assert-NotV1Resources`).
+
+**Trampas conocidas.** Una tarea creada con `schtasks` arranca en System32: la acción entra a la raíz con
+`cmd /c cd /d` antes de correr python, y por eso la ruta del repositorio no puede tener espacios.
+
 ### `scripts/docker_common.ps1`
 
 **Responsabilidad.** Funciones compartidas por la mudanza y el retorno (registro, comprobaciones, ventana segura, huellas de la base, tareas programadas). **No se ejecuta solo**: se carga
@@ -980,13 +992,16 @@ defecto `history/history_v2.db`) corriendo `download_history.main()` sobre ese a
 
 **Funciones y clases clave.**
 - `check_target()` (valida el destino), `download_extra_timeframes()` (15m y 1w, LAST y MARK, de los símbolos que ya
-  tiene el archivo) y `main()` (fija `DATABASE_PATH` en el archivo; `--only-extra` salta `download_history`).
+  tiene el archivo), `replace_with_retries()` y `main()` (fija `DATABASE_PATH` en el archivo; `--only-extra` salta
+  `download_history`; `--via-copy`, el modo de la tarea `MinervaV2HistoryUpdate`, actualiza `<archivo>_next.db` y
+  al final la cambia por el archivo).
 
 **Invariantes — no romper.** Nunca escribe en la base del bot ni dentro de una carpeta `data/`; el destino debe
 terminar en `.db`.
 
 **Trampas conocidas.** Red pública de CoinGecko y Bitunix; la primera corrida tarda (15m es lo más pesado), pero es
-reanudable. Mientras escribe, conviene no leer el mismo archivo desde la pestaña (se abre como inmutable).
+reanudable. En Windows no se puede reemplazar un archivo abierto: si la pestaña lo está leyendo, `--via-copy`
+reintenta y, si no puede, deja la copia para la próxima corrida.
 
 
 <!-- hechos:scripts/update_history_file.py -->
@@ -994,12 +1009,12 @@ reanudable. Mientras escribe, conviene no leer el mismo archivo desde la pestañ
 
 - **Referencia pdoc:** [`api/scripts/update_history_file.html`](../api/scripts/update_history_file.html)
 - **Importa (internos):** `app.config`, `app.market.bitunix_rest`, `app.market.ohlcv_history`, `app.persistence.database`, `app.persistence.repositories.ohlcv_repo`, `scripts.download_history`
-- **Lo importan:** ninguno
+- **Lo importan:** `scripts.record_market_data`
 - **Configuración que lee:** `BITUNIX_RATE_LIMIT_PER_SEC`, `BITUNIX_REST_BASE_URL`, `DATABASE_PATH`
 - **Tablas que lee:** `ohlcv_cache`
 - **Tablas que escribe:** `ohlcv_series_complete`
 - **Tablas que crea o altera:** ninguno
-- **Pruebas que lo importan o citan:** `tests/unit/test_explorer.py`
+- **Pruebas que lo importan o citan:** `tests/unit/test_explorer.py`, `tests/unit/test_record_market_data.py`
 <!-- /hechos:scripts/update_history_file.py -->
 
 ### `scripts/v2_round3.py`
@@ -1111,3 +1126,34 @@ aprobada.
 - **Tablas que crea o altera:** ninguno
 - **Pruebas que lo importan o citan:** ninguno
 <!-- /hechos:scripts/v2_round4.py -->
+
+### `scripts/record_market_data.py`
+
+**Responsabilidad.** Graba hacia adelante, una foto por llamada, datos sin historial gratis: libro de órdenes de
+Bitunix (50 niveles), funding vigente y Fear & Greed del día, en `history/market_v2.db`. Lo llaman las tareas
+`MinervaV2OrderBook`, `MinervaV2Funding` y `MinervaV2FearGreed` (`scripts/register_v2_data_tasks.ps1`).
+
+**Funciones y clases clave.**
+- `summarize_depth()` (mejor compra y venta, spread, cantidades y desequilibrio en 5, 20 y 50 niveles, nocional y
+  20 niveles crudos), `record_orderbook()`, `record_funding()`, `record_fear_greed()`, `open_store()` (esquema),
+  `universe_symbols()` (monedas del archivo de historial en 1d) y `check_target()`.
+
+**Invariantes — no romper.** Nunca escribe en la base del bot ni en `data/`. Un error en un símbolo no corta a los
+demás y todo queda en `capture_log`.
+
+**Trampas conocidas.** Fear & Greed necesita el cliente HTTP del repositorio (`build_async_http_client`, con el
+almacén de certificados del sistema): con `httpx` a secas falla detrás de la inspección TLS del PC.
+
+
+<!-- hechos:scripts/record_market_data.py -->
+**Hechos derivados del código** (los escribe `scripts/build_dev_docs.py`; no se editan):
+
+- **Referencia pdoc:** [`api/scripts/record_market_data.html`](../api/scripts/record_market_data.html)
+- **Importa (internos):** `app.config`, `app.core.http`, `app.market.bitunix_rest`, `app.news.parsers`, `scripts.update_history_file`
+- **Lo importan:** ninguno
+- **Configuración que lee:** `BITUNIX_RATE_LIMIT_PER_SEC`, `BITUNIX_REST_BASE_URL`, `DATABASE_PATH`, `EXPLORER_HISTORY_DB`
+- **Tablas que lee:** `ohlcv_cache`
+- **Tablas que escribe:** `fear_greed`
+- **Tablas que crea o altera:** `fear_greed`
+- **Pruebas que lo importan o citan:** `tests/unit/test_record_market_data.py`
+<!-- /hechos:scripts/record_market_data.py -->

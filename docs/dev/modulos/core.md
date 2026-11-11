@@ -102,7 +102,7 @@ nada lo notara); la causa raíz está en `logging.py`.
 
 - **Referencia pdoc:** [`api/app/core/http.html`](../api/app/core/http.html)
 - **Importa (internos):** ninguno
-- **Lo importan:** `app.market.bitunix_rest`, `app.market.coingecko_client`, `app.news.fetch`
+- **Lo importan:** `app.market.bitunix_rest`, `app.market.coingecko_client`, `app.news.fetch`, `scripts.record_market_data`
 - **Configuración que lee:** ninguno
 - **Tablas que lee:** ninguno
 - **Tablas que escribe:** ninguno

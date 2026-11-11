@@ -161,17 +161,17 @@ async def test_options_without_history_file_says_how_to_create_it(tmp_path):
     assert {i["id"] for i in out["indicators"]} == set(confluence.INDICATORS)
     assert {i["kind"] for i in out["indicators"]} == {"estado", "evento"}
     assert [t["label"] for t in out["timeframes"]] == ["15m", "1h", "4h", "1D", "1S"]
-    assert out["reserved_from"] == "2026-10-01"
+    assert "reserved_from" not in out
 
 
 @pytest.mark.asyncio
-async def test_options_lists_series_only_before_the_reserved_date(history):
+async def test_options_lists_every_series_of_the_file_without_a_cutoff(history):
     out = await route.options(settings=_settings(history))
     assert out["available"] is True
     assert out["symbols"] == ["BTCUSDT", "ETHUSDT"]
     assert {(s["symbol"], s["timeframe"]) for s in out["series"]} == {
         (s, tf) for s in ("BTCUSDT", "ETHUSDT") for tf in service.TIMEFRAMES}
-    assert all(s["last_day"] < "2026-10-01" for s in out["series"])
+    assert max(s["last_day"] for s in out["series"]) > "2026-10-01"
 
 
 @pytest.mark.asyncio
@@ -190,13 +190,13 @@ async def test_history_file_is_opened_read_only_and_never_written(history):
 
 
 @pytest.mark.asyncio
-async def test_run_end_to_end_with_many_indicators_and_never_uses_reserved_data(history):
+async def test_run_end_to_end_with_many_indicators_up_to_the_end_of_the_file(history):
     out = await _run(history, symbols=["BTCUSDT", "ETHUSDT", "XRPUSDT"], timeframe="1h",
                      indicators=["rf", "ema"])
     assert out["exploratory"] is True and "EXPLORATORIA" in out["note"]
     assert out["params"]["name"] == "mix|rf+ema|w5|s2_tp2r"
     assert out["params"]["exit_label"] == "SL 2 ATR, TP 2R"
-    assert out["period"]["end"] < "2026-10-01"
+    assert out["period"]["end"] > "2026-10-01"
     res = out["result"]
     assert res["trades"] > 0
     assert 0.0 <= res["winrate"] <= 1.0
@@ -222,11 +222,33 @@ async def test_run_works_in_15m_with_a_trailing_exit(history):
 
 
 @pytest.mark.asyncio
-async def test_run_respects_requested_dates_and_reserved_limit(history):
+async def test_run_respects_requested_dates(history):
     out = await _run(history, symbols=["BTCUSDT"], timeframe="1h", indicators=["sfp"],
-                     start="2026-10-02")
+                     start="2026-11-01")
     assert out["result"]["trades"] == 0
     assert out["missing"][0]["reason"] == "Sin velas en el periodo pedido."
+
+
+@pytest.mark.asyncio
+async def test_a_short_range_loads_warmup_before_the_start_and_counts_only_later_entries(history):
+    # 14 dias de 1h = 336 velas, menos que el calentamiento de 500: antes daba 0 operaciones.
+    kw = {"symbols": ["BTCUSDT", "ETHUSDT"], "timeframe": "1h", "indicators": ["wt"],
+          "start": "2026-09-20", "end": "2026-10-04"}
+    out = await _run(history, **kw)
+    assert out["result"]["trades"] > 0
+    assert out["period"] == {"start": "2026-09-20", "end": "2026-10-03"}
+    db = service.ReadOnlyDatabase(history)
+    await db.connect()
+    try:
+        req = service.validate_request(**{**kw, "indicators": ["wt"]})
+        full = await service.run_exploration_on_db(
+            db, req, _settings(history), await service.list_available_series(db))
+    finally:
+        await db.close()
+    assert full["result"] == out["result"]
+    start_ms = int(datetime(2026, 9, 20, tzinfo=UTC).timestamp() * 1000)
+    assert all(int(r["key"]) >= 2026 for r in out["by_year"])
+    assert start_ms > START_MS
 
 
 @pytest.mark.asyncio
@@ -258,7 +280,6 @@ async def test_btc_and_rs_use_the_btc_series_of_the_same_timeframe(history):
     finally:
         await db.close()
     assert btc is not None and len(btc) > 0
-    assert btc["open_time"].max() < service.RESERVED_FROM_MS
     out = await _run(history, symbols=["ETHUSDT"], timeframe="1h", indicators=["btc", "rs"])
     assert out["params"]["indicators"] == ["btc", "rs"]
 

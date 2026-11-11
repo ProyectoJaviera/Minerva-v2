@@ -8,9 +8,11 @@
   todos votan alcista o bajista y se entra cuando todos coinciden, con una salida fija en ATR.
 - **Motor:** el mismo `run_backtest` de la Fase 2 (entrada en el open de la vela siguiente,
   comisiones, slippage, funding, liquidacion con MARK_PRICE).
-- **Corte de datos:** nunca se usan velas desde `RESERVED_FROM` (2026-10-01 UTC), que estaban
-  reservadas para las rondas preregistradas (el examen de la ronda 3 ya las uso; quitar el corte es
-  decision del dueno).
+- **Sin corte de datos:** usa todo el historial del archivo. El corte del 2026-10-01 se quito el
+  2026-11-11 por pedido del dueno: esos datos ya se habian usado en el examen de la ronda 3.
+- **Calentamiento previo:** con una fecha de inicio, se cargan antes las velas de calentamiento de
+  la estrategia y solo cuentan las operaciones que entran desde esa fecha (un rango corto ya no se
+  queda sin senales).
 - **Exploratorio:** el resultado no se guarda en la base ni pasa por los criterios de la Fase 2.
   Con cada corrida va el control con direccion al azar (mismas velas de entrada y misma salida),
   la referencia «sin informacion de direccion».
@@ -46,12 +48,10 @@ from app.explorer.confluence import (
     check_pct_exit,
     pct_exit_label,
 )
-from app.market.ohlcv_history import MissingHistoricalDataError
+from app.market.ohlcv_history import MissingHistoricalDataError, interval_to_ms
 from app.persistence.database import Database
 from app.persistence.repositories import ohlcv_repo
 
-RESERVED_FROM = datetime(2026, 10, 1, tzinfo=UTC)
-RESERVED_FROM_MS = int(RESERVED_FROM.timestamp() * 1000)
 TIMEFRAMES = ("15m", "1h", "4h", "1d", "1w")
 TIMEFRAME_LABELS = {"15m": "15m", "1h": "1h", "4h": "4h", "1d": "1D", "1w": "1S"}
 MAX_SYMBOLS = 12
@@ -60,7 +60,7 @@ BTC_SYMBOL = "BTCUSDT"
 NOTE = (
     "Prueba EXPLORATORIA: no es una ronda preregistrada ni evidencia de la Fase 2, y no se guarda. "
     "Probar muchas combinaciones y quedarse con la mejor sobreestima el resultado (sesgo de "
-    "seleccion). Velas de Bitunix (coinciden con TradingView); sin datos desde el 2026-10-01."
+    "seleccion). Velas de Bitunix (coinciden con TradingView)."
 )
 
 _run_lock = asyncio.Lock()
@@ -116,7 +116,7 @@ class ExplorerRequest:
         window: velas que dura el voto de un indicador de evento.
         exit_name: clave de `EXITS`.
         start_ms: inicio pedido (ms UTC) o `None` = desde el comienzo del historial.
-        end_ms: fin pedido (ms UTC) o `None` = hasta el corte.
+        end_ms: fin pedido (ms UTC) o `None` = hasta el final del historial.
         min_agree: cuantos indicadores deben coincidir (`None` = todos).
         pct_exit: `(sl, tp, trailing)` en % si `exit_name` es `PCT_EXIT`, si no `None`.
     """
@@ -208,6 +208,10 @@ def _parse_day(text: str | None, what: str) -> int | None:
     return int(day.timestamp() * 1000)
 
 
+def _ms(dt: datetime) -> int:
+    return int(dt.timestamp() * 1000)
+
+
 def _ms_to_day(ms: int) -> str:
     return datetime.fromtimestamp(ms / 1000, tz=UTC).strftime("%Y-%m-%d")
 
@@ -219,8 +223,8 @@ async def list_available_series(db: Database) -> list[dict]:
         db: el archivo de historial abierto.
 
     Returns:
-        Lista de `{symbol, timeframe, first_day, last_day, first_ms, last_ms, bars}` (solo velas
-        antes del corte), ordenada por simbolo y marco.
+        Lista de `{symbol, timeframe, first_day, last_day, first_ms, last_ms, bars}`, ordenada
+        por simbolo y marco.
 
     Efectos:
         Lee `ohlcv_cache`.
@@ -229,9 +233,9 @@ async def list_available_series(db: Database) -> list[dict]:
     rows = await db.fetch_all(
         "SELECT symbol, interval, MIN(open_time) AS first, MAX(open_time) AS last, "
         "COUNT(*) AS n FROM ohlcv_cache WHERE price_type = 'LAST_PRICE' "
-        f"AND interval IN ({placeholders}) AND open_time < ? "
+        f"AND interval IN ({placeholders}) "
         "GROUP BY symbol, interval ORDER BY symbol, interval",
-        (*TIMEFRAMES, RESERVED_FROM_MS),
+        TIMEFRAMES,
     )
     return [{"symbol": r["symbol"], "timeframe": r["interval"],
              "first_day": _ms_to_day(int(r["first"])), "last_day": _ms_to_day(int(r["last"])),
@@ -266,7 +270,7 @@ async def available_series(path: str) -> list[dict]:
 
 
 async def load_btc(db: Database, timeframe: str) -> pd.DataFrame | None:
-    """Velas de BTC del marco (para los indicadores `btc` y `rs`), hasta el corte.
+    """Velas de BTC del marco (para los indicadores `btc` y `rs`).
 
     Args:
         db: el archivo de historial abierto.
@@ -278,8 +282,7 @@ async def load_btc(db: Database, timeframe: str) -> pd.DataFrame | None:
     Efectos:
         Lee `ohlcv_cache`.
     """
-    bars = await ohlcv_repo.get_bars(db, BTC_SYMBOL, timeframe, "LAST_PRICE", None,
-                                     RESERVED_FROM_MS - 1)
+    bars = await ohlcv_repo.get_bars(db, BTC_SYMBOL, timeframe, "LAST_PRICE")
     if not bars:
         return None
     return pd.DataFrame({"open_time": [b.open_time for b in bars],
@@ -370,23 +373,27 @@ async def run_exploration_on_db(db: Database, req: ExplorerRequest, settings: Se
                             "reason": "No esta en el archivo de historial en este marco."})
             continue
         start = max(info["first_ms"], req.start_ms or 0)
-        end = min(info["last_ms"], RESERVED_FROM_MS - 1)
+        end = info["last_ms"]
         if req.end_ms is not None:
             end = min(end, req.end_ms - 1)
         if end <= start:
             missing.append({"symbol": symbol, "reason": "Sin velas en el periodo pedido."})
             continue
+        # Calentamiento previo: las velas antes de `start` solo sirven para que los indicadores
+        # arranquen; cuentan las operaciones que entran desde `start`.
+        step = interval_to_ms(req.timeframe) or 0
+        load_from = max(info["first_ms"], start - combo.warmup * step)
         try:
-            t, sk = await run_backtest(db, combo, combo.name, symbol, req.timeframe, start, end,
-                                       settings)
-            ct, _ = await run_backtest(db, control, control.name, symbol, req.timeframe, start,
+            t, sk = await run_backtest(db, combo, combo.name, symbol, req.timeframe, load_from,
                                        end, settings)
+            ct, _ = await run_backtest(db, control, control.name, symbol, req.timeframe,
+                                       load_from, end, settings)
         except MissingHistoricalDataError as exc:
             missing.append({"symbol": symbol, "reason": str(exc)})
             continue
-        trades.extend(t)
-        control_trades.extend(ct)
-        skipped += len(sk)
+        trades.extend(x for x in t if _ms(x.entry_time) >= start)
+        control_trades.extend(x for x in ct if _ms(x.entry_time) >= start)
+        skipped += sum(1 for x in sk if _ms(x.ts) >= start)
         period_start = start if period_start is None else min(period_start, start)
         period_end = end if period_end is None else max(period_end, end)
 
@@ -400,8 +407,7 @@ async def run_exploration_on_db(db: Database, req: ExplorerRequest, settings: Se
                    "min_agree": req.min_agree or len(req.indicators),
                    "name": combo.name},
         "period": {"start": _ms_to_day(period_start) if period_start is not None else None,
-                   "end": _ms_to_day(period_end) if period_end is not None else None,
-                   "reserved_from": RESERVED_FROM.strftime("%Y-%m-%d")},
+                   "end": _ms_to_day(period_end) if period_end is not None else None},
         "result": summarize(trades, capital),
         "control": summarize(control_trades, capital),
         "by_symbol": _breakdown(trades, lambda t: t.symbol, capital),

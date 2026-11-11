@@ -41,6 +41,9 @@
                     <a class="function" href="#download_extra_timeframes">download_extra_timeframes</a>
             </li>
             <li>
+                    <a class="function" href="#replace_with_retries">replace_with_retries</a>
+            </li>
+            <li>
                     <a class="function" href="#main">main</a>
             </li>
     </ul>
@@ -78,7 +81,7 @@ cuando cambia su fecha de modificacion (mejor correrlo cuando nadie esta usando 
 <h6 id="uso">Uso:</h6>
 
 <blockquote>
-  <p>python scripts/update_history_file.py [--path history/history_v2.db] [--only-extra]</p>
+  <p>python scripts/update_history_file.py [--path history/history_v2.db] [--only-extra] [--via-copy]</p>
 </blockquote>
 </div>
 
@@ -175,6 +178,47 @@ serie solo pide lo que falta y al terminar sin errores se marca completa.</p>
 
 
                 </section>
+                <section id="replace_with_retries">
+                    <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">replace_with_retries</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="n">src</span><span class="p">:</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span>,</span><span class="param">	<span class="n">dst</span><span class="p">:</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span>,</span><span class="param">	<span class="n">attempts</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">6</span>,</span><span class="param">	<span class="n">wait_s</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">10.0</span>,</span><span class="param">	<span class="n">sleep</span><span class="o">=</span><span class="kc">None</span></span><span class="return-annotation">) -> <span class="nb">bool</span>:</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#replace_with_retries"></a>
+    
+            <div class="docstring"><p>Reemplaza <code>dst</code> por <code>src</code> de forma atomica, reintentando si <code>dst</code> esta abierto.</p>
+
+<p>En Windows no se puede reemplazar un archivo que otro proceso tiene abierto (la pestana
+Indicadores lo abre solo mientras calcula): se reintenta unas veces y, si no se puede, se deja
+<code>src</code> en su lugar para la proxima corrida.</p>
+
+<h6 id="arguments">Arguments:</h6>
+
+<ul>
+<li><strong>src:</strong>  archivo nuevo.</li>
+<li><strong>dst:</strong>  archivo a reemplazar.</li>
+<li><strong>attempts:</strong>  intentos.</li>
+<li><strong>wait_s:</strong>  segundos entre intentos.</li>
+<li><strong>sleep:</strong>  funcion de espera (para las pruebas); por defecto <code>time.sleep</code>.</li>
+</ul>
+
+<h6 id="returns">Returns:</h6>
+
+<blockquote>
+  <p>Si se reemplazo.</p>
+</blockquote>
+
+<h6 id="efectos">Efectos:</h6>
+
+<blockquote>
+  <p>Disco: renombra <code>src</code> sobre <code>dst</code>.</p>
+</blockquote>
+</div>
+
+
+                </section>
                 <section id="main">
                     <div class="attr function">
             
@@ -187,11 +231,15 @@ serie solo pide lo que falta y al terminar sin errores se marca completa.</p>
     
             <div class="docstring"><p>Valida el destino, fija <code>DATABASE_PATH</code> en ese archivo y corre la descarga.</p>
 
+<p>Con <code>--via-copy</code> (lo usa la tarea programada) trabaja sobre una copia <code>&lt;archivo&gt;_next.db</code> y al
+final la cambia por el archivo, para no escribir en el que la pestana puede estar leyendo.</p>
+
 <h6 id="efectos">Efectos:</h6>
 
 <blockquote>
   <p>Red: CoinGecko y Bitunix (publicas). Disco: crea la carpeta del archivo y escribe en ese
-  archivo SQLite (nunca en la base del bot). Cambia <code>DATABASE_PATH</code> solo en este proceso.</p>
+  archivo SQLite o en su copia (nunca en la base del bot). Cambia <code>DATABASE_PATH</code> solo en
+  este proceso.</p>
 </blockquote>
 </div>
 

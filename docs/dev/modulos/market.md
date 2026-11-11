@@ -99,12 +99,12 @@ y reintentos con backoff.
 
 - **Referencia pdoc:** [`api/app/market/bitunix_rest.html`](../api/app/market/bitunix_rest.html)
 - **Importa (internos):** `app.core.http`, `app.core.logging`, `app.market.rate_limiter`
-- **Lo importan:** 13 módulos (core 1, execution 1, main 1, market 4, scripts 4, trading 2)
+- **Lo importan:** 14 módulos (core 1, execution 1, main 1, market 4, scripts 5, trading 2)
 - **Configuración que lee:** ninguno
 - **Tablas que lee:** ninguno
 - **Tablas que escribe:** ninguno
 - **Tablas que crea o altera:** ninguno
-- **Pruebas que lo importan o citan:** `tests/integration/test_bitunix_live.py`, `tests/unit/test_bitunix_rest.py`
+- **Pruebas que lo importan o citan:** `tests/integration/test_bitunix_live.py`, `tests/unit/test_bitunix_rest.py`, `tests/unit/test_record_market_data.py`
 <!-- /hechos:app/market/bitunix_rest.py -->
 
 ### `app/market/bitunix_ws.py`

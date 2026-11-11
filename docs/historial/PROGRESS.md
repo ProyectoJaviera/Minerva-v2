@@ -2465,3 +2465,19 @@ Corrida de `scripts/v2_round4.py` (63 min, 324 variantes en 4h). Resultado en `d
 
 Pedido del dueño: sumar la más cercana de la ronda 4 a la prueba hacia adelante. `scripts/v2_forward_test.py` sigue ahora también `r4|mom42|nada|t42_s25|limit` y su control al azar, contando operaciones desde el 2026-11-11 00:00 UTC, con el mismo criterio de revisión (60 operaciones o el 2027-05-10; sigue en estudio solo con PF ≥ 1.2 y sobre su control). Reglas sin cambios respecto de la ronda 4. Probado sobre una copia del archivo de historial.
 - **Cambios de comportamiento respecto de la v1.0:** ninguno.
+
+### Sección «Indicadores»: sin corte de datos y calentamiento previo (2026-11-11)
+
+- **Corte quitado** (decisión del dueño): la pestaña usa todo el historial; el corte del 2026-10-01 ya no protegía nada porque el examen de la ronda 3 usó esos datos.
+- **Arreglo:** con un rango corto (p. ej. un mes en 4h, ~180 velas) el calentamiento de 500 velas se comía todo el periodo y daba 0 operaciones. Ahora se cargan las velas de calentamiento antes de la fecha de inicio y solo cuentan las operaciones que entran desde esa fecha. Efecto de borde aceptado: una posición abierta antes del inicio puede bloquear una entrada justo después (una posición a la vez).
+- **Cambios de comportamiento respecto de la v1.0:** ninguno.
+
+## v2: captura de datos hacia adelante y tareas programadas (2026-11-11)
+
+Pedido: el dueño pidió grabar el order book y tareas programadas que capturen datos útiles para decidir si entrar o no.
+
+- **`scripts/record_market_data.py`** (nuevo): una foto por llamada en `history/market_v2.db` (aparte de la base del bot y del historial). `orderbook`: `GET /api/v1/futures/market/depth` con `limit=50` (verificado contra la API pública el 2026-11-11: `asks`/`bids` como `[precio, cantidad]` en texto); guarda mejor compra y venta, precio medio, spread en pb, cantidades de los 5, 20 y 50 primeros niveles, desequilibrio en esos tramos, nocional de 50 niveles y los 20 primeros niveles crudos. `funding`: el funding vigente de todos los símbolos del universo, con su JSON crudo (trae también precio de marca, índice y próximo cobro). `feargreed`: el valor del día de alternative.me. Un error en un símbolo no corta a los demás; todo queda en `capture_log`.
+- **Decisión:** 50 niveles cada 5 minutos (unos 2,5 MB al día para 10 monedas). El libro completo (`limit=max`, ~28 000 niveles y ~800 KB por llamada) multiplicaría el tráfico por cientos sin ganar mucho para decisiones de entrada.
+- **`scripts/update_history_file.py --via-copy`**: actualiza una copia y la cambia por el archivo al final (reintenta si la pestaña lo tiene abierto), para no escribir en el archivo que se está leyendo en modo inmutable.
+- **Tareas registradas en el PC del dueño** con `scripts/register_v2_data_tasks.ps1` (usuario actual, sin administrador, `conhost --headless`): `MinervaV2OrderBook` (5 min), `MinervaV2Funding` (1 h), `MinervaV2FearGreed` (diaria 02:10) y `MinervaV2HistoryUpdate` (6 h). Probadas a mano: código 0 y datos en `history/market_v2.db` (10 fotos del libro, 10 fundings, Fear & Greed 29 «Fear»).
+- **Cambios de comportamiento respecto de la v1.0:** ninguno.

@@ -9,9 +9,10 @@ a esa combinación sobre el historial de Bitunix.
 - **Es exploratoria.** Sirve para mirar ideas. No es una ronda preregistrada, no se guarda en la base y no
   pasa por los criterios de la Fase 2. Probar muchas combinaciones y quedarse con la mejor sobreestima el
   resultado (sesgo de selección): una idea que se vea bien aquí hay que llevarla a un preregistro nuevo.
-- **No usa velas desde el 2026-10-01.** Estaban reservadas para las rondas preregistradas; el examen de los
-  finalistas de la ronda 3 ya las usó, así que quitar el corte (`app/explorer/service.py::RESERVED_FROM`) es
-  decisión del dueño.
+- **Usa todo el historial del archivo.** El corte del 2026-10-01 se quitó el 2026-11-11 a pedido del dueño:
+  esos datos ya se habían usado en el examen de los finalistas de la ronda 3.
+- **Rangos cortos:** con una fecha de inicio, se cargan antes las velas de calentamiento y solo cuentan las
+  operaciones que entran desde esa fecha (antes, un mes en 4h quedaba sin señales).
 - **No toca la base del bot.** Lee un archivo de historial aparte, en modo de solo lectura.
 
 ## Cómo se combinan los indicadores
@@ -93,7 +94,7 @@ Sin archivo, la pestaña lo dice y explica cómo crearlo.
 ## API
 
 - `GET /api/explorer/options`: indicadores (con su tipo), salidas, ventana, temporalidades y series
-  disponibles (solo hasta el corte).
+  disponibles.
 - `GET /api/explorer/run?symbols=BTCUSDT&timeframe=1h&indicators=sfp&indicators=ema&window=5&exit=s2_tp2r` (más
   `min_agree`; con `exit=pct`, `sl_pct`, `tp_pct` y `trail_pct`; y `start` y `end`, fechas `AAAA-MM-DD` UTC; `end` excluida): el resultado exploratorio. Hasta 12 monedas y sin
   límite de indicadores; corre de a una prueba por vez, en un hilo aparte para no frenar el bot.

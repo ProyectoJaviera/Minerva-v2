@@ -6,7 +6,7 @@ import { mockFetch, withQueryClient } from "./testUtils";
 const NOTE = "Prueba EXPLORATORIA: no es una ronda preregistrada.";
 
 const OPTIONS = {
-  available: true, detail: null, note: NOTE, reserved_from: "2026-10-01",
+  available: true, detail: null, note: NOTE,
   timeframes: [
     { id: "15m", label: "15m" }, { id: "1h", label: "1h" }, { id: "4h", label: "4h" },
     { id: "1d", label: "1D" }, { id: "1w", label: "1S" },
@@ -39,7 +39,7 @@ const RESULT = {
   exploratory: true, note: NOTE,
   params: { symbols: ["BTCUSDT"], timeframe: "1d", indicators: ["sfp", "fvg", "rf", "ema"], window: 5,
             exit: "s3_trail3", exit_label: "SL 3 ATR con trailing de 3 ATR", min_agree: 3, name: "mix|sfp+fvg+rf+ema|w5|s3_trail3" },
-  period: { start: "2022-04-17", end: "2026-09-30", reserved_from: "2026-10-01" },
+  period: { start: "2022-04-17", end: "2026-09-30" },
   result: SUMMARY,
   control: { ...SUMMARY, winrate: 0.35, trades: 41 },
   by_symbol: [{ key: "BTCUSDT", trades: 40, winrate: 0.375, profit_factor: 0.93, net_pnl_usdt: -1.2 }],
