@@ -2499,3 +2499,13 @@ Pedido: el dueño pidió limpiar la documentación y actualizarla a la v2.
 - Para que el dueño vea, sin abrir archivos, si las tareas de captura funcionan: `GET /api/explorer/data-status` (`app/explorer/data_status.py`) lee `history/market_v2.db` (`MARKET_DATA_DB`, nuevo ajuste, con `mode=ro`) y la última vela de cada marco de `history/history_v2.db`, y la tarjeta muestra la antigüedad de cada captura (en ámbar si se atrasa), los errores de 24 h y la última foto del libro por moneda. Sin resultados de estrategias. La API pasa a 25 rutas (las tres de la pestaña son `GET`).
 - `scripts/record_market_data.py` toma su destino por defecto de `MARKET_DATA_DB`.
 - **Cambios de comportamiento respecto de la v1.0:** ninguno.
+
+### Pestaña «Estudio» en el dashboard (2026-11-11)
+
+Pedido: el dueño quiere ver la investigación de la v2 desde el dashboard, sin entrar al servidor.
+
+- **`app/research/forward.py`** (nuevo): la prueba hacia adelante pasa del script a un módulo compartido (`tracked`, `compute_forward`, `review_state`). Mismas 4 estrategias, controles, fechas de inicio y criterio de revisión; verificado contra la copia real del historial con las mismas operaciones que el script anterior. `scripts/v2_forward_test.py` ahora lo usa.
+- **`GET /api/study/forward`** (`app/api/routes/study.py`): solo lectura del archivo de historial (modo inmutable); el cálculo (~1 min) corre en un hilo aparte y se guarda hasta que el archivo cambie. Devuelve también el resumen fijo de las rondas (`app/research/study_summary.py`). La API pasa a 26 rutas, todavía solo tres escriben.
+- **Pestaña «Estudio»** (`frontend/src/StudyTab.tsx`): una tarjeta por estrategia con sus números y los del control, la etiqueta de revisión y la lista de operaciones; debajo, las 4 rondas y la conclusión. El dashboard pasa a siete pestañas.
+- No son señales en vivo: el bot no opera estas estrategias.
+- **Cambios de comportamiento respecto de la v1.0:** ninguno (pestaña y ruta nuevas de solo lectura).

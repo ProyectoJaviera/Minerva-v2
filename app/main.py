@@ -33,6 +33,7 @@ from app.api.routes import (
     positions,
     risk,
     shadow_trades,
+    study,
     trades,
     universe,
 )
@@ -254,6 +255,7 @@ app.include_router(risk.router)
 app.include_router(universe.router)
 app.include_router(backtest.router)
 app.include_router(explorer.router)
+app.include_router(study.router)
 # Controles del dashboard (pausar, reanudar, kill switch): las unicas escrituras de control de la
 # API; login + mismo origen + JSON + palabra de confirmacion + auditoria (ver control.py).
 app.include_router(control.router)

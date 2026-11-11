@@ -797,3 +797,74 @@ export function useDataStatus() {
     queryFn: () => apiFetch<DataStatus>("/api/explorer/data-status"),
   });
 }
+
+// --- Pestana «Estudio» (v2): prueba hacia adelante y resumen de las rondas -----------------------
+
+export interface StudyStats {
+  trades: number;
+  pf: number | null;
+  pnl_usdt: number;
+  win_rate_pct: number | null;
+}
+
+export interface StudyTrade {
+  entry_time: string;
+  exit_time: string;
+  symbol: string;
+  side: string;
+  entry_price: number;
+  exit_price: number;
+  close_reason: string;
+  pnl_usdt: number;
+}
+
+export interface StudyStrategy {
+  name: string;
+  label: string;
+  origin: string;
+  start: string;
+  days: number;
+  stats: StudyStats;
+  control: StudyStats;
+  review: { due: boolean; verdict: string };
+  open_trades: number;
+  trade_list: StudyTrade[];
+}
+
+export interface StudyForwardResult {
+  available: boolean;
+  detail?: string;
+  data_until?: string;
+  computed_at?: string;
+  stale_symbols?: string[];
+  review?: { trades: number; date: string; min_pf: number };
+  strategies?: StudyStrategy[];
+}
+
+export interface StudyRound {
+  id: string;
+  date: string;
+  title: string;
+  doc: string;
+  tested: string;
+  result: string;
+  passed: number;
+  total: number;
+}
+
+export interface StudyForward {
+  status: "missing" | "computing" | "ready" | "error";
+  detail?: string;
+  result?: StudyForwardResult | null;
+  rounds: StudyRound[];
+  conclusion: string;
+}
+
+export function useStudyForward() {
+  return useQuery({
+    queryKey: ["study-forward"],
+    queryFn: () => apiFetch<StudyForward>("/api/study/forward"),
+    // Mientras el servidor calcula (alrededor de un minuto), vuelve a preguntar cada 10 s.
+    refetchInterval: (query) => (query.state.data?.status === "computing" ? 10_000 : false),
+  });
+}

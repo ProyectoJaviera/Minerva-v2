@@ -191,12 +191,12 @@ flowchart LR
     HE --> OP["Alerta externa<br/>y comprobación de Docker"]
 ```
 
-- **API:** 25 rutas en total, **solo tres escriben**: login, logout y `POST /api/control/{pause|resume|kill}`
-  (las tres de la sección «Indicadores» de la v2 son `GET`: leen archivos de solo lectura).
+- **API:** 26 rutas en total, **solo tres escriben**: login, logout y `POST /api/control/{pause|resume|kill}`
+  (las tres de la sección «Indicadores» y la de «Estudio», de la v2, son `GET`: leen archivos de solo lectura).
   Sin login solo se sirven `GET /health`, `GET /positions` y `GET /trades` (con listas blancas de campos). Las rutas
   están en [`app/api/routes/`](../app/api/routes/).
 - **Dashboard:** seis pestañas (*Resumen*, *Cuenta paper*, *Brazo ejecutado*, *Riesgo y controles*, *Universo y
-  backtest* e *Indicadores*, esta última exploratoria, de la v2). Ver [Uso diario](USO.md#el-dashboard).
+  backtest*, *Indicadores* (exploratoria) y *Estudio* (prueba hacia adelante y resumen de las rondas), estas dos de la v2). Ver [Uso diario](USO.md#el-dashboard).
 - **Telegram:** siete comandos y avisos. Ver [Uso diario](USO.md#telegram).
 - **La puerta de resultados** ([`app/trading/reveal.py`](../app/trading/reveal.py)) decide si un canal puede mostrar PnL,
   saldo, precios de salida o motivos de cierre: solo si el *gate* de la medición está abierto **y** existe el registro
@@ -248,6 +248,7 @@ flowchart LR
     FG["alternative.me<br/>Fear & Greed"] --> RM
     RM --> MD[("history/market_v2.db<br/>libro, funding, F&G")]
     HF --> EX["Pestaña Indicadores<br/>app/explorer"]
+    HF --> ST["Pestaña Estudio<br/>app/research/forward.py"]
     HF --> RS["Rondas de investigación<br/>app/research + scripts/v2_*"]
     HF --> FW["Prueba hacia adelante<br/>scripts/v2_forward_test.py"]
     EX --> BT["Motor de backtest<br/>app/backtesting"]
@@ -261,6 +262,7 @@ flowchart LR
 | `app/candidates/` | Los tres candidatos del preregistro y su control con dirección al azar |
 | `app/research/` | Las rondas exploratorias: combinaciones de gatillo y filtros (`combos.py`), ronda 3 (`round3.py`, FVG, funding, régimen de BTC, orden límite) y ronda 4 (`round4.py`, fuerza relativa, squeeze, volumen, salida por tiempo) |
 | `app/explorer/` + `app/api/routes/explorer.py` | La pestaña Indicadores: confluencia de los indicadores elegidos (`confluence.py`) y backtest a pedido sobre el historial local, en un hilo aparte y de a una prueba por vez ([guía](v2/SECCION_INDICADORES.md)) |
+| `app/research/forward.py` + `app/api/routes/study.py` | La pestaña Estudio: la prueba hacia adelante de las estrategias en estudio (la misma de `scripts/v2_forward_test.py`), calculada en un hilo aparte y guardada hasta que cambie el historial, y el resumen fijo de las rondas (`study_summary.py`) |
 | `app/backtesting/` | El mismo motor de la Fase 2, con tres opciones nuevas que la v1 no usa: omitir la entrada si el `open` ya cruzó el SL, entrada con orden límite y salida por tiempo |
 | `scripts/update_history_file.py` | Mantiene `history/history_v2.db` (copia y reemplazo para no escribir en el archivo que se está leyendo) |
 | `scripts/record_market_data.py` | Graba hacia adelante el libro de órdenes (50 niveles), el funding vigente y el Fear & Greed en `history/market_v2.db` |

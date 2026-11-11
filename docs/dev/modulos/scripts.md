@@ -1074,11 +1074,11 @@ son los del preregistro congelado; no se cambian.
 
 **Responsabilidad.** La prueba hacia adelante de las estrategias en estudio (los tres finalistas de la ronda 3 y la
 fuerza relativa semanal de la ronda 4) y sus controles al azar: las corre
-con el motor de backtest sobre el archivo de historial local y cuenta solo las operaciones abiertas desde el 2026-11-10
+con el motor de backtest sobre el archivo de historial local y cuenta solo las operaciones abiertas desde su fecha de inicio (2026-11-10 o 2026-11-11)
 (`docs/v2/PAPER_V2_RONDA3.md`).
 
-**Funciones y clases clave.** `last_closed_ms()` (hasta dónde hay velas de 4h de cada símbolo), `summarize()` y
-`main()` (`--trades` lista cada operación).
+**Funciones y clases clave.** `main()` (`--trades` lista cada operación); el cálculo vive en
+`app/research/forward.py` (`compute_forward`), el mismo que usa la pestaña Estudio.
 
 **Invariantes — no romper.** Solo lectura (`ReadOnlyDatabase`, modo inmutable) y sin red. Las combinaciones, el
 universo (`SYMBOLS`), la fecha de inicio y el criterio de revisión (60 operaciones o el 2027-05-10) están congelados.
@@ -1090,10 +1090,10 @@ Un símbolo que deje de actualizarse se informa como atrasado.
 **Hechos derivados del código** (los escribe `scripts/build_dev_docs.py`; no se editan):
 
 - **Referencia pdoc:** [`api/scripts/v2_forward_test.html`](../api/scripts/v2_forward_test.html)
-- **Importa (internos):** `app.backtesting.engine`, `app.backtesting.metrics`, `app.config`, `app.explorer.service`, `app.market.ohlcv_history`, `app.persistence.repositories.ohlcv_repo`, `app.research.round3`, `app.research.round4`, `app.strategies.base`
+- **Importa (internos):** `app.config`, `app.explorer.service`, `app.research.forward`
 - **Lo importan:** ninguno
 - **Configuración que lee:** `EXPLORER_HISTORY_DB`
-- **Tablas que lee:** `ohlcv_cache`
+- **Tablas que lee:** ninguno
 - **Tablas que escribe:** ninguno
 - **Tablas que crea o altera:** ninguno
 - **Pruebas que lo importan o citan:** ninguno

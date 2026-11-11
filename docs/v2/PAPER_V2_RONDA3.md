@@ -28,6 +28,9 @@ Para ver el estado, en la carpeta del proyecto:
     python scripts/update_history_file.py     (baja las velas nuevas; red pública de Bitunix y CoinGecko)
     python scripts/v2_forward_test.py --trades
 
+El mismo estado se ve en el dashboard, en la pestaña **Estudio**, que se recalcula sola cada vez que la tarea
+`MinervaV2HistoryUpdate` actualiza el historial (cada 6 h).
+
 ## Criterio de lectura (fijado el 2026-11-10, antes de la primera corrida con datos nuevos)
 
 - Cada finalista se evalúa **una vez**, cuando junte **60 operaciones** hacia adelante o el **2027-05-10**, lo que

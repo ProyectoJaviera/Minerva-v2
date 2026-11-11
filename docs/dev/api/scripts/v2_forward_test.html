@@ -29,42 +29,6 @@
             <h2>API Documentation</h2>
                 <ul class="memberlist">
             <li>
-                    <a class="variable" href="#START_MS">START_MS</a>
-            </li>
-            <li>
-                    <a class="variable" href="#FORWARD_START">FORWARD_START</a>
-            </li>
-            <li>
-                    <a class="variable" href="#REVIEW_TRADES">REVIEW_TRADES</a>
-            </li>
-            <li>
-                    <a class="variable" href="#REVIEW_DATE">REVIEW_DATE</a>
-            </li>
-            <li>
-                    <a class="variable" href="#TIMEFRAME">TIMEFRAME</a>
-            </li>
-            <li>
-                    <a class="variable" href="#STEP_MS">STEP_MS</a>
-            </li>
-            <li>
-                    <a class="variable" href="#SYMBOLS">SYMBOLS</a>
-            </li>
-            <li>
-                    <a class="variable" href="#R3_START">R3_START</a>
-            </li>
-            <li>
-                    <a class="variable" href="#R4_START">R4_START</a>
-            </li>
-            <li>
-                    <a class="function" href="#tracked">tracked</a>
-            </li>
-            <li>
-                    <a class="function" href="#summarize">summarize</a>
-            </li>
-            <li>
-                    <a class="function" href="#last_closed_ms">last_closed_ms</a>
-            </li>
-            <li>
                     <a class="function" href="#main">main</a>
             </li>
     </ul>
@@ -86,20 +50,19 @@
 
                         <div class="docstring"><p>Prueba hacia adelante (paper por repeticion) de las estrategias en estudio de la v2.</p>
 
-<p>Las tres combinaciones de <code>docs/v2/PREREGISTRO_V2_RONDA3.md</code> (congeladas el 2026-11-10) y la
-fuerza relativa semanal de la ronda 4 (<code>r4|mom42|nada|t42_s25|limit</code>, congelada el 2026-11-11, a
-pedido del dueno), cada una con su control al azar. Este script las corre con el motor de backtest
-sobre el archivo de historial local y cuenta solo las operaciones ABIERTAS desde su fecha de
-congelamiento (00:00 UTC): velas que no existian cuando se fijaron las reglas. Como el motor es
-determinista y causal, eso equivale a haberlas operado en paper desde ese dia (incluida la entrada
-con orden limite, que el bot en vivo no simula), sin tener que dejar un proceso corriendo.</p>
+<p>Las tres finalistas de <code>docs/v2/PREREGISTRO_V2_RONDA3.md</code> (congeladas el 2026-11-10) y la fuerza
+relativa semanal de la ronda 4 (congelada el 2026-11-11), cada una con su control al azar. La
+logica vive en <code><a href="../app/research/forward.html">app.research.forward</a></code> (la misma que muestra la pestana «Estudio» del dashboard):
+corre las estrategias con el motor de backtest sobre el archivo de historial local y cuenta solo
+las operaciones ABIERTAS desde su fecha de congelamiento. Como el motor es determinista y causal,
+eso equivale a haberlas operado en paper desde ese dia, sin dejar un proceso corriendo.</p>
 
-<p>Criterio de lectura (fijado en <code>docs/v2/PAPER_V2_RONDA3.md</code> antes de la primera corrida): se
-evalua cada estrategia cuando junte 60 operaciones o el 2027-05-10, lo que ocurra primero.</p>
+<p>Criterio de lectura (<code>docs/v2/PAPER_V2_RONDA3.md</code>): cada estrategia se evalua una vez, al juntar
+60 operaciones o el 2027-05-10; sigue en estudio solo con PF &gt;= 1.2 y por encima de su control.</p>
 
 <p>Solo lectura: abre el archivo de historial (<code>EXPLORER_HISTORY_DB</code>, por defecto
-<code>./history/history_v2.db</code>) en modo inmutable; sin red. Para tener velas nuevas hay que actualizar
-antes ese archivo:</p>
+<code>./history/history_v2.db</code>) en modo inmutable; sin red. La tarea <code>MinervaV2HistoryUpdate</code>
+(<code>scripts/register_v2_data_tasks.ps1</code>) lo actualiza cada 6 horas; a mano:</p>
 
 <pre><code>python scripts/update_history_file.py
 python scripts/v2_forward_test.py [--path history/history_v2.db] [--trades]
@@ -110,198 +73,6 @@ python scripts/v2_forward_test.py [--path history/history_v2.db] [--trades]
                 
                 
             </section>
-                <section id="START_MS">
-                    <div class="attr variable">
-            <span class="name">START_MS</span>        =
-<span class="default_value">1640995200000</span>
-
-        
-    </div>
-    <a class="headerlink" href="#START_MS"></a>
-    
-    
-
-                </section>
-                <section id="FORWARD_START">
-                    <div class="attr variable">
-            <span class="name">FORWARD_START</span>        =
-<span class="default_value">datetime.datetime(2026, 11, 10, 0, 0, tzinfo=datetime.timezone.utc)</span>
-
-        
-    </div>
-    <a class="headerlink" href="#FORWARD_START"></a>
-    
-    
-
-                </section>
-                <section id="REVIEW_TRADES">
-                    <div class="attr variable">
-            <span class="name">REVIEW_TRADES</span>        =
-<span class="default_value">60</span>
-
-        
-    </div>
-    <a class="headerlink" href="#REVIEW_TRADES"></a>
-    
-    
-
-                </section>
-                <section id="REVIEW_DATE">
-                    <div class="attr variable">
-            <span class="name">REVIEW_DATE</span>        =
-<span class="default_value">datetime.datetime(2027, 5, 10, 0, 0, tzinfo=datetime.timezone.utc)</span>
-
-        
-    </div>
-    <a class="headerlink" href="#REVIEW_DATE"></a>
-    
-    
-
-                </section>
-                <section id="TIMEFRAME">
-                    <div class="attr variable">
-            <span class="name">TIMEFRAME</span>        =
-<span class="default_value">&#39;4h&#39;</span>
-
-        
-    </div>
-    <a class="headerlink" href="#TIMEFRAME"></a>
-    
-    
-
-                </section>
-                <section id="STEP_MS">
-                    <div class="attr variable">
-            <span class="name">STEP_MS</span>        =
-<span class="default_value">14400000</span>
-
-        
-    </div>
-    <a class="headerlink" href="#STEP_MS"></a>
-    
-    
-
-                </section>
-                <section id="SYMBOLS">
-                    <div class="attr variable">
-            <span class="name">SYMBOLS</span>        =
-<input id="SYMBOLS-view-value" class="view-value-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
-            <label class="view-value-button pdoc-button" for="SYMBOLS-view-value"></label><span class="default_value">(&#39;BNBUSDT&#39;, &#39;BTCUSDT&#39;, &#39;DOGEUSDT&#39;, &#39;ETHUSDT&#39;, &#39;HYPEUSDT&#39;, &#39;SOLUSDT&#39;, &#39;TRXUSDT&#39;, &#39;XMRUSDT&#39;, &#39;XRPUSDT&#39;, &#39;ZECUSDT&#39;)</span>
-
-        
-    </div>
-    <a class="headerlink" href="#SYMBOLS"></a>
-    
-    
-
-                </section>
-                <section id="R3_START">
-                    <div class="attr variable">
-            <span class="name">R3_START</span>        =
-<span class="default_value">datetime.datetime(2026, 11, 10, 0, 0, tzinfo=datetime.timezone.utc)</span>
-
-        
-    </div>
-    <a class="headerlink" href="#R3_START"></a>
-    
-    
-
-                </section>
-                <section id="R4_START">
-                    <div class="attr variable">
-            <span class="name">R4_START</span>        =
-<span class="default_value">datetime.datetime(2026, 11, 11, 0, 0, tzinfo=datetime.timezone.utc)</span>
-
-        
-    </div>
-    <a class="headerlink" href="#R4_START"></a>
-    
-    
-
-                </section>
-                <section id="tracked">
-                    <div class="attr function">
-            
-        <span class="def">def</span>
-        <span class="name">tracked</span><span class="signature pdoc-code multiline">(<span class="return-annotation">) -> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n"><a href="../app/strategies/base.html#BaseStrategy">app.strategies.base.BaseStrategy</a></span><span class="p">,</span> <span class="n"><a href="../app/strategies/base.html#BaseStrategy">app.strategies.base.BaseStrategy</a></span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">]]</span>:</span></span>
-
-        
-    </div>
-    <a class="headerlink" href="#tracked"></a>
-    
-            <div class="docstring"><p>Las estrategias en estudio: <code>(estrategia, control al azar, inicio de la prueba)</code>.</p>
-
-<h6 id="returns">Returns:</h6>
-
-<blockquote>
-  <p>Las tres finalistas de la ronda 3 y la fuerza relativa semanal de la ronda 4.</p>
-</blockquote>
-</div>
-
-
-                </section>
-                <section id="summarize">
-                    <div class="attr function">
-            
-        <span class="def">def</span>
-        <span class="name">summarize</span><span class="signature pdoc-code condensed">(<span class="param"><span class="n">name</span><span class="p">:</span> <span class="nb">str</span>, </span><span class="param"><span class="n">trades</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n"><a href="../app/backtesting/engine.html#RawTrade">app.backtesting.engine.RawTrade</a></span><span class="p">]</span></span><span class="return-annotation">) -> <span class="nb">str</span>:</span></span>
-
-        
-    </div>
-    <a class="headerlink" href="#summarize"></a>
-    
-            <div class="docstring"><p>Linea de resumen de las operaciones hacia adelante de una combinacion.</p>
-
-<h6 id="arguments">Arguments:</h6>
-
-<ul>
-<li><strong>name:</strong>  nombre de la combinacion.</li>
-<li><strong>trades:</strong>  operaciones abiertas desde el inicio de su prueba.</li>
-</ul>
-
-<h6 id="returns">Returns:</h6>
-
-<blockquote>
-  <p>Operaciones, PF neto, PnL neto y porcentaje de ganadoras.</p>
-</blockquote>
-</div>
-
-
-                </section>
-                <section id="last_closed_ms">
-                    <div class="attr function">
-            
-        <span class="def">async def</span>
-        <span class="name">last_closed_ms</span><span class="signature pdoc-code condensed">(<span class="param"><span class="n">db</span><span class="p">:</span> <span class="n"><a href="../app/explorer/service.html#ReadOnlyDatabase">app.explorer.service.ReadOnlyDatabase</a></span>, </span><span class="param"><span class="n">symbol</span><span class="p">:</span> <span class="nb">str</span></span><span class="return-annotation">) -> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span>:</span></span>
-
-        
-    </div>
-    <a class="headerlink" href="#last_closed_ms"></a>
-    
-            <div class="docstring"><p>Cierre (ms) de la ultima vela de 4h que el archivo tiene en LAST y en MARK para <code>symbol</code>.</p>
-
-<h6 id="arguments">Arguments:</h6>
-
-<ul>
-<li><strong>db:</strong>  archivo de historial.</li>
-<li><strong>symbol:</strong>  simbolo.</li>
-</ul>
-
-<h6 id="returns">Returns:</h6>
-
-<blockquote>
-  <p>El instante de cierre, o <code>None</code> si falta alguna de las dos series.</p>
-</blockquote>
-
-<h6 id="efectos">Efectos:</h6>
-
-<blockquote>
-  <p>Lee <code>ohlcv_cache</code> del archivo de historial.</p>
-</blockquote>
-</div>
-
-
-                </section>
                 <section id="main">
                     <div class="attr function">
             
@@ -312,7 +83,7 @@ python scripts/v2_forward_test.py [--path history/history_v2.db] [--trades]
     </div>
     <a class="headerlink" href="#main"></a>
     
-            <div class="docstring"><p>Corre la prueba hacia adelante e imprime el estado de cada finalista y de su control.</p>
+            <div class="docstring"><p>Corre la prueba hacia adelante e imprime el estado de cada estrategia y de su control.</p>
 
 <h6 id="raises">Raises:</h6>
 

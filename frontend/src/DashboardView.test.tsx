@@ -309,13 +309,13 @@ describe("DashboardView: pestanas (Fase 5)", () => {
 
   const tab = (name: string) => screen.getByRole("tab", { name });
 
-  it("ofrece las seis secciones y abre en Resumen", async () => {
+  it("ofrece las siete secciones y abre en Resumen", async () => {
     open();
 
     await screen.findByText("Avance de la medicion");
     expect(screen.getAllByRole("tab").map((t) => t.textContent)).toEqual([
       "Resumen", "Cuenta paper", "Brazo ejecutado", "Riesgo y controles", "Universo y backtest",
-      "Indicadores",
+      "Indicadores", "Estudio",
     ]);
     expect(tab("Resumen")).toHaveAttribute("aria-selected", "true");
     expect(screen.getByRole("tabpanel")).toHaveAccessibleName("Resumen");

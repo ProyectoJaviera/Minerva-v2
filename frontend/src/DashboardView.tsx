@@ -3,6 +3,7 @@ import { AccountTab } from "./AccountTab";
 import { ArmTab } from "./ArmTab";
 import { IndicatorsTab } from "./IndicatorsTab";
 import { RiskTab } from "./RiskTab";
+import { StudyTab } from "./StudyTab";
 import { SummaryTab } from "./SummaryTab";
 import { UniverseTab } from "./UniverseTab";
 import { useHealth, useLogout } from "./api";
@@ -20,6 +21,8 @@ const TABS: TabDef[] = [
   { id: "universe", label: "Universo y backtest" },
   // v2: pruebas manuales y exploratorias de indicadores sobre el historial local.
   { id: "indicators", label: "Indicadores" },
+  // v2: prueba hacia adelante de las estrategias en estudio y resumen de las rondas.
+  { id: "study", label: "Estudio" },
 ];
 
 function ActiveTab({ id }: { id: string }) {
@@ -34,6 +37,8 @@ function ActiveTab({ id }: { id: string }) {
       return <UniverseTab />;
     case "indicators":
       return <IndicatorsTab />;
+    case "study":
+      return <StudyTab />;
     default:
       return <SummaryTab />;
   }

@@ -96,7 +96,7 @@ caché de columnas.
 
 - **Referencia pdoc:** [`api/app/research/round3.html`](../api/app/research/round3.html)
 - **Importa (internos):** `app.candidates.common`, `app.candidates.sfp_reversal`, `app.indicators._pine`, `app.research.combos`, `app.strategies.base`
-- **Lo importan:** `app.explorer.confluence`, `app.research.round4`, `scripts.v2_forward_test`, `scripts.v2_round3`, `scripts.v2_round3_reserved`, `scripts.v2_round4`
+- **Lo importan:** `app.explorer.confluence`, `app.research.forward`, `app.research.round4`, `scripts.v2_round3`, `scripts.v2_round3_reserved`, `scripts.v2_round4`
 - **Configuración que lee:** ninguno
 - **Tablas que lee:** ninguno
 - **Tablas que escribe:** ninguno
@@ -126,10 +126,65 @@ la serie no está en el contexto, no hay señales de fuerza relativa.
 
 - **Referencia pdoc:** [`api/app/research/round4.html`](../api/app/research/round4.html)
 - **Importa (internos):** `app.candidates.common`, `app.indicators._pine`, `app.research.combos`, `app.research.round3`, `app.strategies.base`
-- **Lo importan:** `scripts.v2_forward_test`, `scripts.v2_round4`
+- **Lo importan:** `app.research.forward`, `scripts.v2_round4`
 - **Configuración que lee:** ninguno
 - **Tablas que lee:** ninguno
 - **Tablas que escribe:** ninguno
 - **Tablas que crea o altera:** ninguno
 - **Pruebas que lo importan o citan:** `tests/unit/test_research_round4.py`
 <!-- /hechos:app/research/round4.py -->
+
+### `app/research/forward.py`
+
+**Responsabilidad.** La prueba hacia adelante de la v2, compartida por `scripts/v2_forward_test.py` y la pestaña
+«Estudio»: repite las estrategias congeladas sobre el archivo de historial y cuenta solo las operaciones abiertas desde
+su fecha de inicio, junto con su control de dirección al azar.
+
+**Funciones y clases clave.** `tracked()` (las 3 finalistas de la ronda 3 con salida `s3_trail3` y orden límite desde el
+2026-11-10, y la fuerza relativa semanal de la ronda 4 desde el 2026-11-11), `compute_forward()`, `trade_stats()`,
+`review_state()` (el criterio fijo) y `last_closed_ms()`.
+
+**Invariantes — no romper.** Estrategias, universo (`SYMBOLS`), fechas de inicio y criterio (60 operaciones o el
+2027-05-10; sigue en estudio con PF ≥ 1.2 y por encima del control) están congelados en
+`docs/v2/PAPER_V2_RONDA3.md`. Solo lectura y sin red.
+
+**Trampas conocidas.** Solo ve las velas que tenga el archivo; un símbolo que deje de actualizarse sale en
+`stale_symbols`. El calentamiento empieza en 2024 (`START_MS`), así que el cálculo tarda alrededor de un minuto.
+
+<!-- hechos:app/research/forward.py -->
+**Hechos derivados del código** (los escribe `scripts/build_dev_docs.py`; no se editan):
+
+- **Referencia pdoc:** [`api/app/research/forward.html`](../api/app/research/forward.html)
+- **Importa (internos):** `app.backtesting.engine`, `app.backtesting.metrics`, `app.config`, `app.market.ohlcv_history`, `app.persistence.database`, `app.persistence.repositories.ohlcv_repo`, `app.research.round3`, `app.research.round4`, `app.strategies.base`
+- **Lo importan:** `app.api.routes.study`, `scripts.v2_forward_test`
+- **Configuración que lee:** ninguno
+- **Tablas que lee:** `ohlcv_cache`
+- **Tablas que escribe:** ninguno
+- **Tablas que crea o altera:** ninguno
+- **Pruebas que lo importan o citan:** `tests/unit/test_study.py`
+<!-- /hechos:app/research/forward.py -->
+
+### `app/research/study_summary.py`
+
+**Responsabilidad.** Datos fijos para la pestaña «Estudio»: el resumen de las rondas de investigación de la v2.
+
+**Funciones y clases clave.** `ROUNDS` (cada ronda con fecha, qué se probó, resultado, cuántas pasaron y su informe en
+`docs/v2/`) y `CONCLUSION`.
+
+**Invariantes — no romper.** No recalcula nada: repite lo que dicen los informes publicados. Si cambia un informe, se
+actualiza aquí a mano.
+
+**Trampas conocidas.** Ninguna conocida.
+
+<!-- hechos:app/research/study_summary.py -->
+**Hechos derivados del código** (los escribe `scripts/build_dev_docs.py`; no se editan):
+
+- **Referencia pdoc:** [`api/app/research/study_summary.html`](../api/app/research/study_summary.html)
+- **Importa (internos):** ninguno
+- **Lo importan:** `app.api.routes.study`
+- **Configuración que lee:** ninguno
+- **Tablas que lee:** ninguno
+- **Tablas que escribe:** ninguno
+- **Tablas que crea o altera:** ninguno
+- **Pruebas que lo importan o citan:** `tests/unit/test_study.py`
+<!-- /hechos:app/research/study_summary.py -->

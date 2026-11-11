@@ -85,12 +85,12 @@ reescribir sus filas no. Ver [Sombras](../ZONAS_PROTEGIDAS.md#sombras) y
 
 - **Referencia pdoc:** [`api/app/persistence/database.html`](../api/app/persistence/database.html)
 - **Importa (internos):** ninguno
-- **Lo importan:** 89 módulos (api 15, backtesting 2, core 1, execution 1, explorer 1, llm 5, main 1, market 4, memory 8, news 4, persistence 16, scripts 16, telegram 3, trading 12)
+- **Lo importan:** 90 módulos (api 15, backtesting 2, core 1, execution 1, explorer 1, llm 5, main 1, market 4, memory 8, news 4, persistence 16, research 1, scripts 16, telegram 3, trading 12)
 - **Configuración que lee:** ninguno
 - **Tablas que lee:** ninguno
 - **Tablas que escribe:** ninguno
 - **Tablas que crea o altera:** `asset_universe`, `backtest_runs`, `backtest_skipped_entries`, `backtest_trades`, `backtest_verdicts`, `contract_specs_cache`, `control_audit`, `data_source_health`, `fear_greed`, `funding_cache`, `lesson_applications`, `lessons`, `lessons_reports`, `llm_logs`, `memory_entries`, `news_fetch_state`, `news_items`, `ohlcv_cache`, `ohlcv_floor`, `ohlcv_series_complete`, `ohlcv_unrepairable_gaps`, `paper_execution_log`, `risk_rejections`, `shadow_trades`, `signals`, `signals_discarded_by_sl_cap`, `system_state`, `trades`
-- **Pruebas que lo importan o citan:** 32 archivos (e2e 1, tests/ 1, unit 30)
+- **Pruebas que lo importan o citan:** 33 archivos (e2e 1, tests/ 1, unit 31)
 <!-- /hechos:app/persistence/database.py -->
 
 ### `app/persistence/llm_log_fields.py`
@@ -141,7 +141,7 @@ FastAPI no protegería nada).
 - **Tablas que lee:** ninguno
 - **Tablas que escribe:** ninguno
 - **Tablas que crea o altera:** ninguno
-- **Pruebas que lo importan o citan:** 63 archivos (e2e 10, unit 53)
+- **Pruebas que lo importan o citan:** 64 archivos (e2e 10, unit 54)
 <!-- /hechos:app/persistence/models.py -->
 
 ### `app/persistence/repositories/__init__.py`
@@ -366,12 +366,12 @@ visto no existía para esa decisión. Solo título, URL, dominio y fecha (nunca 
 
 - **Referencia pdoc:** [`api/app/persistence/repositories/ohlcv_repo.html`](../api/app/persistence/repositories/ohlcv_repo.html)
 - **Importa (internos):** `app.persistence.database`, `app.persistence.models`
-- **Lo importan:** `app.explorer.service`, `app.llm.market_features`, `app.market.funding_history`, `app.market.ohlcv_history`, `app.trading.position_monitor`, `app.trading.signal_generator`, `scripts.download_history`, `scripts.repair_ohlcv_gaps`, `scripts.update_history_file`, `scripts.v2_forward_test`
+- **Lo importan:** `app.explorer.service`, `app.llm.market_features`, `app.market.funding_history`, `app.market.ohlcv_history`, `app.research.forward`, `app.trading.position_monitor`, `app.trading.signal_generator`, `scripts.download_history`, `scripts.repair_ohlcv_gaps`, `scripts.update_history_file`
 - **Configuración que lee:** ninguno
 - **Tablas que lee:** `ohlcv_cache`, `ohlcv_floor`, `ohlcv_series_complete`, `ohlcv_unrepairable_gaps`
 - **Tablas que escribe:** `ohlcv_cache`, `ohlcv_floor`, `ohlcv_series_complete`, `ohlcv_unrepairable_gaps`
 - **Tablas que crea o altera:** ninguno
-- **Pruebas que lo importan o citan:** 20 archivos (e2e 2, unit 18)
+- **Pruebas que lo importan o citan:** 21 archivos (e2e 2, unit 19)
 <!-- /hechos:app/persistence/repositories/ohlcv_repo.py -->
 
 ### `app/persistence/repositories/paper_execution_repo.py`

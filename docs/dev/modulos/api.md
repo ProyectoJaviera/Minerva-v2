@@ -97,7 +97,7 @@ tolerarlo.
 
 - **Referencia pdoc:** [`api/app/api/deps.html`](../api/app/api/deps.html)
 - **Importa (internos):** `app.config`, `app.core.heartbeat`, `app.core.scheduler`, `app.news.collector`, `app.persistence.database`, `app.telegram.push`, `app.trading.paper_execution`, `app.trading.shadow_live_labeler`
-- **Lo importan:** 17 módulos (api 17)
+- **Lo importan:** 18 módulos (api 18)
 - **Configuración que lee:** ninguno
 - **Tablas que lee:** ninguno
 - **Tablas que escribe:** ninguno
@@ -534,7 +534,7 @@ nada de resultados.
 
 - **Referencia pdoc:** [`api/app/api/security.html`](../api/app/api/security.html)
 - **Importa (internos):** `app.api.deps`, `app.config`
-- **Lo importan:** 15 módulos (api 13, main 1, scripts 1)
+- **Lo importan:** 16 módulos (api 14, main 1, scripts 1)
 - **Configuración que lee:** `JWT_SECRET`
 - **Tablas que lee:** ninguno
 - **Tablas que escribe:** ninguno
@@ -603,3 +603,33 @@ valen; 404 si no hay archivo de historial.
 - **Tablas que crea o altera:** ninguno
 - **Pruebas que lo importan o citan:** `tests/unit/test_explorer.py`, `tests/unit/test_explorer_data_status.py`
 <!-- /hechos:app/api/routes/explorer.py -->
+
+### `app/api/routes/study.py`
+
+**Responsabilidad.** La pestaña «Estudio» de la v2: `GET /api/study/forward` (con `require_auth`) devuelve el resumen
+fijo de las rondas (`study_summary`) y el estado de la prueba hacia adelante: `missing` si no existe el archivo de
+historial, `computing` mientras se calcula, `ready` con el resultado o `error`.
+
+**Funciones y clases clave.** `forward()` (la ruta), `start_computation()` y `_compute_in_thread()` (el cálculo en un
+hilo con su propio bucle de eventos) y `_file_key()` (versión del archivo: ruta, fecha de modificación y tamaño).
+
+**Invariantes — no romper.** Solo lectura: abre el historial con `ReadOnlyDatabase` (modo inmutable) y no toca la base
+del bot. Nunca calcula dentro del bucle de eventos del servidor (tarda alrededor de un minuto) ni lanza dos cálculos a
+la vez (`_lock`).
+
+**Trampas conocidas.** La caché vive en memoria (`_state`): se pierde al reiniciar y se recalcula solo cuando cambia el
+archivo (la tarea `MinervaV2HistoryUpdate`, cada 6 h). Mientras recalcula, devuelve el resultado anterior junto con
+`computing`. Los tests deben vaciar `_state` entre casos.
+
+<!-- hechos:app/api/routes/study.py -->
+**Hechos derivados del código** (los escribe `scripts/build_dev_docs.py`; no se editan):
+
+- **Referencia pdoc:** [`api/app/api/routes/study.html`](../api/app/api/routes/study.html)
+- **Importa (internos):** `app.api.deps`, `app.api.security`, `app.config`, `app.core.logging`, `app.explorer.service`, `app.research.forward`, `app.research.study_summary`
+- **Lo importan:** `app.main`
+- **Configuración que lee:** `EXPLORER_HISTORY_DB`
+- **Tablas que lee:** ninguno
+- **Tablas que escribe:** ninguno
+- **Tablas que crea o altera:** ninguno
+- **Pruebas que lo importan o citan:** `tests/unit/test_study.py`
+<!-- /hechos:app/api/routes/study.py -->

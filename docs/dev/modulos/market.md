@@ -255,12 +255,12 @@ estaba 100 % cubierto: cientos de solicitudes desperdiciadas por reintento. Un h
 
 - **Referencia pdoc:** [`api/app/market/ohlcv_history.html`](../api/app/market/ohlcv_history.html)
 - **Importa (internos):** `app.core.logging`, `app.market.bitunix_rest`, `app.persistence.database`, `app.persistence.models`, `app.persistence.repositories.ohlcv_repo`
-- **Lo importan:** 16 módulos (backtesting 2, explorer 1, llm 1, market 1, scripts 9, trading 2)
+- **Lo importan:** 16 módulos (backtesting 2, explorer 1, llm 1, market 1, research 1, scripts 8, trading 2)
 - **Configuración que lee:** ninguno
 - **Tablas que lee:** `ohlcv_cache`, `ohlcv_floor`, `ohlcv_series_complete`, `ohlcv_unrepairable_gaps`
 - **Tablas que escribe:** `ohlcv_cache`, `ohlcv_floor`, `ohlcv_unrepairable_gaps`
 - **Tablas que crea o altera:** ninguno
-- **Pruebas que lo importan o citan:** 14 archivos (unit 14)
+- **Pruebas que lo importan o citan:** 15 archivos (unit 15)
 <!-- /hechos:app/market/ohlcv_history.py -->
 
 ### `app/market/rate_limiter.py`

@@ -55,12 +55,12 @@ es orientativo.
 
 - **Referencia pdoc:** [`api/app/explorer/service.html`](../api/app/explorer/service.html)
 - **Importa (internos):** `app.backtesting.engine`, `app.backtesting.metrics`, `app.config`, `app.explorer.confluence`, `app.market.ohlcv_history`, `app.persistence.database`, `app.persistence.repositories.ohlcv_repo`
-- **Lo importan:** `app.api.routes.explorer`, `scripts.v2_forward_test`
+- **Lo importan:** `app.api.routes.explorer`, `app.api.routes.study`, `scripts.v2_forward_test`
 - **Configuración que lee:** `BACKTEST_INITIAL_CAPITAL`, `BACKTEST_SLIPPAGE_BPS`, `DEFAULT_MARGIN_USDT`, `LEVERAGE`, `TAKER_FEE_PCT`
 - **Tablas que lee:** `ohlcv_cache`
 - **Tablas que escribe:** ninguno
 - **Tablas que crea o altera:** ninguno
-- **Pruebas que lo importan o citan:** `tests/unit/test_explorer.py`
+- **Pruebas que lo importan o citan:** `tests/unit/test_explorer.py`, `tests/unit/test_study.py`
 <!-- /hechos:app/explorer/service.py -->
 
 ### `app/explorer/confluence.py`
