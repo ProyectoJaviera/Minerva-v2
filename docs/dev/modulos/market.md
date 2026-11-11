@@ -99,7 +99,7 @@ y reintentos con backoff.
 
 - **Referencia pdoc:** [`api/app/market/bitunix_rest.html`](../api/app/market/bitunix_rest.html)
 - **Importa (internos):** `app.core.http`, `app.core.logging`, `app.market.rate_limiter`
-- **Lo importan:** `app.core.scheduler`, `app.execution.paper_backend`, `app.main`, `app.market.contract_specs`, `app.market.funding_history`, `app.market.ohlcv_history`, `app.market.universe`, `app.trading.position_monitor`, `app.trading.signal_generator`, `scripts.download_history`, `scripts.repair_ohlcv_gaps`, `scripts.v2_tradingview_check`
+- **Lo importan:** 13 módulos (core 1, execution 1, main 1, market 4, scripts 4, trading 2)
 - **Configuración que lee:** ninguno
 - **Tablas que lee:** ninguno
 - **Tablas que escribe:** ninguno
@@ -255,12 +255,12 @@ estaba 100 % cubierto: cientos de solicitudes desperdiciadas por reintento. Un h
 
 - **Referencia pdoc:** [`api/app/market/ohlcv_history.html`](../api/app/market/ohlcv_history.html)
 - **Importa (internos):** `app.core.logging`, `app.market.bitunix_rest`, `app.persistence.database`, `app.persistence.models`, `app.persistence.repositories.ohlcv_repo`
-- **Lo importan:** 14 módulos (backtesting 2, explorer 1, llm 1, market 1, scripts 7, trading 2)
+- **Lo importan:** 16 módulos (backtesting 2, explorer 1, llm 1, market 1, scripts 9, trading 2)
 - **Configuración que lee:** ninguno
 - **Tablas que lee:** `ohlcv_cache`, `ohlcv_floor`, `ohlcv_series_complete`, `ohlcv_unrepairable_gaps`
 - **Tablas que escribe:** `ohlcv_cache`, `ohlcv_floor`, `ohlcv_unrepairable_gaps`
 - **Tablas que crea o altera:** ninguno
-- **Pruebas que lo importan o citan:** 13 archivos (unit 13)
+- **Pruebas que lo importan o citan:** 14 archivos (unit 14)
 <!-- /hechos:app/market/ohlcv_history.py -->
 
 ### `app/market/rate_limiter.py`

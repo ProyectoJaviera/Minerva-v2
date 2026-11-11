@@ -68,7 +68,7 @@ de cierres; se vacía al pasar de 64 series. El marco se deduce del paso entre v
 
 - **Referencia pdoc:** [`api/app/research/combos.html`](../api/app/research/combos.html)
 - **Importa (internos):** `app.candidates.camarilla_s3_r3`, `app.candidates.common`, `app.candidates.sfp_reversal`, `app.indicators._pine`, `app.indicators.oscillators`, `app.indicators.structure`, `app.indicators.trend_filters`, `app.strategies.base`
-- **Lo importan:** `app.explorer.service`, `app.research.round3`, `scripts.v2_explore`
+- **Lo importan:** `app.explorer.confluence`, `app.research.round3`, `app.research.round4`, `scripts.v2_explore`
 - **Configuración que lee:** ninguno
 - **Tablas que lee:** ninguno
 - **Tablas que escribe:** ninguno
@@ -96,10 +96,40 @@ caché de columnas.
 
 - **Referencia pdoc:** [`api/app/research/round3.html`](../api/app/research/round3.html)
 - **Importa (internos):** `app.candidates.common`, `app.candidates.sfp_reversal`, `app.indicators._pine`, `app.research.combos`, `app.strategies.base`
-- **Lo importan:** `app.api.routes.explorer`, `app.explorer.service`, `scripts.v2_forward_test`, `scripts.v2_round3`, `scripts.v2_round3_reserved`
+- **Lo importan:** `app.explorer.confluence`, `app.research.round4`, `scripts.v2_forward_test`, `scripts.v2_round3`, `scripts.v2_round3_reserved`, `scripts.v2_round4`
 - **Configuración que lee:** ninguno
 - **Tablas que lee:** ninguno
 - **Tablas que escribe:** ninguno
 - **Tablas que crea o altera:** ninguno
-- **Pruebas que lo importan o citan:** `tests/unit/test_explorer.py`, `tests/unit/test_research_round3.py`
+- **Pruebas que lo importan o citan:** `tests/unit/test_research_round3.py`
 <!-- /hechos:app/research/round3.py -->
+
+### `app/research/round4.py`
+
+**Responsabilidad.** La ronda 4 exploratoria: gatillos de fuerza relativa semanal entre monedas (`mom42`, `mom180`:
+largo en las 3 más fuertes y corto en las 3 más débiles en la vela que cierra el lunes 00:00 UTC, cierre por tiempo a
+las 42 velas), el gatillo `squeeze` (TTM Squeeze) y los filtros `adx` (ADX(14) > 20), `vol` (volumen en USDT mayor que
+el doble de su media de 20) y `vwap` (VWAP semanal anclado al lunes).
+
+**Funciones y clases clave.** `set_universe_context()`, `momentum_signals()`, `ttm_squeeze()`, `adx()`,
+`weekly_vwap()`, `compute_features_r4()` y `Round4Strategy` (sus salidas de rebalanceo declaran `max_hold_bars`, que
+lee el motor).
+
+**Invariantes — no romper.** Causal (prueba con serie truncada == completa). Sin contexto del universo los gatillos de
+fuerza relativa quedan en falso; sin columna `volume`, también `vol` y `vwap`. No cambia la interfaz de `round3.py`.
+
+**Trampas conocidas.** El símbolo de cada serie se reconoce comparando sus cierres con los del universo registrado: si
+la serie no está en el contexto, no hay señales de fuerza relativa.
+
+<!-- hechos:app/research/round4.py -->
+**Hechos derivados del código** (los escribe `scripts/build_dev_docs.py`; no se editan):
+
+- **Referencia pdoc:** [`api/app/research/round4.html`](../api/app/research/round4.html)
+- **Importa (internos):** `app.candidates.common`, `app.indicators._pine`, `app.research.combos`, `app.research.round3`, `app.strategies.base`
+- **Lo importan:** `scripts.v2_round4`
+- **Configuración que lee:** ninguno
+- **Tablas que lee:** ninguno
+- **Tablas que escribe:** ninguno
+- **Tablas que crea o altera:** ninguno
+- **Pruebas que lo importan o citan:** `tests/unit/test_research_round4.py`
+<!-- /hechos:app/research/round4.py -->

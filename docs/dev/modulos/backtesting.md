@@ -78,6 +78,10 @@ afectar la medición (aunque cambiar un criterio de descarte tras ver resultados
   atraviesa el precio (estricto), paga `MAKER_FEE_PCT` y no tiene slippage de entrada. Si no se llena, la señal se
   pierde (se cuenta en el log). En la vela de entrada solo se evalúa el lado adverso. Ninguna estrategia de la v1 ni
   del preregistro lo declara.
+- **Salida por tiempo (opcional, solo investigación de la v2):** una estrategia con `max_hold_bars = N` cierra la
+  posición al cierre de su N-ésima vela (contando la de entrada), motivo `TIME`, y no recibe el TP de respaldo; esa misma
+  vela ya puede dar la señal siguiente. El DataFrame de `precompute` trae además `volume` (volumen en USDT de la vela),
+  antes de `open_time`. Ninguna estrategia de la v1 lo usa (regresión de la v1 sin cambios).
 
 **Trampas conocidas.**
 - `MAX_LOOKBACK_BARS = 300`: nunca le pasa más historia a `evaluate` por vela (fue la causa del bug de la estrategia por
@@ -206,7 +210,7 @@ veredicto global por estrategia aplicando los criterios de descarte.
 
 - **Referencia pdoc:** [`api/app/backtesting/report.html`](../api/app/backtesting/report.html)
 - **Importa (internos):** `app.backtesting.engine`, `app.backtesting.metrics`, `app.config`, `app.core.logging`, `app.market.ohlcv_history`, `app.persistence.database`, `app.persistence.models`, `app.persistence.repositories.backtest_repo`, `app.strategies.base`, `app.strategies.registry`
-- **Lo importan:** `scripts.run_backtest`, `scripts.run_backtest_v2`, `scripts.v2_explore`, `scripts.v2_round3`
+- **Lo importan:** `scripts.run_backtest`, `scripts.run_backtest_v2`, `scripts.v2_explore`, `scripts.v2_round3`, `scripts.v2_round4`
 - **Configuración que lee:** `BACKTEST_CONCENTRATION_LIMIT_PCT`, `BACKTEST_INITIAL_CAPITAL`, `BACKTEST_MAX_DRAWDOWN_PCT`, `BACKTEST_MIN_PCT_FOLDS_POSITIVE`, `BACKTEST_MIN_PCT_SYMBOLS_PF_GT1`, `BACKTEST_MIN_PROFIT_FACTOR`, `BACKTEST_MIN_TRADES_PER_CELL`, `BACKTEST_MIN_TRADES_TOTAL`, `BACKTEST_OOS_SPLIT_PCT`, `BACKTEST_PORTFOLIO_SIM_RUNS`, `BACKTEST_STRESS_FEE_MULTIPLIER`, `BACKTEST_STRESS_SLIPPAGE_MULTIPLIER`, `BACKTEST_WALK_FORWARD_FOLD_MONTHS`, `BACKTEST_WALK_FORWARD_STEP_MONTHS`, `DEFAULT_MARGIN_USDT`, `MAX_SIMULTANEOUS_POSITIONS`, `backtest_control_symbols_list`
 - **Tablas que lee:** ninguno
 - **Tablas que escribe:** `backtest_runs`, `backtest_skipped_entries`, `backtest_trades`, `backtest_verdicts`

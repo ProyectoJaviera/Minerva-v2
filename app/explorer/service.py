@@ -1,18 +1,19 @@
 """Backtest exploratorio a pedido sobre el archivo de historial local (seccion «Indicadores»).
 
 - **Fuente:** un archivo SQLite aparte de la base del bot (`EXPLORER_HISTORY_DB`, por defecto
-  `./history/history_v2.db`), creado con `scripts/download_history.py` y `DATABASE_PATH` apuntando
-  a ese archivo. Tiene las mismas tablas de mercado que usa el motor (velas LAST_PRICE y
-  MARK_PRICE, funding y specs). Se abre en modo `immutable` de solo lectura: nada se escribe.
+  `./history/history_v2.db`), creado con `scripts/update_history_file.py`. Tiene las mismas tablas
+  de mercado que usa el motor (velas LAST_PRICE y MARK_PRICE, funding y specs). Se abre en modo
+  `immutable` de solo lectura: nada se escribe.
+- **Estrategia:** la confluencia de los indicadores que el dueno marca (`app.explorer.confluence`):
+  todos votan alcista o bajista y se entra cuando todos coinciden, con una salida fija en ATR.
 - **Motor:** el mismo `run_backtest` de la Fase 2 (entrada en el open de la vela siguiente,
-  comisiones, slippage, funding, liquidacion con MARK_PRICE) con las combinaciones de
-  `app.research.combos` (un gatillo con 0, 1 o 2 filtros y su salida fija).
-- **Datos reservados:** nunca se usan velas desde `RESERVED_FROM` (2026-10-01 UTC). Estan
-  reservadas para las rondas preregistradas; el limite esta fijo en el codigo a proposito, no es
-  configurable.
+  comisiones, slippage, funding, liquidacion con MARK_PRICE).
+- **Corte de datos:** nunca se usan velas desde `RESERVED_FROM` (2026-10-01 UTC), que estaban
+  reservadas para las rondas preregistradas (el examen de la ronda 3 ya las uso; quitar el corte es
+  decision del dueno).
 - **Exploratorio:** el resultado no se guarda en la base ni pasa por los criterios de la Fase 2.
-  Con cada corrida va el control con direccion al azar (mismas velas, mismos filtros), la
-  referencia «sin informacion de direccion».
+  Con cada corrida va el control con direccion al azar (mismas velas de entrada y misma salida),
+  la referencia «sin informacion de direccion».
 
 El calculo corre en un hilo aparte con su propio bucle y su propia conexion, de a una corrida
 por vez, para no frenar el bucle del bot.
@@ -33,54 +34,33 @@ import pandas as pd
 
 from app.backtesting.engine import RawTrade, run_backtest
 from app.backtesting.metrics import compute_metrics
-from app.candidates.common import BAR_INDEX_COLUMN
 from app.config import Settings
+from app.explorer.confluence import (
+    DEFAULT_EXIT,
+    DEFAULT_WINDOW,
+    EXITS,
+    INDICATORS,
+    MAX_WINDOW,
+    PCT_EXIT,
+    ConfluenceStrategy,
+    check_pct_exit,
+    pct_exit_label,
+)
 from app.market.ohlcv_history import MissingHistoricalDataError
 from app.persistence.database import Database
 from app.persistence.repositories import ohlcv_repo
-from app.research.combos import ComboStrategy
-from app.research.round3 import R3_FILTERS, R3_TRIGGERS, Round3Strategy, set_btc_context
 
 RESERVED_FROM = datetime(2026, 10, 1, tzinfo=UTC)
 RESERVED_FROM_MS = int(RESERVED_FROM.timestamp() * 1000)
-TIMEFRAMES = ("1h", "4h")
-MAX_FILTERS = 2
+TIMEFRAMES = ("15m", "1h", "4h", "1d", "1w")
+TIMEFRAME_LABELS = {"15m": "15m", "1h": "1h", "4h": "4h", "1d": "1D", "1w": "1S"}
 MAX_SYMBOLS = 12
-
-TRIGGER_LABELS = {
-    "sfp": "SFP del HeatMap (barrida de swing con cierre de vuelta)",
-    "camarilla": "Camarilla: rechazo de S3 (largo) o R3 (corto)",
-    "rf_flip": "Giro del Range Filter (Frost)",
-    "vidya_flip": "Giro de la banda VIDYA (F. Trail de Frost)",
-    "bb_reversal": "Reversion del BB%B (sale de sobreventa/sobrecompra)",
-    "wt_cross": "Cruce de WaveTrend en zona extrema (+-72)",
-    "zone_reject": "Rechazo de una zona de liquidez",
-    "grab": "Liquidity Grab de Frost (agotamiento)",
-    "fvg": "FVG: retesteo de un Fair Value Gap de 3 velas",
-}
-FILTER_LABELS = {
-    "ema": "Cierre sobre/bajo la EMA 144",
-    "rf": "Estado del Range Filter",
-    "vidya": "Tendencia de la banda VIDYA",
-    "wt": "WaveTrend: wt1 sobre/bajo wt2",
-    "fund": "Funding bajo/sobre su mediana de 30 dias (en contra del lado saturado)",
-    "btc": "Regimen de BTC: cierre sobre/bajo su EMA 200",
-    "rs": "Fuerza relativa contra BTC (retorno de 180 velas)",
-}
-# Gatillos y filtros de la seccion: los de `combos` mas los de la ronda 3 (FVG, funding, regimen
-# de BTC y fuerza relativa). Las combinaciones solo con piezas de `combos` corren con
-# `ComboStrategy` (identicas a la exploracion); las que usan una pieza de la ronda 3, con
-# `Round3Strategy` y su salida `base` (la misma de `combos` para los demas gatillos).
-TRIGGERS = R3_TRIGGERS
-FILTERS = R3_FILTERS
-ROUND3_ONLY = {"fvg", "fund", "btc", "rs"}
 BTC_SYMBOL = "BTCUSDT"
 
 NOTE = (
     "Prueba EXPLORATORIA: no es una ronda preregistrada ni evidencia de la Fase 2, y no se guarda. "
     "Probar muchas combinaciones y quedarse con la mejor sobreestima el resultado (sesgo de "
-    "seleccion). Velas de Bitunix (coinciden con TradingView); sin datos desde el 2026-10-01, "
-    "reservados para las rondas preregistradas."
+    "seleccion). Velas de Bitunix (coinciden con TradingView); sin datos desde el 2026-10-01."
 )
 
 _run_lock = asyncio.Lock()
@@ -125,129 +105,53 @@ class ReadOnlyDatabase(Database):
         """No hace nada: el archivo es de solo lectura."""
 
 
-class _ArrayRow:
-    """Fila de solo lectura sobre columnas numpy (lo unico que `ComboStrategy` lee de una fila)."""
-
-    __slots__ = ("_cols", "_i")
-
-    def __init__(self, cols: dict, i: int) -> None:
-        self._cols = cols
-        self._i = i
-
-    def __getitem__(self, key: str):
-        return self._cols[key][self._i]
-
-
-class _FastRowMixin:
-    """Lee la fila de la senal de arrays en vez de `df.iloc[-1]`.
-
-    Mismas senales, SL, TP y trailing (`tests/unit/test_explorer.py` lo compara operacion por
-    operacion); solo evita construir una `pd.Series` por vela, que era mas de la mitad del tiempo
-    de una corrida. Las columnas se guardan en `precompute`, que el motor llama una vez por
-    corrida antes de evaluar ventanas de ese mismo DataFrame.
-    """
-
-    _cols: dict | None = None
-
-    def precompute(self, df):
-        """El `precompute` de la estrategia y, ademas, guarda sus columnas como arrays numpy.
-
-        Args:
-            df: velas de toda la serie (con `open_time`).
-
-        Returns:
-            El mismo DataFrame que el `precompute` de la estrategia.
-        """
-        out = super().precompute(df)
-        self._cols = {c: out[c].to_numpy() for c in out.columns}
-        return out
-
-    def _row(self, df):
-        """Fila de la ultima vela de la ventana, leida de los arrays guardados."""
-        if self._cols is None or BAR_INDEX_COLUMN not in df.columns:
-            return super()._row(df)
-        return _ArrayRow(self._cols, int(df[BAR_INDEX_COLUMN].iat[-1]))
-
-
-class FastComboStrategy(_FastRowMixin, ComboStrategy):
-    """`ComboStrategy` con la fila leida de arrays (mismas operaciones, ver `_FastRowMixin`)."""
-
-
-class FastRound3Strategy(_FastRowMixin, Round3Strategy):
-    """`Round3Strategy` con la fila leida de arrays (mismas operaciones, ver `_FastRowMixin`)."""
-
-
-def build_strategy(trigger: str, filters: tuple[str, ...], *, random_dir: bool = False):
-    """La estrategia de una combinacion: `ComboStrategy` salvo que use una pieza de la ronda 3.
-
-    Args:
-        trigger: gatillo.
-        filters: filtros.
-        random_dir: sortea la direccion (control).
-
-    Returns:
-        `FastComboStrategy` o `FastRound3Strategy` (salida `base`, entrada a mercado).
-    """
-    if trigger in ROUND3_ONLY or set(filters) & ROUND3_ONLY:
-        return FastRound3Strategy(trigger, filters, random_dir=random_dir)
-    return FastComboStrategy(trigger, filters, random_dir=random_dir)
-
-
-async def load_btc_context(db: Database, timeframe: str) -> bool:
-    """Registra la serie de BTC del marco para los filtros `btc` y `rs` de la ronda 3.
-
-    Args:
-        db: el archivo de historial abierto.
-        timeframe: marco.
-
-    Returns:
-        Si habia velas de BTC (sin ellas, `btc` y `rs` quedan siempre en falso).
-
-    Efectos:
-        Lee `ohlcv_cache`. Cambia el contexto de BTC del modulo `round3` (las corridas de la
-        seccion son de a una por vez).
-    """
-    bars = await ohlcv_repo.get_bars(db, BTC_SYMBOL, timeframe, "LAST_PRICE", None,
-                                     RESERVED_FROM_MS - 1)
-    if not bars:
-        return False
-    set_btc_context(timeframe, pd.DataFrame({"open_time": [b.open_time for b in bars],
-                                             "close": [b.close for b in bars]}))
-    return True
-
-
 @dataclass(frozen=True)
 class ExplorerRequest:
     """Una corrida exploratoria validada.
 
     Attributes:
         symbols: simbolos (1 a `MAX_SYMBOLS`).
-        timeframe: `1h` o `4h`.
-        trigger: uno de `TRIGGERS`.
-        filters: 0 a `MAX_FILTERS` de `FILTERS`, ordenados.
+        timeframe: uno de `TIMEFRAMES`.
+        indicators: ids de `INDICATORS` (al menos uno), en su orden.
+        window: velas que dura el voto de un indicador de evento.
+        exit_name: clave de `EXITS`.
         start_ms: inicio pedido (ms UTC) o `None` = desde el comienzo del historial.
-        end_ms: fin pedido (ms UTC) o `None` = hasta el limite reservado.
+        end_ms: fin pedido (ms UTC) o `None` = hasta el corte.
+        min_agree: cuantos indicadores deben coincidir (`None` = todos).
+        pct_exit: `(sl, tp, trailing)` en % si `exit_name` es `PCT_EXIT`, si no `None`.
     """
 
     symbols: tuple[str, ...]
     timeframe: str
-    trigger: str
-    filters: tuple[str, ...]
+    indicators: tuple[str, ...]
+    window: int = DEFAULT_WINDOW
+    exit_name: str = DEFAULT_EXIT
     start_ms: int | None = None
     end_ms: int | None = None
+    min_agree: int | None = None
+    pct_exit: tuple[float, float | None, float | None] | None = None
 
 
-def validate_request(symbols: list[str], timeframe: str, trigger: str, filters: list[str],
-                     start: str | None = None, end: str | None = None) -> ExplorerRequest:
+def validate_request(symbols: list[str], timeframe: str, indicators: list[str],
+                     window: int = DEFAULT_WINDOW, exit_name: str = DEFAULT_EXIT,
+                     start: str | None = None, end: str | None = None,
+                     min_agree: int | None = None, sl_pct: float | None = None,
+                     tp_pct: float | None = None,
+                     trail_pct: float | None = None) -> ExplorerRequest:
     """Valida los parametros de una corrida y los normaliza.
 
     Args:
         symbols: simbolos (p. ej. `["BTCUSDT"]`).
-        timeframe: `1h` o `4h`.
-        trigger: gatillo.
-        filters: filtros (0 a 2, sin repetir).
+        timeframe: `15m`, `1h`, `4h`, `1d` o `1w`.
+        indicators: ids de los indicadores (uno o mas, sin limite).
+        window: velas que dura el voto de un indicador de evento (1 a `MAX_WINDOW`).
+        exit_name: salida (clave de `EXITS`).
         start: fecha de inicio `YYYY-MM-DD` (UTC) o `None`.
         end: fecha de fin `YYYY-MM-DD` (UTC, excluida) o `None`.
+        min_agree: cuantos indicadores deben coincidir (`None`, 0 o la cantidad elegida = todos).
+        sl_pct: SL en % del precio de entrada (obligatorio con la salida `PCT_EXIT`).
+        tp_pct: TP en % (opcional, solo con `PCT_EXIT`).
+        trail_pct: trailing en % (opcional, solo con `PCT_EXIT`).
 
     Returns:
         La corrida validada.
@@ -264,19 +168,34 @@ def validate_request(symbols: list[str], timeframe: str, trigger: str, filters: 
         raise ExplorerRequestError("Simbolo invalido.")
     if timeframe not in TIMEFRAMES:
         raise ExplorerRequestError(f"Marco invalido: {timeframe} (usa {', '.join(TIMEFRAMES)}).")
-    if trigger not in TRIGGERS:
-        raise ExplorerRequestError(f"Gatillo desconocido: {trigger}.")
-    flt = tuple(sorted(set(filters)))
-    if len(flt) > MAX_FILTERS:
-        raise ExplorerRequestError(f"Como maximo {MAX_FILTERS} filtros.")
-    unknown = set(flt) - set(FILTERS)
+    chosen = set(indicators)
+    if not chosen:
+        raise ExplorerRequestError("Elige al menos un indicador.")
+    unknown = chosen - set(INDICATORS)
     if unknown:
-        raise ExplorerRequestError(f"Filtros desconocidos: {', '.join(sorted(unknown))}.")
+        raise ExplorerRequestError(f"Indicadores desconocidos: {', '.join(sorted(unknown))}.")
+    if not 1 <= window <= MAX_WINDOW:
+        raise ExplorerRequestError(f"La ventana debe estar entre 1 y {MAX_WINDOW} velas.")
+    pct_exit = None
+    if exit_name == PCT_EXIT:
+        try:
+            pct_exit = check_pct_exit(sl_pct, tp_pct, trail_pct)
+        except ValueError as exc:
+            raise ExplorerRequestError(str(exc)) from exc
+    elif exit_name not in EXITS:
+        raise ExplorerRequestError(f"Salida desconocida: {exit_name}.")
     start_ms = _parse_day(start, "inicio")
     end_ms = _parse_day(end, "fin")
     if start_ms is not None and end_ms is not None and end_ms <= start_ms:
         raise ExplorerRequestError("La fecha de fin debe ser posterior a la de inicio.")
-    return ExplorerRequest(syms, timeframe, trigger, flt, start_ms, end_ms)
+    ordered = tuple(i for i in INDICATORS if i in chosen)
+    if min_agree in (0, len(ordered)):
+        min_agree = None
+    if min_agree is not None and not 1 <= min_agree <= len(ordered):
+        raise ExplorerRequestError(
+            f"El minimo de coincidencias debe estar entre 1 y {len(ordered)}.")
+    return ExplorerRequest(syms, timeframe, ordered, window, exit_name, start_ms, end_ms,
+                           min_agree, pct_exit)
 
 
 def _parse_day(text: str | None, what: str) -> int | None:
@@ -300,8 +219,8 @@ async def list_available_series(db: Database) -> list[dict]:
         db: el archivo de historial abierto.
 
     Returns:
-        Lista de `{symbol, timeframe, first_day, last_day, bars}` (solo velas antes del limite
-        reservado), ordenada por simbolo y marco.
+        Lista de `{symbol, timeframe, first_day, last_day, first_ms, last_ms, bars}` (solo velas
+        antes del corte), ordenada por simbolo y marco.
 
     Efectos:
         Lee `ohlcv_cache`.
@@ -344,6 +263,27 @@ async def available_series(path: str) -> list[dict]:
         finally:
             await db.close()
     return _available_cache[key]
+
+
+async def load_btc(db: Database, timeframe: str) -> pd.DataFrame | None:
+    """Velas de BTC del marco (para los indicadores `btc` y `rs`), hasta el corte.
+
+    Args:
+        db: el archivo de historial abierto.
+        timeframe: marco.
+
+    Returns:
+        DataFrame con `open_time` y `close`, o `None` si no hay velas de BTC.
+
+    Efectos:
+        Lee `ohlcv_cache`.
+    """
+    bars = await ohlcv_repo.get_bars(db, BTC_SYMBOL, timeframe, "LAST_PRICE", None,
+                                     RESERVED_FROM_MS - 1)
+    if not bars:
+        return None
+    return pd.DataFrame({"open_time": [b.open_time for b in bars],
+                         "close": [b.close for b in bars]})
 
 
 def summarize(trades: list[RawTrade], initial_capital: float) -> dict:
@@ -391,7 +331,7 @@ def _breakdown(trades: list[RawTrade], key, initial_capital: float) -> list[dict
 
 async def run_exploration_on_db(db: Database, req: ExplorerRequest, settings: Settings,
                                 series: list[dict]) -> dict:
-    """Corre la combinacion y su control al azar sobre cada moneda pedida.
+    """Corre la confluencia elegida y su control al azar sobre cada moneda pedida.
 
     Args:
         db: el archivo de historial abierto.
@@ -407,10 +347,15 @@ async def run_exploration_on_db(db: Database, req: ExplorerRequest, settings: Se
         Solo lectura del archivo de historial. No escribe en ninguna base.
     """
     started = time.perf_counter()
-    combo = build_strategy(req.trigger, req.filters)
-    control = build_strategy(req.trigger, req.filters, random_dir=True)
-    if {"btc", "rs"} & set(req.filters):
-        await load_btc_context(db, req.timeframe)
+    btc = await load_btc(db, req.timeframe) if {"btc", "rs"} & set(req.indicators) else None
+    combo = ConfluenceStrategy(req.indicators, req.timeframe, window=req.window,
+                               exit_name=req.exit_name, btc=btc, min_agree=req.min_agree,
+                               pct_exit=req.pct_exit)
+    control = ConfluenceStrategy(req.indicators, req.timeframe, window=req.window,
+                                 exit_name=req.exit_name, btc=btc, min_agree=req.min_agree,
+                                 pct_exit=req.pct_exit, random_dir=True)
+    exit_label = (pct_exit_label(*req.pct_exit) if req.pct_exit is not None
+                  else EXITS[req.exit_name][0])
     by_key = {(s["symbol"], s["timeframe"]): s for s in series}
     trades: list[RawTrade] = []
     control_trades: list[RawTrade] = []
@@ -421,7 +366,8 @@ async def run_exploration_on_db(db: Database, req: ExplorerRequest, settings: Se
     for symbol in req.symbols:
         info = by_key.get((symbol, req.timeframe))
         if info is None:
-            missing.append({"symbol": symbol, "reason": "No esta en el archivo de historial."})
+            missing.append({"symbol": symbol,
+                            "reason": "No esta en el archivo de historial en este marco."})
             continue
         start = max(info["first_ms"], req.start_ms or 0)
         end = min(info["last_ms"], RESERVED_FROM_MS - 1)
@@ -449,8 +395,10 @@ async def run_exploration_on_db(db: Database, req: ExplorerRequest, settings: Se
         "exploratory": True,
         "note": NOTE,
         "params": {"symbols": list(req.symbols), "timeframe": req.timeframe,
-                   "trigger": req.trigger, "filters": list(req.filters),
-                   "exit_mode": combo.exit_mode, "name": combo.name},
+                   "indicators": list(req.indicators), "window": req.window,
+                   "exit": req.exit_name, "exit_label": exit_label,
+                   "min_agree": req.min_agree or len(req.indicators),
+                   "name": combo.name},
         "period": {"start": _ms_to_day(period_start) if period_start is not None else None,
                    "end": _ms_to_day(period_end) if period_end is not None else None,
                    "reserved_from": RESERVED_FROM.strftime("%Y-%m-%d")},

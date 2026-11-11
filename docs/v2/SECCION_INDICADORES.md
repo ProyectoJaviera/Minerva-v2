@@ -1,16 +1,48 @@
 # Sección «Indicadores» (v2): pruebas manuales y exploratorias
 
-Pestaña **Indicadores** del dashboard de la v2 (<http://127.0.0.1:8001/>). Eliges monedas, marco, un gatillo y
-hasta dos filtros, y en segundos ves cómo le habría ido a esa combinación sobre el historial de Bitunix.
+Pestaña **Indicadores** del dashboard de la v2 (<http://127.0.0.1:8001/>). Eliges monedas, temporalidad (15m,
+1h, 4h, 1D o 1S) y marcas los indicadores que quieras (uno, varios o todos), y en segundos ves cómo le habría ido
+a esa combinación sobre el historial de Bitunix.
 
 ## Qué es y qué no es
 
 - **Es exploratoria.** Sirve para mirar ideas. No es una ronda preregistrada, no se guarda en la base y no
   pasa por los criterios de la Fase 2. Probar muchas combinaciones y quedarse con la mejor sobreestima el
   resultado (sesgo de selección): una idea que se vea bien aquí hay que llevarla a un preregistro nuevo.
-- **Nunca usa velas desde el 2026-10-01.** Están reservadas para las rondas preregistradas. El límite está
-  fijo en el código (`app/explorer/service.py::RESERVED_FROM`) y no se puede cambiar por configuración.
+- **No usa velas desde el 2026-10-01.** Estaban reservadas para las rondas preregistradas; el examen de los
+  finalistas de la ronda 3 ya las usó, así que quitar el corte (`app/explorer/service.py::RESERVED_FROM`) es
+  decisión del dueño.
 - **No toca la base del bot.** Lee un archivo de historial aparte, en modo de solo lectura.
+
+## Cómo se combinan los indicadores
+
+Todos los indicadores son casillas y se tratan igual: cada uno **vota** alcista o bajista en cada vela.
+
+- **De estado** (votan siempre): Range Filter, banda VIDYA, WaveTrend (`wt1` sobre o bajo `wt2`), cierre sobre o
+  bajo la EMA 144, funding contra su mediana de 30 días (en contra del lado saturado), régimen de BTC (cierre
+  de BTC sobre o bajo su EMA 200 del mismo marco) y fuerza relativa contra BTC (retorno de 180 velas).
+- **De evento** (votan durante la **ventana** que eliges, 5 velas por defecto, contando la de la señal): SFP del
+  HeatMap, rechazo de Camarilla S3/R3, FVG (retesteo de un Fair Value Gap de 3 velas), rechazo de una zona de
+  liquidez, Liquidity Grab, reversión del BB%B y cruce de WaveTrend en zona extrema. Si en la ventana hubo
+  señales de los dos lados, vale la más reciente.
+
+**Se entra en la vela en que todos los marcados coinciden** (y en la anterior no coincidían): largo si todos
+son alcistas, corto si todos son bajistas. Un indicador de estado solo entra en cada cambio de estado (el Range
+Filter solo da exactamente sus giros); uno de evento solo, en cada señal nueva. Con más indicadores hay menos
+coincidencias y menos operaciones: con los 14 marcados casi nunca coinciden todos, así que la opción **«Deben
+coincidir»** permite pedir solo «al menos N» (el lado ganador necesita al menos N votos y más votos que el
+contrario).
+
+**Salida** a elección, en múltiplos del ATR(14): SL 2 ATR con TP 2R (por defecto), SL 1 ATR con TP 2R, SL 1,5 ATR
+con TP 3R, SL 2 ATR con TP 1R, y SL 2 o 3 ATR con trailing de la misma distancia (con trailing no hay TP fijo y el
+motor usa su TP de respaldo del 10 %). O una salida **personalizada en %** del precio de entrada: SL
+obligatorio, TP y trailing opcionales (el trailing sigue al mejor precio a esa distancia; sin TP ni trailing
+vale el TP de respaldo). Ojo con el tope de riesgo del motor: a 10x, un SL mayor que 5 % perdería más del 50 % del
+margen y esas entradas se omiten (la pantalla lo avisa).
+
+Las señales vienen del mismo código de la exploración y de la ronda 3 (`app/research/combos.py` y
+`fvg_signals` de `app/research/round3.py`); la combinación está en `app/explorer/confluence.py`. El calentamiento
+(velas sin señal al inicio) es de 500 velas en 15m, 1h y 4h, 300 en 1D y 100 en 1S.
 
 ## Qué muestra
 
@@ -18,34 +50,26 @@ hasta dos filtros, y en segundos ves cómo le habría ido a esa combinación sob
   medio por operación, ganancia y pérdida medias y drawdown máximo. Los montos son del motor de la Fase 2:
   margen de 5 USDT a 10x, comisión taker por lado, slippage, funding y liquidación, entrada en el open de la
   vela siguiente a la señal.
-- **Control con dirección al azar:** las mismas velas y los mismos filtros, pero la dirección se sortea
-  (como el control del preregistro). Si la combinación no supera claramente a su control, el indicador no
-  está aportando información de dirección.
+- **Control con dirección al azar:** las mismas velas de entrada y la misma salida, pero la dirección se sortea
+  (como el control del preregistro). Si la combinación no supera claramente a su control, los indicadores no
+  están aportando información de dirección.
 - Desglose **por moneda** y **por año**, cómo cerraron las operaciones (SL, TP, trailing, liquidación) y las
   entradas omitidas por el tope de riesgo.
 
-## Gatillos, filtros y salidas
+## Temporalidades y tiempos
 
-Son los de `app/research/combos.py` (el mismo código de la exploración de la v2). El gatillo da el momento y
-la dirección de la entrada: SFP del HeatMap, rechazo de Camarilla S3/R3, giro del Range Filter, giro de la
-banda VIDYA, reversión del BB%B, cruce de WaveTrend en zona extrema, rechazo de zona de liquidez y Liquidity
-Grab. Los filtros (EMA 144, estado del Range Filter, tendencia VIDYA y WaveTrend) exigen el estado alcista
-para un largo y el bajista para un corto. La salida es fija: la del preregistro para SFP, Camarilla y Range
-Filter; SL a 2 ATR(14) y TP 2R para el resto.
-
-Además, las piezas de la ronda 3 (`app/research/round3.py`): el gatillo **FVG** (retesteo de un Fair Value Gap
-de 3 velas de al menos 0,25 ATR, vigente hasta 100 velas; SL en el lado lejano del hueco ∓ 0,1 ATR y TP 2R) y los
-filtros **funding** (bajo su mediana de 30 días para un largo, sobre ella para un corto), **régimen de BTC** (cierre
-de BTC sobre o bajo su EMA 200 del mismo marco) y **fuerza relativa** (retorno de 180 velas contra el de BTC). Una
-combinación que usa alguna de estas piezas corre con `Round3Strategy` (salida `base`, entrada a mercado); las
-demás, con `ComboStrategy`, idénticas a la exploración.
+- **15m:** cuatro veces más velas que 1h; con varias monedas la prueba puede tardar minutos.
+- **1h:** unos 7 segundos por moneda. **4h:** unos 2 segundos. Repetir una prueba es instantáneo (caché de las
+  últimas 32).
+- **1S:** desde 2022 hay unas 230 velas semanales y 100 se usan de calentamiento: pocas operaciones.
 
 ## El archivo de historial
 
 Un archivo SQLite aparte de la base del bot, por defecto `history/history_v2.db` (configurable con
-`EXPLORER_HISTORY_DB`). Tiene las velas LAST_PRICE y MARK_PRICE de 1h, 4h y 1d desde el piso real de Bitunix
-(~abril de 2022), el funding y las specs de contrato del universo top-10 de CoinGecko y de los símbolos de
-control. Las velas de Bitunix coinciden con las de TradingView (comparación del 2026-11-09 en
+`EXPLORER_HISTORY_DB`). Tiene las velas LAST_PRICE y MARK_PRICE de 15m, 1h, 4h, 1d y 1w desde el piso real de
+Bitunix (~abril de 2022), el funding y las specs de contrato del universo top-10 de CoinGecko y de los símbolos
+de control. Los intervalos 15m y 1w se verificaron contra la API pública de Bitunix el 2026-11-11 (la semanal
+abre el lunes 00:00 UTC). Las velas de Bitunix coinciden con las de TradingView (comparación del 2026-11-09 en
 `docs/historial/PROGRESS.md`); exportarlas desde TradingView no es posible en el plan gratuito.
 
 Crearlo o ponerlo al día (PowerShell, en la carpeta del repositorio de la v2; es reanudable y gratis):
@@ -54,8 +78,8 @@ Crearlo o ponerlo al día (PowerShell, en la carpeta del repositorio de la v2; e
 .\.venv\Scripts\python.exe scripts\update_history_file.py
 ```
 
-El script se niega a escribir en la base del bot o dentro de `data/`. La carpeta `history/` no va a git
-(`*.db` está en `.gitignore`).
+Con `--only-extra` baja solo 15m y 1w. El script se niega a escribir en la base del bot o dentro de `data/`. La
+carpeta `history/` no va a git (`*.db` está en `.gitignore`).
 
 - **Servidor de desarrollo** (`scripts/run_dev_server.py`, puerto 8001): lee `history/history_v2.db` del
   repositorio directamente.
@@ -67,9 +91,10 @@ Sin archivo, la pestaña lo dice y explica cómo crearlo.
 
 ## API
 
-- `GET /api/explorer/options`: gatillos, filtros, marcos y series disponibles (solo hasta la fecha reservada).
-- `GET /api/explorer/run?symbols=BTCUSDT&timeframe=1h&trigger=sfp&filters=ema` (más `start` y `end`, fechas `AAAA-MM-DD`
-  UTC; `end` excluida): el resultado exploratorio. Hasta 12 monedas y 2 filtros; corre de a una prueba por
-  vez, en un hilo aparte para no frenar el bot.
+- `GET /api/explorer/options`: indicadores (con su tipo), salidas, ventana, temporalidades y series
+  disponibles (solo hasta el corte).
+- `GET /api/explorer/run?symbols=BTCUSDT&timeframe=1h&indicators=sfp&indicators=ema&window=5&exit=s2_tp2r` (más
+  `min_agree`; con `exit=pct`, `sl_pct`, `tp_pct` y `trail_pct`; y `start` y `end`, fechas `AAAA-MM-DD` UTC; `end` excluida): el resultado exploratorio. Hasta 12 monedas y sin
+  límite de indicadores; corre de a una prueba por vez, en un hilo aparte para no frenar el bot.
 
 Las dos piden sesión iniciada, como el resto del dashboard.

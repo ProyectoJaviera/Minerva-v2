@@ -975,26 +975,29 @@ preregistro nuevo y validación hacia adelante.
 ### `scripts/update_history_file.py`
 
 **Responsabilidad.** Crea o actualiza el archivo de historial de la sección «Indicadores» (`EXPLORER_HISTORY_DB`, por
-defecto `history/history_v2.db`) corriendo `download_history.main()` sobre ese archivo.
+defecto `history/history_v2.db`) corriendo `download_history.main()` sobre ese archivo y bajando después las velas de
+`EXTRA_TIMEFRAMES` (15m y 1w).
 
 **Funciones y clases clave.**
-- `check_target()` (valida el destino) y `main()` (fija `DATABASE_PATH` en el archivo y corre la descarga).
+- `check_target()` (valida el destino), `download_extra_timeframes()` (15m y 1w, LAST y MARK, de los símbolos que ya
+  tiene el archivo) y `main()` (fija `DATABASE_PATH` en el archivo; `--only-extra` salta `download_history`).
 
 **Invariantes — no romper.** Nunca escribe en la base del bot ni dentro de una carpeta `data/`; el destino debe
 terminar en `.db`.
 
-**Trampas conocidas.** Red pública de CoinGecko y Bitunix; la primera corrida tarda, pero es reanudable.
+**Trampas conocidas.** Red pública de CoinGecko y Bitunix; la primera corrida tarda (15m es lo más pesado), pero es
+reanudable. Mientras escribe, conviene no leer el mismo archivo desde la pestaña (se abre como inmutable).
 
 
 <!-- hechos:scripts/update_history_file.py -->
 **Hechos derivados del código** (los escribe `scripts/build_dev_docs.py`; no se editan):
 
 - **Referencia pdoc:** [`api/scripts/update_history_file.html`](../api/scripts/update_history_file.html)
-- **Importa (internos):** `app.config`, `scripts.download_history`
+- **Importa (internos):** `app.config`, `app.market.bitunix_rest`, `app.market.ohlcv_history`, `app.persistence.database`, `app.persistence.repositories.ohlcv_repo`, `scripts.download_history`
 - **Lo importan:** ninguno
-- **Configuración que lee:** `DATABASE_PATH`
-- **Tablas que lee:** ninguno
-- **Tablas que escribe:** ninguno
+- **Configuración que lee:** `BITUNIX_RATE_LIMIT_PER_SEC`, `BITUNIX_REST_BASE_URL`, `DATABASE_PATH`
+- **Tablas que lee:** `ohlcv_cache`
+- **Tablas que escribe:** `ohlcv_series_complete`
 - **Tablas que crea o altera:** ninguno
 - **Pruebas que lo importan o citan:** `tests/unit/test_explorer.py`
 <!-- /hechos:scripts/update_history_file.py -->
@@ -1079,3 +1082,31 @@ Un símbolo que deje de actualizarse se informa como atrasado.
 - **Tablas que crea o altera:** ninguno
 - **Pruebas que lo importan o citan:** ninguno
 <!-- /hechos:scripts/v2_forward_test.py -->
+
+### `scripts/v2_round4.py`
+
+**Responsabilidad.** La ronda 4 exploratoria de la v2, solo en 4h: 21 señales nuevas (fuerza relativa semanal,
+squeeze con ADX y el volumen como filtro sobre gatillos anteriores), con sus salidas y entradas y los controles al azar.
+El diseño y la regla de selección están en su docstring, subido antes de correr.
+
+**Funciones y clases clave.** `build_entries()`, `select()` (una variante por señal elegida por PF IS y juzgada en el
+OOS; finalistas con la regla fija) y `main()` (registra el contexto de BTC y del universo antes de correr).
+
+**Invariantes — no romper.** La salida y la entrada de cada señal se eligen solo con el IS. Sin red; exige
+`DATABASE_PATH` con una base temporal.
+
+**Trampas conocidas.** El OOS ya se usó en rondas anteriores (con otras señales): un finalista no es una estrategia
+aprobada.
+
+<!-- hechos:scripts/v2_round4.py -->
+**Hechos derivados del código** (los escribe `scripts/build_dev_docs.py`; no se editan):
+
+- **Referencia pdoc:** [`api/scripts/v2_round4.html`](../api/scripts/v2_round4.html)
+- **Importa (internos):** `app.backtesting.report`, `app.config`, `app.core.logging`, `app.market.ohlcv_history`, `app.persistence.database`, `app.persistence.repositories.universe_repo`, `app.research.round3`, `app.research.round4`, `app.strategies.base`
+- **Lo importan:** ninguno
+- **Configuración que lee:** `DATABASE_PATH`, `backtest_control_symbols_list`, `backtest_official_end_ms`
+- **Tablas que lee:** `asset_universe`
+- **Tablas que escribe:** ninguno
+- **Tablas que crea o altera:** ninguno
+- **Pruebas que lo importan o citan:** ninguno
+<!-- /hechos:scripts/v2_round4.py -->

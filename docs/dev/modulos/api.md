@@ -580,8 +580,9 @@ nada de resultados.
 logout y los controles).
 
 **Funciones y clases clave.**
-- `options()` (gatillos, filtros, marcos y series, o el aviso de que falta el archivo), y `run()` (parámetros de consulta;
-  `symbols` y `filters` se repiten).
+- `options()` (indicadores con su tipo, salidas, ventana, marcos y series, o el aviso de que falta el archivo) y
+  `run()` (parámetros de consulta; `symbols` e `indicators` se repiten; `window`, `exit`, `min_agree` y, con `exit=pct`, `sl_pct`, `tp_pct` y `trail_pct`). `options()` informa
+  también `max_sl_pct_before_skip` (`MAX_SL_MARGIN_LOSS_PCT / LEVERAGE`).
 
 **Invariantes — no romper.** Solo lectura: delegan todo en `app/explorer/service.py`. 400 si los parámetros no
 valen; 404 si no hay archivo de historial.
@@ -594,9 +595,9 @@ valen; 404 si no hay archivo de historial.
 **Hechos derivados del código** (los escribe `scripts/build_dev_docs.py`; no se editan):
 
 - **Referencia pdoc:** [`api/app/api/routes/explorer.html`](../api/app/api/routes/explorer.html)
-- **Importa (internos):** `app.api.deps`, `app.api.security`, `app.config`, `app.explorer.service`, `app.research.round3`
+- **Importa (internos):** `app.api.deps`, `app.api.security`, `app.config`, `app.explorer.confluence`, `app.explorer.service`
 - **Lo importan:** `app.main`
-- **Configuración que lee:** `EXPLORER_HISTORY_DB`
+- **Configuración que lee:** `EXPLORER_HISTORY_DB`, `LEVERAGE`, `MAX_SL_MARGIN_LOSS_PCT`
 - **Tablas que lee:** ninguno
 - **Tablas que escribe:** ninguno
 - **Tablas que crea o altera:** ninguno

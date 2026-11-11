@@ -69,7 +69,7 @@ nunca se pasa el calentamiento y no hay señal (a propósito: es conservador).
 
 - **Referencia pdoc:** [`api/app/candidates/common.html`](../api/app/candidates/common.html)
 - **Importa (internos):** ninguno
-- **Lo importan:** `app.candidates.camarilla_s3_r3`, `app.candidates.range_filter_flip`, `app.candidates.sfp_reversal`, `app.explorer.service`, `app.research.combos`, `app.research.round3`
+- **Lo importan:** `app.candidates.camarilla_s3_r3`, `app.candidates.range_filter_flip`, `app.candidates.sfp_reversal`, `app.explorer.confluence`, `app.research.combos`, `app.research.round3`, `app.research.round4`
 - **Configuración que lee:** ninguno
 - **Tablas que lee:** ninguno
 - **Tablas que escribe:** ninguno
@@ -99,7 +99,7 @@ interfaz de las estrategias no los recibe.
 
 - **Referencia pdoc:** [`api/app/candidates/sfp_reversal.html`](../api/app/candidates/sfp_reversal.html)
 - **Importa (internos):** `app.candidates.common`, `app.indicators._pine`, `app.indicators.structure`, `app.strategies.base`
-- **Lo importan:** `app.candidates`, `app.research.combos`, `app.research.round3`
+- **Lo importan:** `app.candidates`, `app.explorer.confluence`, `app.research.combos`, `app.research.round3`
 - **Configuración que lee:** ninguno
 - **Tablas que lee:** ninguno
 - **Tablas que escribe:** ninguno

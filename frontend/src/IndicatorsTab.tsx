@@ -71,25 +71,31 @@ function BreakdownTable({ rows, caption, keyLabel }: { rows: ExplorerBreakdownRo
   );
 }
 
-function ResultCard({ r }: { r: ExplorerResult }) {
+function ResultCard({ r, labels }: { r: ExplorerResult; labels: ExplorerOptions }) {
   const reasons = Object.entries(r.result.close_reasons)
     .map(([k, v]) => `${k} ${v}`)
     .join(" · ");
+  const names = r.params.indicators.map((id) => labels.indicators.find((i) => i.id === id)?.label ?? id);
+  const tf = labels.timeframes.find((t) => t.id === r.params.timeframe)?.label ?? r.params.timeframe;
   return (
-    <Card title={`Resultado exploratorio: ${r.params.name}`}>
+    <Card title="Resultado exploratorio">
+      <p className="mb-1 text-sm font-medium text-gray-800 dark:text-gray-200">
+        {names.length} indicador{names.length === 1 ? "" : "es"}
+        {r.params.min_agree < names.length ? ` (coinciden al menos ${r.params.min_agree})` : ""}: {names.join(" + ")}
+      </p>
       <p className="mb-3 text-sm text-gray-700 dark:text-gray-300">
-        {r.params.symbols.join(", ")} · {r.params.timeframe} · periodo {r.period.start ?? "-"} a{" "}
+        {r.params.symbols.join(", ")} · {tf} · {r.params.exit_label} · ventana {r.params.window} · periodo {r.period.start ?? "-"} a{" "}
         {r.period.end ?? "-"} · calculado en {fmtNum(r.elapsed_s, 1)} s{r.cached ? " (repetida: sale de la cache)" : ""}
       </p>
       <SummaryGrid s={r.result} />
       {reasons && <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">Cierres: {reasons}</p>}
 
       <h3 className="mt-4 text-sm font-semibold text-gray-700 dark:text-gray-300">
-        Control: mismas velas y filtros, direccion al azar
+        Control: mismas velas de entrada y misma salida, direccion al azar
       </h3>
       <p className="mb-2 text-xs text-gray-500 dark:text-gray-400">
-        Si la combinacion no supera claramente a su control, el indicador no aporta informacion de
-        direccion.
+        Si la combinacion no supera claramente a su control, los indicadores no aportan informacion
+        de direccion.
       </p>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <StatTile label="% ganadoras" value={fmtPct(r.control.winrate)} />
@@ -122,14 +128,27 @@ function ResultCard({ r }: { r: ExplorerResult }) {
 function Form({ opts }: { opts: ExplorerOptions }) {
   const run = useExplorerRun();
   const [symbols, setSymbols] = useState<string[]>(opts.symbols.slice(0, 1));
-  const [timeframe, setTimeframe] = useState(opts.timeframes[0] ?? "1h");
-  const [trigger, setTrigger] = useState(opts.triggers[0]?.id ?? "");
-  const [filters, setFilters] = useState<string[]>([]);
+  const [timeframe, setTimeframe] = useState(
+    opts.timeframes.find((t) => t.id === "1h")?.id ?? opts.timeframes[0]?.id ?? "1h",
+  );
+  const [indicators, setIndicators] = useState<string[]>([]);
+  const [windowBars, setWindowBars] = useState(opts.window.default);
+  const [exit, setExit] = useState(opts.default_exit);
+  // 0 = todos los marcados deben coincidir
+  const [minAgree, setMinAgree] = useState(0);
+  // salida en %: texto libre ("" = sin ese nivel); el SL es obligatorio
+  const [slPct, setSlPct] = useState("2");
+  const [tpPct, setTpPct] = useState("4");
+  const [trailPct, setTrailPct] = useState("");
+  const num = (v: string) => (v.trim() === "" ? null : Number(v.replace(",", ".")));
+  const slTooWide = exit === "pct" && (num(slPct) ?? 0) > opts.max_sl_pct_before_skip;
   const [start, setStart] = useState("");
   const [end, setEnd] = useState("");
 
-  const toggle = (list: string[], id: string, max?: number) =>
-    list.includes(id) ? list.filter((x) => x !== id) : max !== undefined && list.length >= max ? list : [...list, id];
+  const toggle = (list: string[], id: string) =>
+    list.includes(id) ? list.filter((x) => x !== id) : [...list, id];
+  const hasEvent = opts.indicators.some((i) => i.kind === "evento" && indicators.includes(i.id));
+  const tfLabel = (id: string) => opts.timeframes.find((t) => t.id === id)?.label ?? id;
 
   const errorText =
     run.error instanceof ApiError && run.error.detail
@@ -142,10 +161,22 @@ function Form({ opts }: { opts: ExplorerOptions }) {
     <>
       <Card title="Probar indicadores (exploratorio)">
         <form
-          className="space-y-3"
+          className="space-y-4"
           onSubmit={(e) => {
             e.preventDefault();
-            run.mutate({ symbols, timeframe, trigger, filters, start: start || null, end: end || null });
+            run.mutate({
+              symbols,
+              timeframe,
+              indicators,
+              window: windowBars,
+              exit,
+              minAgree: minAgree > 0 && minAgree < indicators.length ? minAgree : null,
+              slPct: num(slPct),
+              tpPct: num(tpPct),
+              trailPct: num(trailPct),
+              start: start || null,
+              end: end || null,
+            });
           }}
         >
           <fieldset>
@@ -163,27 +194,133 @@ function Form({ opts }: { opts: ExplorerOptions }) {
             </div>
           </fieldset>
 
+          <fieldset>
+            <legend className="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">Temporalidad</legend>
+            <div className="flex flex-wrap gap-3">
+              {opts.timeframes.map((t) => (
+                <label key={t.id} className="flex items-center gap-1 text-sm text-gray-800 dark:text-gray-200">
+                  <input
+                    type="radio"
+                    name="timeframe"
+                    value={t.id}
+                    checked={timeframe === t.id}
+                    onChange={() => setTimeframe(t.id)}
+                  />
+                  {t.label}
+                </label>
+              ))}
+            </div>
+            {timeframe === "15m" && (
+              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                15m tiene 4 veces mas velas que 1h: con varias monedas puede tardar minutos.
+              </p>
+            )}
+            {timeframe === "1w" && (
+              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                Desde 2022 hay pocas velas semanales: espera pocas operaciones.
+              </p>
+            )}
+          </fieldset>
+
+          <fieldset>
+            <legend className="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
+              Indicadores (marca uno o varios: se entra cuando todos coinciden; largo si todos son
+              alcistas, corto si todos son bajistas)
+            </legend>
+            <div className="mb-1 flex gap-3">
+              <button
+                type="button"
+                className="text-xs text-blue-700 underline dark:text-blue-400"
+                onClick={() => setIndicators(opts.indicators.map((i) => i.id))}
+              >
+                todos
+              </button>
+              <button type="button" className="text-xs text-blue-700 underline dark:text-blue-400" onClick={() => setIndicators([])}>
+                ninguno
+              </button>
+            </div>
+            <ul className="divide-y divide-gray-100 dark:divide-gray-700">
+              {opts.indicators.map((i) => (
+                <li key={i.id} className="py-1">
+                  <label className="flex items-center gap-2 text-sm text-gray-800 dark:text-gray-200">
+                    <input type="checkbox" checked={indicators.includes(i.id)} onChange={() => setIndicators(toggle(indicators, i.id))} />
+                    <span className="flex-1">{i.label}</span>
+                    <span
+                      className={
+                        "rounded px-1.5 text-xs " +
+                        (i.kind === "evento"
+                          ? "bg-blue-50 text-blue-800 dark:bg-blue-900/40 dark:text-blue-200"
+                          : "bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-200")
+                      }
+                    >
+                      {i.kind}
+                    </span>
+                  </label>
+                </li>
+              ))}
+            </ul>
+            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+              Los de estado votan en cada vela; los de evento votan solo durante la ventana desde su senal.
+            </p>
+          </fieldset>
+
           <div className="flex flex-wrap gap-4">
             <label className="flex flex-col text-sm text-gray-700 dark:text-gray-300">
-              Marco
-              <select className={inputCls} value={timeframe} onChange={(e) => setTimeframe(e.target.value)}>
-                {opts.timeframes.map((t) => (
-                  <option key={t} value={t}>
-                    {t}
-                  </option>
-                ))}
+              Deben coincidir
+              <select
+                className={inputCls}
+                value={minAgree > 0 && minAgree < indicators.length ? minAgree : 0}
+                disabled={indicators.length < 2}
+                onChange={(e) => setMinAgree(Number(e.target.value))}
+              >
+                <option value={0}>todos ({indicators.length})</option>
+                {Array.from({ length: Math.max(0, indicators.length - 1) }, (_, k) => k + 1)
+                  .reverse()
+                  .map((k) => (
+                    <option key={k} value={k}>
+                      al menos {k}
+                    </option>
+                  ))}
               </select>
             </label>
             <label className="flex flex-col text-sm text-gray-700 dark:text-gray-300">
-              Gatillo (da la entrada y su direccion)
-              <select className={inputCls} value={trigger} onChange={(e) => setTrigger(e.target.value)}>
-                {opts.triggers.map((t) => (
-                  <option key={t.id} value={t.id}>
-                    {t.label}
+              Ventana de los eventos (velas)
+              <input
+                type="number"
+                min={1}
+                max={opts.window.max}
+                className={inputCls + " w-24"}
+                value={windowBars}
+                disabled={!hasEvent}
+                onChange={(e) => setWindowBars(Math.max(1, Math.min(opts.window.max, Number(e.target.value) || 1)))}
+              />
+            </label>
+            <label className="flex flex-col text-sm text-gray-700 dark:text-gray-300">
+              Salida
+              <select className={inputCls} value={exit} onChange={(e) => setExit(e.target.value)}>
+                {opts.exits.map((x) => (
+                  <option key={x.id} value={x.id}>
+                    {x.label}
                   </option>
                 ))}
               </select>
             </label>
+            {exit === "pct" && (
+              <>
+                <label className="flex flex-col text-sm text-gray-700 dark:text-gray-300">
+                  SL %
+                  <input type="text" inputMode="decimal" className={inputCls + " w-20"} value={slPct} onChange={(e) => setSlPct(e.target.value)} />
+                </label>
+                <label className="flex flex-col text-sm text-gray-700 dark:text-gray-300">
+                  TP % (opcional)
+                  <input type="text" inputMode="decimal" className={inputCls + " w-20"} value={tpPct} onChange={(e) => setTpPct(e.target.value)} />
+                </label>
+                <label className="flex flex-col text-sm text-gray-700 dark:text-gray-300">
+                  Trailing % (opcional)
+                  <input type="text" inputMode="decimal" className={inputCls + " w-20"} value={trailPct} onChange={(e) => setTrailPct(e.target.value)} />
+                </label>
+              </>
+            )}
             <label className="flex flex-col text-sm text-gray-700 dark:text-gray-300">
               Desde (opcional)
               <input type="date" className={inputCls} value={start} onChange={(e) => setStart(e.target.value)} />
@@ -193,32 +330,25 @@ function Form({ opts }: { opts: ExplorerOptions }) {
               <input type="date" className={inputCls} value={end} max={opts.reserved_from} onChange={(e) => setEnd(e.target.value)} />
             </label>
           </div>
-
-          <fieldset>
-            <legend className="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
-              Filtros (hasta {opts.max_filters}; un largo exige estado alcista y un corto bajista)
-            </legend>
-            <div className="flex flex-wrap gap-3">
-              {opts.filters.map((f) => (
-                <label key={f.id} className="flex items-center gap-1 text-sm text-gray-800 dark:text-gray-200">
-                  <input
-                    type="checkbox"
-                    checked={filters.includes(f.id)}
-                    disabled={!filters.includes(f.id) && filters.length >= opts.max_filters}
-                    onChange={() => setFilters(toggle(filters, f.id, opts.max_filters))}
-                  />
-                  {f.label}
-                </label>
-              ))}
-            </div>
-          </fieldset>
+          {exit === "pct" && (
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              Porcentajes del precio de entrada (no del margen). Sin TP ni trailing, el motor usa su TP de
+              respaldo del 10 %. El trailing sigue al mejor precio a esa distancia.
+            </p>
+          )}
+          {slTooWide && (
+            <p role="alert" className="text-sm text-amber-800 dark:text-amber-300">
+              Con este apalancamiento, un SL mayor que {opts.max_sl_pct_before_skip} % perderia mas margen del permitido:
+              el motor omitira esas entradas.
+            </p>
+          )}
 
           <button
             type="submit"
-            disabled={run.isPending || symbols.length === 0}
+            disabled={run.isPending || symbols.length === 0 || indicators.length === 0}
             className="rounded bg-blue-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
           >
-            {run.isPending ? "Calculando..." : "Probar"}
+            {run.isPending ? "Calculando..." : `Probar en ${tfLabel(timeframe)}`}
           </button>
           {errorText && (
             <p role="alert" className="text-sm text-red-700 dark:text-red-400">
@@ -227,7 +357,7 @@ function Form({ opts }: { opts: ExplorerOptions }) {
           )}
         </form>
       </Card>
-      {run.data && <ResultCard r={run.data} />}
+      {run.data && <ResultCard r={run.data} labels={opts} />}
     </>
   );
 }

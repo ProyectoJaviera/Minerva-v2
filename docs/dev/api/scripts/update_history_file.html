@@ -32,7 +32,13 @@
                     <a class="variable" href="#DEFAULT_PATH">DEFAULT_PATH</a>
             </li>
             <li>
+                    <a class="variable" href="#EXTRA_TIMEFRAMES">EXTRA_TIMEFRAMES</a>
+            </li>
+            <li>
                     <a class="function" href="#check_target">check_target</a>
+            </li>
+            <li>
+                    <a class="function" href="#download_extra_timeframes">download_extra_timeframes</a>
             </li>
             <li>
                     <a class="function" href="#main">main</a>
@@ -59,8 +65,11 @@
 <p>Es <code>scripts/download_history.py</code> (universo top-10 de CoinGecko mas los simbolos de control; velas
 LAST_PRICE y MARK_PRICE de 1h, 4h y 1d desde el piso real de Bitunix, y funding) escribiendo en un
 archivo SQLite APARTE de la base del bot: <code>EXPLORER_HISTORY_DB</code>, por defecto
-<code>./history/history_v2.db</code>. Es reanudable: correrlo de nuevo solo baja lo que falta. Las velas de
-Bitunix coinciden con las de TradingView (docs/historial/PROGRESS.md, comparacion del 2026-11-09).</p>
+<code>./history/history_v2.db</code>; despues baja tambien las velas de <code><a href="#EXTRA_TIMEFRAMES">EXTRA_TIMEFRAMES</a></code> (15m y 1w, que la
+seccion ofrece y el backtest de la Fase 2 no usa) de los mismos simbolos. Ambos intervalos se
+verificaron contra la API publica de Bitunix el 2026-11-11 (la semanal abre el lunes 00:00 UTC).
+Es reanudable: correrlo de nuevo solo baja lo que falta. Las velas de Bitunix coinciden con las de
+TradingView (docs/historial/PROGRESS.md, comparacion del 2026-11-09).</p>
 
 <p>Se niega a escribir en la base del bot, en <code>data/</code> o en cualquier archivo que no termine en <code>.db</code>.
 Con el contenedor de la v2 corriendo no hace falta reiniciarlo: la seccion vuelve a leer el archivo
@@ -69,7 +78,7 @@ cuando cambia su fecha de modificacion (mejor correrlo cuando nadie esta usando 
 <h6 id="uso">Uso:</h6>
 
 <blockquote>
-  <p>python scripts/update_history_file.py [--path history/history_v2.db]</p>
+  <p>python scripts/update_history_file.py [--path history/history_v2.db] [--only-extra]</p>
 </blockquote>
 </div>
 
@@ -85,6 +94,18 @@ cuando cambia su fecha de modificacion (mejor correrlo cuando nadie esta usando 
         
     </div>
     <a class="headerlink" href="#DEFAULT_PATH"></a>
+    
+    
+
+                </section>
+                <section id="EXTRA_TIMEFRAMES">
+                    <div class="attr variable">
+            <span class="name">EXTRA_TIMEFRAMES</span>        =
+<span class="default_value">(&#39;15m&#39;, &#39;1w&#39;)</span>
+
+        
+    </div>
+    <a class="headerlink" href="#EXTRA_TIMEFRAMES"></a>
     
     
 
@@ -119,6 +140,37 @@ cuando cambia su fecha de modificacion (mejor correrlo cuando nadie esta usando 
 <ul>
 <li><strong>SystemExit:</strong>  si apunta a la base del bot, a una carpeta <code>data/</code> o no termina en <code>.db</code>.</li>
 </ul>
+</div>
+
+
+                </section>
+                <section id="download_extra_timeframes">
+                    <div class="attr function">
+            
+        <span class="def">async def</span>
+        <span class="name">download_extra_timeframes</span><span class="signature pdoc-code condensed">(<span class="param"><span class="n">timeframes</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">'15m'</span><span class="p">,</span> <span class="s1">'1w'</span><span class="p">)</span></span><span class="return-annotation">) -> <span class="kc">None</span>:</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#download_extra_timeframes"></a>
+    
+            <div class="docstring"><p>Baja las velas de <code>timeframes</code> (LAST y MARK) de los simbolos que ya tiene el archivo.</p>
+
+<p>Usa <code>settings.database_path</code>, que <code><a href="#main">main</a></code> ya fijo en el archivo de historial. Reanudable: cada
+serie solo pide lo que falta y al terminar sin errores se marca completa.</p>
+
+<h6 id="arguments">Arguments:</h6>
+
+<ul>
+<li><strong>timeframes:</strong>  marcos extra a bajar.</li>
+</ul>
+
+<h6 id="efectos">Efectos:</h6>
+
+<blockquote>
+  <p>Red: Bitunix (publica). Escribe <code>ohlcv_cache</code>, <code>ohlcv_floor</code> y <code>ohlcv_series_complete</code>
+  del archivo de historial.</p>
+</blockquote>
 </div>
 
 

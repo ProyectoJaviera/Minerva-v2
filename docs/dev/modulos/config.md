@@ -81,10 +81,10 @@ propiedades derivadas (listas separadas por comas, fecha final del backtest en m
 
 - **Referencia pdoc:** [`api/app/config.html`](../api/app/config.html)
 - **Importa (internos):** ninguno
-- **Lo importan:** 70 módulos (api 12, backtesting 2, core 2, execution 1, explorer 1, llm 5, main 1, market 1, memory 3, news 3, scripts 26, telegram 4, trading 9)
+- **Lo importan:** 71 módulos (api 12, backtesting 2, core 2, execution 1, explorer 1, llm 5, main 1, market 1, memory 3, news 3, scripts 27, telegram 4, trading 9)
 - **Configuración que lee:** ninguno
 - **Tablas que lee:** ninguno
 - **Tablas que escribe:** ninguno
 - **Tablas que crea o altera:** ninguno
-- **Pruebas que lo importan o citan:** 65 archivos (e2e 1, tests/ 1, unit 63)
+- **Pruebas que lo importan o citan:** 66 archivos (e2e 1, tests/ 1, unit 64)
 <!-- /hechos:app/config.py -->

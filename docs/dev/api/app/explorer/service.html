@@ -38,25 +38,10 @@
                     <a class="variable" href="#TIMEFRAMES">TIMEFRAMES</a>
             </li>
             <li>
-                    <a class="variable" href="#MAX_FILTERS">MAX_FILTERS</a>
+                    <a class="variable" href="#TIMEFRAME_LABELS">TIMEFRAME_LABELS</a>
             </li>
             <li>
                     <a class="variable" href="#MAX_SYMBOLS">MAX_SYMBOLS</a>
-            </li>
-            <li>
-                    <a class="variable" href="#TRIGGER_LABELS">TRIGGER_LABELS</a>
-            </li>
-            <li>
-                    <a class="variable" href="#FILTER_LABELS">FILTER_LABELS</a>
-            </li>
-            <li>
-                    <a class="variable" href="#TRIGGERS">TRIGGERS</a>
-            </li>
-            <li>
-                    <a class="variable" href="#FILTERS">FILTERS</a>
-            </li>
-            <li>
-                    <a class="variable" href="#ROUND3_ONLY">ROUND3_ONLY</a>
             </li>
             <li>
                     <a class="variable" href="#BTC_SYMBOL">BTC_SYMBOL</a>
@@ -92,24 +77,6 @@
 
             </li>
             <li>
-                    <a class="class" href="#FastComboStrategy">FastComboStrategy</a>
-                            <ul class="memberlist">
-                </ul>
-
-            </li>
-            <li>
-                    <a class="class" href="#FastRound3Strategy">FastRound3Strategy</a>
-                            <ul class="memberlist">
-                </ul>
-
-            </li>
-            <li>
-                    <a class="function" href="#build_strategy">build_strategy</a>
-            </li>
-            <li>
-                    <a class="function" href="#load_btc_context">load_btc_context</a>
-            </li>
-            <li>
                     <a class="class" href="#ExplorerRequest">ExplorerRequest</a>
                             <ul class="memberlist">
                         <li>
@@ -122,16 +89,25 @@
                                 <a class="variable" href="#ExplorerRequest.timeframe">timeframe</a>
                         </li>
                         <li>
-                                <a class="variable" href="#ExplorerRequest.trigger">trigger</a>
+                                <a class="variable" href="#ExplorerRequest.indicators">indicators</a>
                         </li>
                         <li>
-                                <a class="variable" href="#ExplorerRequest.filters">filters</a>
+                                <a class="variable" href="#ExplorerRequest.window">window</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#ExplorerRequest.exit_name">exit_name</a>
                         </li>
                         <li>
                                 <a class="variable" href="#ExplorerRequest.start_ms">start_ms</a>
                         </li>
                         <li>
                                 <a class="variable" href="#ExplorerRequest.end_ms">end_ms</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#ExplorerRequest.min_agree">min_agree</a>
+                        </li>
+                        <li>
+                                <a class="variable" href="#ExplorerRequest.pct_exit">pct_exit</a>
                         </li>
                 </ul>
 
@@ -144,6 +120,9 @@
             </li>
             <li>
                     <a class="function" href="#available_series">available_series</a>
+            </li>
+            <li>
+                    <a class="function" href="#load_btc">load_btc</a>
             </li>
             <li>
                     <a class="function" href="#summarize">summarize</a>
@@ -175,18 +154,19 @@
 
 <ul>
 <li><strong>Fuente:</strong> un archivo SQLite aparte de la base del bot (<code>EXPLORER_HISTORY_DB</code>, por defecto
-<code>./history/history_v2.db</code>), creado con <code>scripts/download_history.py</code> y <code>DATABASE_PATH</code> apuntando
-a ese archivo. Tiene las mismas tablas de mercado que usa el motor (velas LAST_PRICE y
-MARK_PRICE, funding y specs). Se abre en modo <code>immutable</code> de solo lectura: nada se escribe.</li>
+<code>./history/history_v2.db</code>), creado con <code>scripts/update_history_file.py</code>. Tiene las mismas tablas
+de mercado que usa el motor (velas LAST_PRICE y MARK_PRICE, funding y specs). Se abre en modo
+<code>immutable</code> de solo lectura: nada se escribe.</li>
+<li><strong>Estrategia:</strong> la confluencia de los indicadores que el dueno marca (<code><a href="confluence.html">app.explorer.confluence</a></code>):
+todos votan alcista o bajista y se entra cuando todos coinciden, con una salida fija en ATR.</li>
 <li><strong>Motor:</strong> el mismo <code>run_backtest</code> de la Fase 2 (entrada en el open de la vela siguiente,
-comisiones, slippage, funding, liquidacion con MARK_PRICE) con las combinaciones de
-<code><a href="../research/combos.html">app.research.combos</a></code> (un gatillo con 0, 1 o 2 filtros y su salida fija).</li>
-<li><strong>Datos reservados:</strong> nunca se usan velas desde <code><a href="#RESERVED_FROM">RESERVED_FROM</a></code> (2026-10-01 UTC). Estan
-reservadas para las rondas preregistradas; el limite esta fijo en el codigo a proposito, no es
-configurable.</li>
+comisiones, slippage, funding, liquidacion con MARK_PRICE).</li>
+<li><strong>Corte de datos:</strong> nunca se usan velas desde <code><a href="#RESERVED_FROM">RESERVED_FROM</a></code> (2026-10-01 UTC), que estaban
+reservadas para las rondas preregistradas (el examen de la ronda 3 ya las uso; quitar el corte es
+decision del dueno).</li>
 <li><strong>Exploratorio:</strong> el resultado no se guarda en la base ni pasa por los criterios de la Fase 2.
-Con cada corrida va el control con direccion al azar (mismas velas, mismos filtros), la
-referencia «sin informacion de direccion».</li>
+Con cada corrida va el control con direccion al azar (mismas velas de entrada y misma salida),
+la referencia «sin informacion de direccion».</li>
 </ul>
 
 <p>El calculo corre en un hilo aparte con su propio bucle y su propia conexion, de a una corrida
@@ -224,7 +204,7 @@ por vez, para no frenar el bucle del bot.</p>
                 <section id="TIMEFRAMES">
                     <div class="attr variable">
             <span class="name">TIMEFRAMES</span>        =
-<span class="default_value">(&#39;1h&#39;, &#39;4h&#39;)</span>
+<span class="default_value">(&#39;15m&#39;, &#39;1h&#39;, &#39;4h&#39;, &#39;1d&#39;, &#39;1w&#39;)</span>
 
         
     </div>
@@ -233,14 +213,14 @@ por vez, para no frenar el bucle del bot.</p>
     
 
                 </section>
-                <section id="MAX_FILTERS">
+                <section id="TIMEFRAME_LABELS">
                     <div class="attr variable">
-            <span class="name">MAX_FILTERS</span>        =
-<span class="default_value">2</span>
+            <span class="name">TIMEFRAME_LABELS</span>        =
+<span class="default_value">{&#39;15m&#39;: &#39;15m&#39;, &#39;1h&#39;: &#39;1h&#39;, &#39;4h&#39;: &#39;4h&#39;, &#39;1d&#39;: &#39;1D&#39;, &#39;1w&#39;: &#39;1S&#39;}</span>
 
         
     </div>
-    <a class="headerlink" href="#MAX_FILTERS"></a>
+    <a class="headerlink" href="#TIMEFRAME_LABELS"></a>
     
     
 
@@ -253,69 +233,6 @@ por vez, para no frenar el bucle del bot.</p>
         
     </div>
     <a class="headerlink" href="#MAX_SYMBOLS"></a>
-    
-    
-
-                </section>
-                <section id="TRIGGER_LABELS">
-                    <div class="attr variable">
-            <span class="name">TRIGGER_LABELS</span>        =
-<input id="TRIGGER_LABELS-view-value" class="view-value-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
-            <label class="view-value-button pdoc-button" for="TRIGGER_LABELS-view-value"></label><span class="default_value">{&#39;sfp&#39;: &#39;SFP del HeatMap (barrida de swing con cierre de vuelta)&#39;, &#39;camarilla&#39;: &#39;Camarilla: rechazo de S3 (largo) o R3 (corto)&#39;, &#39;rf_flip&#39;: &#39;Giro del Range Filter (Frost)&#39;, &#39;vidya_flip&#39;: &#39;Giro de la banda VIDYA (F. Trail de Frost)&#39;, &#39;bb_reversal&#39;: &#39;Reversion del BB%B (sale de sobreventa/sobrecompra)&#39;, &#39;wt_cross&#39;: &#39;Cruce de WaveTrend en zona extrema (+-72)&#39;, &#39;zone_reject&#39;: &#39;Rechazo de una zona de liquidez&#39;, &#39;grab&#39;: &#39;Liquidity Grab de Frost (agotamiento)&#39;, &#39;fvg&#39;: &#39;FVG: retesteo de un Fair Value Gap de 3 velas&#39;}</span>
-
-        
-    </div>
-    <a class="headerlink" href="#TRIGGER_LABELS"></a>
-    
-    
-
-                </section>
-                <section id="FILTER_LABELS">
-                    <div class="attr variable">
-            <span class="name">FILTER_LABELS</span>        =
-<input id="FILTER_LABELS-view-value" class="view-value-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
-            <label class="view-value-button pdoc-button" for="FILTER_LABELS-view-value"></label><span class="default_value">{&#39;ema&#39;: &#39;Cierre sobre/bajo la EMA 144&#39;, &#39;rf&#39;: &#39;Estado del Range Filter&#39;, &#39;vidya&#39;: &#39;Tendencia de la banda VIDYA&#39;, &#39;wt&#39;: &#39;WaveTrend: wt1 sobre/bajo wt2&#39;, &#39;fund&#39;: &#39;Funding bajo/sobre su mediana de 30 dias (en contra del lado saturado)&#39;, &#39;btc&#39;: &#39;Regimen de BTC: cierre sobre/bajo su EMA 200&#39;, &#39;rs&#39;: &#39;Fuerza relativa contra BTC (retorno de 180 velas)&#39;}</span>
-
-        
-    </div>
-    <a class="headerlink" href="#FILTER_LABELS"></a>
-    
-    
-
-                </section>
-                <section id="TRIGGERS">
-                    <div class="attr variable">
-            <span class="name">TRIGGERS</span>        =
-<input id="TRIGGERS-view-value" class="view-value-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
-            <label class="view-value-button pdoc-button" for="TRIGGERS-view-value"></label><span class="default_value">(&#39;sfp&#39;, &#39;camarilla&#39;, &#39;rf_flip&#39;, &#39;vidya_flip&#39;, &#39;bb_reversal&#39;, &#39;wt_cross&#39;, &#39;zone_reject&#39;, &#39;grab&#39;, &#39;fvg&#39;)</span>
-
-        
-    </div>
-    <a class="headerlink" href="#TRIGGERS"></a>
-    
-    
-
-                </section>
-                <section id="FILTERS">
-                    <div class="attr variable">
-            <span class="name">FILTERS</span>        =
-<span class="default_value">(&#39;ema&#39;, &#39;rf&#39;, &#39;vidya&#39;, &#39;wt&#39;, &#39;fund&#39;, &#39;btc&#39;, &#39;rs&#39;)</span>
-
-        
-    </div>
-    <a class="headerlink" href="#FILTERS"></a>
-    
-    
-
-                </section>
-                <section id="ROUND3_ONLY">
-                    <div class="attr variable">
-            <span class="name">ROUND3_ONLY</span>        =
-<span class="default_value">{&#39;btc&#39;, &#39;fvg&#39;, &#39;rs&#39;, &#39;fund&#39;}</span>
-
-        
-    </div>
-    <a class="headerlink" href="#ROUND3_ONLY"></a>
     
     
 
@@ -336,7 +253,7 @@ por vez, para no frenar el bucle del bot.</p>
                     <div class="attr variable">
             <span class="name">NOTE</span>        =
 <input id="NOTE-view-value" class="view-value-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
-            <label class="view-value-button pdoc-button" for="NOTE-view-value"></label><span class="default_value">&#39;Prueba EXPLORATORIA: no es una ronda preregistrada ni evidencia de la Fase 2, y no se guarda. Probar muchas combinaciones y quedarse con la mejor sobreestima el resultado (sesgo de seleccion). Velas de Bitunix (coinciden con TradingView); sin datos desde el 2026-10-01, reservados para las rondas preregistradas.&#39;</span>
+            <label class="view-value-button pdoc-button" for="NOTE-view-value"></label><span class="default_value">&#39;Prueba EXPLORATORIA: no es una ronda preregistrada ni evidencia de la Fase 2, y no se guarda. Probar muchas combinaciones y quedarse con la mejor sobreestima el resultado (sesgo de seleccion). Velas de Bitunix (coinciden con TradingView); sin datos desde el 2026-10-01.&#39;</span>
 
         
     </div>
@@ -464,155 +381,6 @@ lectura en Docker).</p>
                                 </dl>
                             </div>
                 </section>
-                <section id="FastComboStrategy">
-                    <div class="attr class">
-            
-    <span class="def">class</span>
-    <span class="name">FastComboStrategy</span><wbr>(<span class="base"><a href="#_FastRowMixin">_FastRowMixin</a></span>, <span class="base"><a href="../research/combos.html#ComboStrategy">app.research.combos.ComboStrategy</a></span>):
-
-        
-    </div>
-    <a class="headerlink" href="#FastComboStrategy"></a>
-    
-            <div class="docstring"><p><code>ComboStrategy</code> con la fila leida de arrays (mismas operaciones, ver <code>_FastRowMixin</code>).</p>
-</div>
-
-
-                            <div class="inherited">
-                                <h5>Inherited Members</h5>
-                                <dl>
-                                    <div><dt><a href="../research/combos.html#ComboStrategy">app.research.combos.ComboStrategy</a></dt>
-                                <dd id="FastComboStrategy.__init__" class="function"><a href="../research/combos.html#ComboStrategy.__init__">ComboStrategy</a></dd>
-                <dd id="FastComboStrategy.skip_entry_if_sl_crossed" class="variable"><a href="../research/combos.html#ComboStrategy.skip_entry_if_sl_crossed">skip_entry_if_sl_crossed</a></dd>
-                <dd id="FastComboStrategy.filters" class="variable"><a href="../research/combos.html#ComboStrategy.filters">filters</a></dd>
-                <dd id="FastComboStrategy.trigger" class="variable"><a href="../research/combos.html#ComboStrategy.trigger">trigger</a></dd>
-                <dd id="FastComboStrategy.exit_mode" class="variable"><a href="../research/combos.html#ComboStrategy.exit_mode">exit_mode</a></dd>
-                <dd id="FastComboStrategy.random_dir" class="variable"><a href="../research/combos.html#ComboStrategy.random_dir">random_dir</a></dd>
-                <dd id="FastComboStrategy.warmup" class="variable"><a href="../research/combos.html#ComboStrategy.warmup">warmup</a></dd>
-                <dd id="FastComboStrategy.name" class="variable"><a href="../research/combos.html#ComboStrategy.name">name</a></dd>
-                <dd id="FastComboStrategy.natural_side" class="function"><a href="../research/combos.html#ComboStrategy.natural_side">natural_side</a></dd>
-                <dd id="FastComboStrategy.evaluate" class="function"><a href="../research/combos.html#ComboStrategy.evaluate">evaluate</a></dd>
-                <dd id="FastComboStrategy.stop_price" class="function"><a href="../research/combos.html#ComboStrategy.stop_price">stop_price</a></dd>
-                <dd id="FastComboStrategy.take_profit_price" class="function"><a href="../research/combos.html#ComboStrategy.take_profit_price">take_profit_price</a></dd>
-                <dd id="FastComboStrategy.trailing_distance" class="function"><a href="../research/combos.html#ComboStrategy.trailing_distance">trailing_distance</a></dd>
-
-            </div>
-            <div><dt><a href="#_FastRowMixin">_FastRowMixin</a></dt>
-                                <dd id="FastComboStrategy.precompute" class="function"><a href="#_FastRowMixin.precompute">precompute</a></dd>
-
-            </div>
-                                </dl>
-                            </div>
-                </section>
-                <section id="FastRound3Strategy">
-                    <div class="attr class">
-            
-    <span class="def">class</span>
-    <span class="name">FastRound3Strategy</span><wbr>(<span class="base"><a href="#_FastRowMixin">_FastRowMixin</a></span>, <span class="base"><a href="../research/round3.html#Round3Strategy">app.research.round3.Round3Strategy</a></span>):
-
-        
-    </div>
-    <a class="headerlink" href="#FastRound3Strategy"></a>
-    
-            <div class="docstring"><p><code>Round3Strategy</code> con la fila leida de arrays (mismas operaciones, ver <code>_FastRowMixin</code>).</p>
-</div>
-
-
-                            <div class="inherited">
-                                <h5>Inherited Members</h5>
-                                <dl>
-                                    <div><dt><a href="../research/round3.html#Round3Strategy">app.research.round3.Round3Strategy</a></dt>
-                                <dd id="FastRound3Strategy.__init__" class="function"><a href="../research/round3.html#Round3Strategy.__init__">Round3Strategy</a></dd>
-                <dd id="FastRound3Strategy.filters" class="variable"><a href="../research/round3.html#Round3Strategy.filters">filters</a></dd>
-                <dd id="FastRound3Strategy.trigger" class="variable"><a href="../research/round3.html#Round3Strategy.trigger">trigger</a></dd>
-                <dd id="FastRound3Strategy.exit_name" class="variable"><a href="../research/round3.html#Round3Strategy.exit_name">exit_name</a></dd>
-                <dd id="FastRound3Strategy.exit_mode" class="variable"><a href="../research/round3.html#Round3Strategy.exit_mode">exit_mode</a></dd>
-                <dd id="FastRound3Strategy.entry_mode" class="variable"><a href="../research/round3.html#Round3Strategy.entry_mode">entry_mode</a></dd>
-                <dd id="FastRound3Strategy.random_dir" class="variable"><a href="../research/round3.html#Round3Strategy.random_dir">random_dir</a></dd>
-                <dd id="FastRound3Strategy.warmup" class="variable"><a href="../research/round3.html#Round3Strategy.warmup">warmup</a></dd>
-                <dd id="FastRound3Strategy.name" class="variable"><a href="../research/round3.html#Round3Strategy.name">name</a></dd>
-                <dd id="FastRound3Strategy.evaluate" class="function"><a href="../research/round3.html#Round3Strategy.evaluate">evaluate</a></dd>
-                <dd id="FastRound3Strategy.take_profit_price" class="function"><a href="../research/round3.html#Round3Strategy.take_profit_price">take_profit_price</a></dd>
-                <dd id="FastRound3Strategy.trailing_distance" class="function"><a href="../research/round3.html#Round3Strategy.trailing_distance">trailing_distance</a></dd>
-
-            </div>
-            <div><dt><a href="#_FastRowMixin">_FastRowMixin</a></dt>
-                                <dd id="FastRound3Strategy.precompute" class="function"><a href="#_FastRowMixin.precompute">precompute</a></dd>
-
-            </div>
-            <div><dt><a href="../research/combos.html#ComboStrategy">app.research.combos.ComboStrategy</a></dt>
-                                <dd id="FastRound3Strategy.skip_entry_if_sl_crossed" class="variable"><a href="../research/combos.html#ComboStrategy.skip_entry_if_sl_crossed">skip_entry_if_sl_crossed</a></dd>
-                <dd id="FastRound3Strategy.natural_side" class="function"><a href="../research/combos.html#ComboStrategy.natural_side">natural_side</a></dd>
-                <dd id="FastRound3Strategy.stop_price" class="function"><a href="../research/combos.html#ComboStrategy.stop_price">stop_price</a></dd>
-
-            </div>
-                                </dl>
-                            </div>
-                </section>
-                <section id="build_strategy">
-                    <div class="attr function">
-            
-        <span class="def">def</span>
-        <span class="name">build_strategy</span><span class="signature pdoc-code condensed">(<span class="param"><span class="n">trigger</span><span class="p">:</span> <span class="nb">str</span>, </span><span class="param"><span class="n">filters</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>, </span><span class="param"><span class="o">*</span>, </span><span class="param"><span class="n">random_dir</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span></span><span class="return-annotation">):</span></span>
-
-        
-    </div>
-    <a class="headerlink" href="#build_strategy"></a>
-    
-            <div class="docstring"><p>La estrategia de una combinacion: <code>ComboStrategy</code> salvo que use una pieza de la ronda 3.</p>
-
-<h6 id="arguments">Arguments:</h6>
-
-<ul>
-<li><strong>trigger:</strong>  gatillo.</li>
-<li><strong>filters:</strong>  filtros.</li>
-<li><strong>random_dir:</strong>  sortea la direccion (control).</li>
-</ul>
-
-<h6 id="returns">Returns:</h6>
-
-<blockquote>
-  <p><code><a href="#FastComboStrategy">FastComboStrategy</a></code> o <code><a href="#FastRound3Strategy">FastRound3Strategy</a></code> (salida <code>base</code>, entrada a mercado).</p>
-</blockquote>
-</div>
-
-
-                </section>
-                <section id="load_btc_context">
-                    <div class="attr function">
-            
-        <span class="def">async def</span>
-        <span class="name">load_btc_context</span><span class="signature pdoc-code condensed">(<span class="param"><span class="n">db</span><span class="p">:</span> <span class="n"><a href="../persistence/database.html#Database">app.persistence.database.Database</a></span>, </span><span class="param"><span class="n">timeframe</span><span class="p">:</span> <span class="nb">str</span></span><span class="return-annotation">) -> <span class="nb">bool</span>:</span></span>
-
-        
-    </div>
-    <a class="headerlink" href="#load_btc_context"></a>
-    
-            <div class="docstring"><p>Registra la serie de BTC del marco para los filtros <code>btc</code> y <code>rs</code> de la ronda 3.</p>
-
-<h6 id="arguments">Arguments:</h6>
-
-<ul>
-<li><strong>db:</strong>  el archivo de historial abierto.</li>
-<li><strong>timeframe:</strong>  marco.</li>
-</ul>
-
-<h6 id="returns">Returns:</h6>
-
-<blockquote>
-  <p>Si habia velas de BTC (sin ellas, <code>btc</code> y <code>rs</code> quedan siempre en falso).</p>
-</blockquote>
-
-<h6 id="efectos">Efectos:</h6>
-
-<blockquote>
-  <p>Lee <code>ohlcv_cache</code>. Cambia el contexto de BTC del modulo <code>round3</code> (las corridas de la
-  seccion son de a una por vez).</p>
-</blockquote>
-</div>
-
-
-                </section>
                 <section id="ExplorerRequest">
                     <div class="attr class">
                     <div class="decorator decorator-dataclass">@dataclass(frozen=True)</div>
@@ -630,11 +398,14 @@ lectura en Docker).</p>
 
 <ul>
 <li><strong>symbols:</strong>  simbolos (1 a <code><a href="#MAX_SYMBOLS">MAX_SYMBOLS</a></code>).</li>
-<li><strong>timeframe:</strong>  <code>1h</code> o <code>4h</code>.</li>
-<li><strong>trigger:</strong>  uno de <code><a href="#TRIGGERS">TRIGGERS</a></code>.</li>
-<li><strong>filters:</strong>  0 a <code><a href="#MAX_FILTERS">MAX_FILTERS</a></code> de <code><a href="#FILTERS">FILTERS</a></code>, ordenados.</li>
+<li><strong>timeframe:</strong>  uno de <code><a href="#TIMEFRAMES">TIMEFRAMES</a></code>.</li>
+<li><strong>indicators:</strong>  ids de <code>INDICATORS</code> (al menos uno), en su orden.</li>
+<li><strong>window:</strong>  velas que dura el voto de un indicador de evento.</li>
+<li><strong>exit_name:</strong>  clave de <code>EXITS</code>.</li>
 <li><strong>start_ms:</strong>  inicio pedido (ms UTC) o <code>None</code> = desde el comienzo del historial.</li>
-<li><strong>end_ms:</strong>  fin pedido (ms UTC) o <code>None</code> = hasta el limite reservado.</li>
+<li><strong>end_ms:</strong>  fin pedido (ms UTC) o <code>None</code> = hasta el corte.</li>
+<li><strong>min_agree:</strong>  cuantos indicadores deben coincidir (<code>None</code> = todos).</li>
+<li><strong>pct_exit:</strong>  <code>(sl, tp, trailing)</code> en % si <code><a href="#ExplorerRequest.exit_name">exit_name</a></code> es <code>PCT_EXIT</code>, si no <code>None</code>.</li>
 </ul>
 </div>
 
@@ -642,7 +413,7 @@ lectura en Docker).</p>
                             <div id="ExplorerRequest.__init__" class="classattr">
                                 <div class="attr function">
             
-        <span class="name">ExplorerRequest</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="n">symbols</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>,</span><span class="param">	<span class="n">timeframe</span><span class="p">:</span> <span class="nb">str</span>,</span><span class="param">	<span class="n">trigger</span><span class="p">:</span> <span class="nb">str</span>,</span><span class="param">	<span class="n">filters</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>,</span><span class="param">	<span class="n">start_ms</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>,</span><span class="param">	<span class="n">end_ms</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span></span>)</span>
+        <span class="name">ExplorerRequest</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="n">symbols</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>,</span><span class="param">	<span class="n">timeframe</span><span class="p">:</span> <span class="nb">str</span>,</span><span class="param">	<span class="n">indicators</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>,</span><span class="param">	<span class="n">window</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span>,</span><span class="param">	<span class="n">exit_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">'s2_tp2r'</span>,</span><span class="param">	<span class="n">start_ms</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>,</span><span class="param">	<span class="n">end_ms</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>,</span><span class="param">	<span class="n">min_agree</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>,</span><span class="param">	<span class="n">pct_exit</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span></span>)</span>
 
         
     </div>
@@ -673,24 +444,37 @@ lectura en Docker).</p>
     
 
                             </div>
-                            <div id="ExplorerRequest.trigger" class="classattr">
+                            <div id="ExplorerRequest.indicators" class="classattr">
                                 <div class="attr variable">
-            <span class="name">trigger</span><span class="annotation">: str</span>
+            <span class="name">indicators</span><span class="annotation">: tuple[str, ...]</span>
 
         
     </div>
-    <a class="headerlink" href="#ExplorerRequest.trigger"></a>
+    <a class="headerlink" href="#ExplorerRequest.indicators"></a>
     
     
 
                             </div>
-                            <div id="ExplorerRequest.filters" class="classattr">
+                            <div id="ExplorerRequest.window" class="classattr">
                                 <div class="attr variable">
-            <span class="name">filters</span><span class="annotation">: tuple[str, ...]</span>
+            <span class="name">window</span><span class="annotation">: int</span>        =
+<span class="default_value">5</span>
 
         
     </div>
-    <a class="headerlink" href="#ExplorerRequest.filters"></a>
+    <a class="headerlink" href="#ExplorerRequest.window"></a>
+    
+    
+
+                            </div>
+                            <div id="ExplorerRequest.exit_name" class="classattr">
+                                <div class="attr variable">
+            <span class="name">exit_name</span><span class="annotation">: str</span>        =
+<span class="default_value">&#39;s2_tp2r&#39;</span>
+
+        
+    </div>
+    <a class="headerlink" href="#ExplorerRequest.exit_name"></a>
     
     
 
@@ -719,12 +503,36 @@ lectura en Docker).</p>
     
 
                             </div>
+                            <div id="ExplorerRequest.min_agree" class="classattr">
+                                <div class="attr variable">
+            <span class="name">min_agree</span><span class="annotation">: int | None</span>        =
+<span class="default_value">None</span>
+
+        
+    </div>
+    <a class="headerlink" href="#ExplorerRequest.min_agree"></a>
+    
+    
+
+                            </div>
+                            <div id="ExplorerRequest.pct_exit" class="classattr">
+                                <div class="attr variable">
+            <span class="name">pct_exit</span><span class="annotation">: tuple[float, float | None, float | None] | None</span>        =
+<span class="default_value">None</span>
+
+        
+    </div>
+    <a class="headerlink" href="#ExplorerRequest.pct_exit"></a>
+    
+    
+
+                            </div>
                 </section>
                 <section id="validate_request">
                     <div class="attr function">
             
         <span class="def">def</span>
-        <span class="name">validate_request</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="n">symbols</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>,</span><span class="param">	<span class="n">timeframe</span><span class="p">:</span> <span class="nb">str</span>,</span><span class="param">	<span class="n">trigger</span><span class="p">:</span> <span class="nb">str</span>,</span><span class="param">	<span class="n">filters</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>,</span><span class="param">	<span class="n">start</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>,</span><span class="param">	<span class="n">end</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span></span><span class="return-annotation">) -> <span class="n"><a href="#ExplorerRequest">ExplorerRequest</a></span>:</span></span>
+        <span class="name">validate_request</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="n">symbols</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>,</span><span class="param">	<span class="n">timeframe</span><span class="p">:</span> <span class="nb">str</span>,</span><span class="param">	<span class="n">indicators</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>,</span><span class="param">	<span class="n">window</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span>,</span><span class="param">	<span class="n">exit_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">'s2_tp2r'</span>,</span><span class="param">	<span class="n">start</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>,</span><span class="param">	<span class="n">end</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>,</span><span class="param">	<span class="n">min_agree</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>,</span><span class="param">	<span class="n">sl_pct</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>,</span><span class="param">	<span class="n">tp_pct</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>,</span><span class="param">	<span class="n">trail_pct</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span></span><span class="return-annotation">) -> <span class="n"><a href="#ExplorerRequest">ExplorerRequest</a></span>:</span></span>
 
         
     </div>
@@ -736,11 +544,16 @@ lectura en Docker).</p>
 
 <ul>
 <li><strong>symbols:</strong>  simbolos (p. ej. <code>["BTCUSDT"]</code>).</li>
-<li><strong>timeframe:</strong>  <code>1h</code> o <code>4h</code>.</li>
-<li><strong>trigger:</strong>  gatillo.</li>
-<li><strong>filters:</strong>  filtros (0 a 2, sin repetir).</li>
+<li><strong>timeframe:</strong>  <code>15m</code>, <code>1h</code>, <code>4h</code>, <code>1d</code> o <code>1w</code>.</li>
+<li><strong>indicators:</strong>  ids de los indicadores (uno o mas, sin limite).</li>
+<li><strong>window:</strong>  velas que dura el voto de un indicador de evento (1 a <code>MAX_WINDOW</code>).</li>
+<li><strong>exit_name:</strong>  salida (clave de <code>EXITS</code>).</li>
 <li><strong>start:</strong>  fecha de inicio <code>YYYY-MM-DD</code> (UTC) o <code>None</code>.</li>
 <li><strong>end:</strong>  fecha de fin <code>YYYY-MM-DD</code> (UTC, excluida) o <code>None</code>.</li>
+<li><strong>min_agree:</strong>  cuantos indicadores deben coincidir (<code>None</code>, 0 o la cantidad elegida = todos).</li>
+<li><strong>sl_pct:</strong>  SL en % del precio de entrada (obligatorio con la salida <code>PCT_EXIT</code>).</li>
+<li><strong>tp_pct:</strong>  TP en % (opcional, solo con <code>PCT_EXIT</code>).</li>
+<li><strong>trail_pct:</strong>  trailing en % (opcional, solo con <code>PCT_EXIT</code>).</li>
 </ul>
 
 <h6 id="returns">Returns:</h6>
@@ -779,8 +592,8 @@ lectura en Docker).</p>
 <h6 id="returns">Returns:</h6>
 
 <blockquote>
-  <p>Lista de <code>{symbol, timeframe, first_day, last_day, bars}</code> (solo velas antes del limite
-  reservado), ordenada por simbolo y marco.</p>
+  <p>Lista de <code>{symbol, timeframe, first_day, last_day, first_ms, last_ms, bars}</code> (solo velas
+  antes del corte), ordenada por simbolo y marco.</p>
 </blockquote>
 
 <h6 id="efectos">Efectos:</h6>
@@ -825,6 +638,40 @@ lectura en Docker).</p>
 
 
                 </section>
+                <section id="load_btc">
+                    <div class="attr function">
+            
+        <span class="def">async def</span>
+        <span class="name">load_btc</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="n">db</span><span class="p">:</span> <span class="n"><a href="../persistence/database.html#Database">app.persistence.database.Database</a></span>,</span><span class="param">	<span class="n">timeframe</span><span class="p">:</span> <span class="nb">str</span></span><span class="return-annotation">) -> <span class="n">pandas</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="kc">None</span>:</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#load_btc"></a>
+    
+            <div class="docstring"><p>Velas de BTC del marco (para los indicadores <code>btc</code> y <code>rs</code>), hasta el corte.</p>
+
+<h6 id="arguments">Arguments:</h6>
+
+<ul>
+<li><strong>db:</strong>  el archivo de historial abierto.</li>
+<li><strong>timeframe:</strong>  marco.</li>
+</ul>
+
+<h6 id="returns">Returns:</h6>
+
+<blockquote>
+  <p>DataFrame con <code>open_time</code> y <code>close</code>, o <code>None</code> si no hay velas de BTC.</p>
+</blockquote>
+
+<h6 id="efectos">Efectos:</h6>
+
+<blockquote>
+  <p>Lee <code>ohlcv_cache</code>.</p>
+</blockquote>
+</div>
+
+
+                </section>
                 <section id="summarize">
                     <div class="attr function">
             
@@ -865,7 +712,7 @@ lectura en Docker).</p>
     </div>
     <a class="headerlink" href="#run_exploration_on_db"></a>
     
-            <div class="docstring"><p>Corre la combinacion y su control al azar sobre cada moneda pedida.</p>
+            <div class="docstring"><p>Corre la confluencia elegida y su control al azar sobre cada moneda pedida.</p>
 
 <h6 id="arguments">Arguments:</h6>
 

@@ -653,10 +653,14 @@ export interface ExplorerOptions {
   detail: string | null;
   note: string;
   reserved_from: string;
-  max_filters: number;
-  timeframes: string[];
-  triggers: { id: string; label: string; exit: "native" | "atr" }[];
-  filters: { id: string; label: string }[];
+  timeframes: { id: string; label: string }[];
+  indicators: { id: string; label: string; kind: "estado" | "evento" }[];
+  exits: { id: string; label: string }[];
+  default_exit: string;
+  pct_limits: { sl: number; tp: number; trail: number };
+  // un SL en % mayor que esto se omite por el tope de riesgo del motor (perderia mas del margen permitido)
+  max_sl_pct_before_skip: number;
+  window: { default: number; max: number };
   symbols: string[];
   series: { symbol: string; timeframe: string; first_day: string; last_day: string; bars: number }[];
 }
@@ -689,9 +693,11 @@ export interface ExplorerResult {
   params: {
     symbols: string[];
     timeframe: string;
-    trigger: string;
-    filters: string[];
-    exit_mode: string;
+    indicators: string[];
+    window: number;
+    exit: string;
+    exit_label: string;
+    min_agree: number;
     name: string;
   };
   period: { start: string | null; end: string | null; reserved_from: string };
@@ -709,8 +715,15 @@ export interface ExplorerResult {
 export interface ExplorerRunRequest {
   symbols: string[];
   timeframe: string;
-  trigger: string;
-  filters: string[];
+  indicators: string[];
+  window: number;
+  exit: string;
+  // cuantos indicadores deben coincidir; null = todos
+  minAgree?: number | null;
+  // salida "pct": SL obligatorio, TP y trailing opcionales (en % del precio de entrada)
+  slPct?: number | null;
+  tpPct?: number | null;
+  trailPct?: number | null;
   start?: string | null;
   end?: string | null;
 }
@@ -727,9 +740,19 @@ export function useExplorerRun() {
   return useMutation({
     // GET a proposito: solo calcula sobre un archivo de solo lectura, no escribe nada.
     mutationFn: (body: ExplorerRunRequest) => {
-      const q = new URLSearchParams({ timeframe: body.timeframe, trigger: body.trigger });
+      const q = new URLSearchParams({
+        timeframe: body.timeframe,
+        window: String(body.window),
+        exit: body.exit,
+      });
       for (const s of body.symbols) q.append("symbols", s);
-      for (const f of body.filters) q.append("filters", f);
+      for (const i of body.indicators) q.append("indicators", i);
+      if (body.minAgree) q.set("min_agree", String(body.minAgree));
+      if (body.exit === "pct") {
+        if (body.slPct != null) q.set("sl_pct", String(body.slPct));
+        if (body.tpPct != null) q.set("tp_pct", String(body.tpPct));
+        if (body.trailPct != null) q.set("trail_pct", String(body.trailPct));
+      }
       if (body.start) q.set("start", body.start);
       if (body.end) q.set("end", body.end);
       return apiFetch<ExplorerResult>(`/api/explorer/run?${q.toString()}`);

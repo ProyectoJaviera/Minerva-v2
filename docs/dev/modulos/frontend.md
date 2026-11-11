@@ -489,15 +489,15 @@ todavía no manda el campo.
 **Responsabilidad.** La pestaña «Indicadores»: formulario de la prueba y tarjeta del resultado exploratorio.
 
 **Funciones y clases clave.**
-- `IndicatorsTab` (pide `useExplorerOptions` y muestra la nota exploratoria), `Form` (monedas, marco, gatillo, hasta
-  dos filtros, fechas con tope en la fecha reservada; llama a `useExplorerRun`), `ResultCard`, `SummaryGrid` y
-  `BreakdownTable`.
+- `IndicatorsTab` (pide `useExplorerOptions` y muestra la nota exploratoria), `Form` (monedas, temporalidad con
+  botones de radio, un indicador por línea como casilla con su tipo y «todos»/«ninguno», «Deben coincidir», ventana, salida (con SL, TP y trailing en % y el aviso de SL demasiado amplio)
+  y fechas con tope en el corte; llama a `useExplorerRun`), `ResultCard`, `SummaryGrid` y `BreakdownTable`.
 
 **Invariantes — no romper.** La nota exploratoria del servidor siempre se ve; el control al azar se muestra junto al
-resultado.
+resultado. Sin monedas o sin indicadores el botón queda deshabilitado.
 
 **Trampas conocidas.** El profit factor sin pérdidas llega como `null` y se muestra «sin pérdidas» (con 0 operaciones,
-«-»).
+«-»). La ventana solo se habilita si hay algún indicador de evento marcado.
 
 
 <!-- hechos:frontend/src/IndicatorsTab.tsx -->

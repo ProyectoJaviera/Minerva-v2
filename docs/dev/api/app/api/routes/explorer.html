@@ -57,8 +57,7 @@
                         <div class="docstring"><p>Seccion «Indicadores» (v2): backtest EXPLORATORIO a pedido sobre el archivo de historial local.</p>
 
 <p>No es la medicion en vivo ni una ronda preregistrada: no escribe en la base ni pasa por la puerta
-de resultados. Nunca usa velas desde el 2026-10-01 (reservadas). Protegido con <code>require_auth</code> a
-nivel de router.</p>
+de resultados. Nunca usa velas desde el 2026-10-01. Protegido con <code>require_auth</code> a nivel de router.</p>
 </div>
 
                 
@@ -88,7 +87,7 @@ nivel de router.</p>
     </div>
     <a class="headerlink" href="#options"></a>
     
-            <div class="docstring"><p><code>GET /api/explorer/options</code>: gatillos, filtros y series disponibles en el historial local.</p>
+            <div class="docstring"><p><code>GET /api/explorer/options</code>: indicadores, salidas, marcos y series del historial local.</p>
 
 <h6 id="arguments">Arguments:</h6>
 
@@ -99,8 +98,9 @@ nivel de router.</p>
 <h6 id="returns">Returns:</h6>
 
 <blockquote>
-  <p><code>available</code> (si existe el archivo), <code>detail</code>, <code>triggers</code>, <code>filters</code>, <code>timeframes</code>,
-  <code>symbols</code>, <code>series</code>, <code>reserved_from</code>, <code>max_filters</code> y la nota exploratoria.</p>
+  <p><code>available</code> (si existe el archivo), <code>detail</code>, <code>indicators</code> (id, etiqueta y tipo),
+  <code>exits</code>, <code>default_exit</code>, <code>window</code> (por defecto y maximo), <code>timeframes</code> (id y etiqueta),
+  <code>symbols</code>, <code>series</code>, <code>reserved_from</code> y la nota exploratoria.</p>
 </blockquote>
 
 <h6 id="efectos">Efectos:</h6>
@@ -117,13 +117,13 @@ nivel de router.</p>
                     <div class="decorator decorator-router.get">@router.get(&#39;/run&#39;)</div>
 
         <span class="def">async def</span>
-        <span class="name">run</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="n">symbols</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Annotated</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">Query</span><span class="p">(</span><span class="n">PydanticUndefined</span><span class="p">)]</span>,</span><span class="param">	<span class="n">timeframe</span><span class="p">:</span> <span class="nb">str</span>,</span><span class="param">	<span class="n">trigger</span><span class="p">:</span> <span class="nb">str</span>,</span><span class="param">	<span class="n">filters</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Annotated</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="n">Query</span><span class="p">(</span><span class="n">PydanticUndefined</span><span class="p">)]</span> <span class="o">=</span> <span class="kc">None</span>,</span><span class="param">	<span class="n">start</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>,</span><span class="param">	<span class="n">end</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>,</span><span class="param">	<span class="n">settings</span><span class="p">:</span> <span class="n"><a href="../../config.html#Settings">app.config.Settings</a></span> <span class="o">=</span> <span class="n">Depends</span><span class="p">(</span><span class="n">dependency</span><span class="o">=&lt;</span><span class="n">function</span> <span class="n">get_settings</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">use_cache</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">scope</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></span><span class="return-annotation">) -> <span class="nb">dict</span>:</span></span>
+        <span class="name">run</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="n">symbols</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Annotated</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">Query</span><span class="p">(</span><span class="n">PydanticUndefined</span><span class="p">)]</span>,</span><span class="param">	<span class="n">timeframe</span><span class="p">:</span> <span class="nb">str</span>,</span><span class="param">	<span class="n">indicators</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Annotated</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">Query</span><span class="p">(</span><span class="n">PydanticUndefined</span><span class="p">)]</span>,</span><span class="param">	<span class="n">window</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span>,</span><span class="param">	<span class="n">exit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">'s2_tp2r'</span>,</span><span class="param">	<span class="n">start</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>,</span><span class="param">	<span class="n">end</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>,</span><span class="param">	<span class="n">min_agree</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>,</span><span class="param">	<span class="n">sl_pct</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>,</span><span class="param">	<span class="n">tp_pct</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>,</span><span class="param">	<span class="n">trail_pct</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>,</span><span class="param">	<span class="n">settings</span><span class="p">:</span> <span class="n"><a href="../../config.html#Settings">app.config.Settings</a></span> <span class="o">=</span> <span class="n">Depends</span><span class="p">(</span><span class="n">dependency</span><span class="o">=&lt;</span><span class="n">function</span> <span class="n">get_settings</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">use_cache</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">scope</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></span><span class="return-annotation">) -> <span class="nb">dict</span>:</span></span>
 
         
     </div>
     <a class="headerlink" href="#run"></a>
     
-            <div class="docstring"><p><code>GET /api/explorer/run</code>: corre la combinacion elegida y su control al azar.</p>
+            <div class="docstring"><p><code>GET /api/explorer/run</code>: corre la confluencia elegida y su control al azar.</p>
 
 <p>Es <code>GET</code> a proposito: solo calcula sobre un archivo de solo lectura y no escribe nada (las
 unicas rutas que escriben siguen siendo login, logout y los controles).</p>
@@ -132,11 +132,16 @@ unicas rutas que escriben siguen siendo login, logout y los controles).</p>
 
 <ul>
 <li><strong>symbols:</strong>  monedas (<code>?symbols=BTCUSDT&amp;symbols=ETHUSDT</code>).</li>
-<li><strong>timeframe:</strong>  <code>1h</code> o <code>4h</code>.</li>
-<li><strong>trigger:</strong>  gatillo.</li>
-<li><strong>filters:</strong>  filtros (0 a 2, repetidos como <code>symbols</code>).</li>
+<li><strong>timeframe:</strong>  <code>15m</code>, <code>1h</code>, <code>4h</code>, <code>1d</code> o <code>1w</code>.</li>
+<li><strong>indicators:</strong>  indicadores (uno o mas, repetidos como <code>symbols</code>).</li>
+<li><strong>window:</strong>  velas que dura el voto de un indicador de evento.</li>
+<li><strong>exit:</strong>  salida (clave de <code>confluence.EXITS</code>).</li>
 <li><strong>start:</strong>  fecha de inicio <code>AAAA-MM-DD</code> (UTC) opcional.</li>
 <li><strong>end:</strong>  fecha de fin <code>AAAA-MM-DD</code> (UTC, excluida) opcional.</li>
+<li><strong>min_agree:</strong>  cuantos indicadores deben coincidir (sin valor = todos).</li>
+<li><strong>sl_pct:</strong>  SL en % del precio de entrada (con <code>exit=pct</code>).</li>
+<li><strong>tp_pct:</strong>  TP en % (opcional, con <code>exit=pct</code>).</li>
+<li><strong>trail_pct:</strong>  trailing en % (opcional, con <code>exit=pct</code>).</li>
 <li><strong>settings:</strong>  configuracion (inyectada).</li>
 </ul>
 
