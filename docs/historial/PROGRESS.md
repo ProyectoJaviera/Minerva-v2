@@ -2493,3 +2493,9 @@ Pedido: el dueño pidió limpiar la documentación y actualizarla a la v2.
 - **Avisos «Documento de la v1»** en Metodología, Veredicto, Diseño de la medición del LLM y Paso a dinero real. El Informe final ya se presentaba como fotografía de la v1.
 - No se movieron ni se borraron documentos (las pruebas de la documentación vigilan sus rutas y enlaces).
 - **Cambios de comportamiento respecto de la v1.0:** ninguno.
+
+### Tarjeta «Datos capturados» en la pestaña Indicadores (2026-11-11)
+
+- Para que el dueño vea, sin abrir archivos, si las tareas de captura funcionan: `GET /api/explorer/data-status` (`app/explorer/data_status.py`) lee `history/market_v2.db` (`MARKET_DATA_DB`, nuevo ajuste, con `mode=ro`) y la última vela de cada marco de `history/history_v2.db`, y la tarjeta muestra la antigüedad de cada captura (en ámbar si se atrasa), los errores de 24 h y la última foto del libro por moneda. Sin resultados de estrategias. La API pasa a 25 rutas (las tres de la pestaña son `GET`).
+- `scripts/record_market_data.py` toma su destino por defecto de `MARKET_DATA_DB`.
+- **Cambios de comportamiento respecto de la v1.0:** ninguno.

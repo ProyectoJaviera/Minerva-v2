@@ -28,7 +28,6 @@ from __future__ import annotations
 import argparse
 import asyncio
 import json
-import os
 import sqlite3
 import sys
 import time
@@ -313,9 +312,10 @@ def main() -> None:
     """
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("kind", choices=("orderbook", "funding", "feargreed"))
-    parser.add_argument("--path", default=os.environ.get("MARKET_DATA_DB", DEFAULT_PATH))
-    args = parser.parse_args()
     from app.config import settings
+
+    parser.add_argument("--path", default=settings.market_data_db or DEFAULT_PATH)
+    args = parser.parse_args()
 
     target = check_target(args.path, settings.database_path)
     conn = open_store(target)

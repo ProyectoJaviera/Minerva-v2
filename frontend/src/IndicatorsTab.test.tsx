@@ -148,3 +148,42 @@ describe("IndicatorsTab: entradas omitidas por el tope de riesgo", () => {
     expect(screen.getByRole("alert")).toHaveTextContent("5 % del precio");
   });
 });
+
+describe("IndicatorsTab: datos capturados", () => {
+  it("muestra si la captura esta al dia, los errores y la ultima foto del libro", async () => {
+    const now = new Date().toISOString();
+    vi.stubGlobal("fetch", mockFetch({
+      "/api/explorer/options": { status: 200, body: OPTIONS },
+      "/api/explorer/data-status": { status: 200, body: {
+        market: {
+          available: true, path: "./history/market_v2.db",
+          orderbook: { last_at: now, stale: false, snapshots_24h: 288, symbols_24h: 10 },
+          funding: { last_at: now, stale: true, symbols: 10 },
+          feargreed: { last_at: now, stale: false, day: "2026-11-11", value: 29, classification: "Fear" },
+          errors_24h: { count: 2, last: { at: now, kind: "orderbook", detail: "ETHUSDT: caido" } },
+          symbols: [{ symbol: "BTCUSDT", at: now, mid: 74000.5, spread_bps: 0.01, imbalance_20: 0.12,
+                      bid_notional_50: 6_800_000, ask_notional_50: 6_700_000, funding_rate: 0.0001 }],
+        },
+        history: { available: true, path: "./history/history_v2.db", last_at: now, stale: false, timeframes: [] },
+      } },
+    }));
+    render(withQueryClient(<IndicatorsTab />));
+    expect(await screen.findByText("288 fotos en 24 h, 10 monedas")).toBeInTheDocument();
+    expect(screen.getByText(/\(atrasado\)/)).toBeInTheDocument();
+    expect(screen.getByText("29 (Fear)")).toBeInTheDocument();
+    expect(screen.getByRole("alert")).toHaveTextContent("ETHUSDT: caido");
+    expect(screen.getByText("6.8M / 6.7M")).toBeInTheDocument();
+  });
+
+  it("sin archivo de datos explica como se llena", async () => {
+    vi.stubGlobal("fetch", mockFetch({
+      "/api/explorer/options": { status: 200, body: OPTIONS },
+      "/api/explorer/data-status": { status: 200, body: {
+        market: { available: false, path: "./history/market_v2.db" },
+        history: { available: false, path: "./history/history_v2.db", last_at: null, stale: true },
+      } },
+    }));
+    render(withQueryClient(<IndicatorsTab />));
+    expect(await screen.findByText(/Todavia no hay datos capturados/)).toBeInTheDocument();
+  });
+});

@@ -5,13 +5,14 @@ import {
   type ExplorerOptions,
   type ExplorerResult,
   type ExplorerSummary,
+  useDataStatus,
   useExplorerOptions,
   useExplorerRun,
 } from "./api";
 import { Card } from "./components/Card";
 import { StatTile } from "./components/StatTile";
 import { Unavailable } from "./components/Unavailable";
-import { fmtNum, fmtPct, fmtPercentValue, fmtSigned } from "./format";
+import { fmtAgo, fmtCompact, fmtNum, fmtPct, fmtPercentValue, fmtSigned } from "./format";
 
 // Seccion «Indicadores» (v2): el dueno elige monedas, marco, un gatillo y hasta dos filtros, y ve al
 // momento el % de operaciones ganadoras sobre el historial local de Bitunix. Es EXPLORATORIA: no es
@@ -373,6 +374,113 @@ function Form({ opts }: { opts: ExplorerOptions }) {
   );
 }
 
+function Freshness({ label, block, extra }: { label: string; block?: { last_at: string | null; stale: boolean }; extra?: string }) {
+  const value = block?.last_at ? fmtAgo(block.last_at) : "sin datos";
+  return (
+    <div className="flex flex-col">
+      <span className="text-xs text-gray-500 dark:text-gray-400">{label}</span>
+      <span
+        className={
+          "tabular-nums text-base font-medium " +
+          (block && !block.stale ? "text-gray-900 dark:text-gray-100" : "text-amber-700 dark:text-amber-300")
+        }
+      >
+        {value}
+        {block?.stale ? " (atrasado)" : ""}
+      </span>
+      {extra && <span className="text-xs text-gray-500 dark:text-gray-400">{extra}</span>}
+    </div>
+  );
+}
+
+// Si las tareas programadas de captura (MinervaV2*) estan funcionando: ultima foto de cada cosa,
+// errores y los ultimos valores del libro de ordenes. No muestra resultados de ninguna estrategia.
+function DataStatusCard() {
+  const status = useDataStatus();
+  if (status.isLoading) return <p className="text-sm text-gray-500">Cargando datos capturados...</p>;
+  if (status.isError || !status.data) {
+    return (
+      <Card title="Datos capturados">
+        <Unavailable error={status.error} what="Datos capturados" />
+      </Card>
+    );
+  }
+  const { market, history } = status.data;
+  return (
+    <Card title="Datos capturados">
+      {!market.available ? (
+        <p role="status" className="text-sm text-gray-700 dark:text-gray-300">
+          Todavia no hay datos capturados ({market.path}). Se llenan solos con las tareas programadas MinervaV2
+          (scriptsegister_v2_data_tasks.ps1).
+        </p>
+      ) : (
+        <>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <Freshness
+              label="Libro de ordenes (cada 5 min)"
+              block={market.orderbook}
+              extra={`${market.orderbook?.snapshots_24h ?? 0} fotos en 24 h, ${market.orderbook?.symbols_24h ?? 0} monedas`}
+            />
+            <Freshness label="Funding (cada hora)" block={market.funding} extra={`${market.funding?.symbols ?? 0} monedas`} />
+            <Freshness
+              label="Fear & Greed (diario)"
+              block={market.feargreed}
+              extra={market.feargreed?.value != null ? `${market.feargreed.value} (${market.feargreed.classification ?? "-"})` : undefined}
+            />
+            <Freshness
+              label="Historial de velas (cada 6 h)"
+              block={history.available ? history : undefined}
+              extra={history.available ? "ultima vela de 1h" : "sin archivo de historial"}
+            />
+          </div>
+          {(market.errors_24h?.count ?? 0) > 0 && (
+            <p role="alert" className="mt-2 text-sm text-amber-800 dark:text-amber-300">
+              {market.errors_24h?.count} captura(s) con error en 24 h. Ultimo: {market.errors_24h?.last?.kind}{" "}
+              {market.errors_24h?.last?.detail}
+            </p>
+          )}
+          {market.symbols && market.symbols.length > 0 && (
+            <div className="mt-3 overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <caption className="mb-1 text-left text-sm text-gray-700 dark:text-gray-300">
+                  Ultima foto del libro por moneda (50 niveles por lado)
+                </caption>
+                <thead>
+                  <tr className="border-b border-gray-200 text-gray-500 dark:border-gray-700 dark:text-gray-400">
+                    <th className="py-1 pr-2 font-normal">Moneda</th>
+                    <th className="py-1 pr-2 font-normal">Precio medio</th>
+                    <th className="py-1 pr-2 font-normal">Spread (pb)</th>
+                    <th className="py-1 pr-2 font-normal">Desequilibrio 20 niveles</th>
+                    <th className="py-1 pr-2 font-normal">Compras / ventas (USDT)</th>
+                    <th className="py-1 pr-2 font-normal">Funding (Bitunix)</th>
+                  </tr>
+                </thead>
+                <tbody className="tabular-nums">
+                  {market.symbols.map((r) => (
+                    <tr key={r.symbol} className="border-b border-gray-100 dark:border-gray-800">
+                      <td className="py-1 pr-2">{r.symbol}</td>
+                      <td className="py-1 pr-2">{fmtNum(r.mid, 6)}</td>
+                      <td className="py-1 pr-2">{fmtNum(r.spread_bps, 2)}</td>
+                      <td className="py-1 pr-2">{fmtSigned(r.imbalance_20, 2)}</td>
+                      <td className="py-1 pr-2">
+                        {fmtCompact(r.bid_notional_50)} / {fmtCompact(r.ask_notional_50)}
+                      </td>
+                      <td className="py-1 pr-2">{fmtNum(r.funding_rate, 6)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                Desequilibrio: (compras - ventas) / (compras + ventas) en los 20 primeros niveles; positivo = mas compras.
+              </p>
+            </div>
+          )}
+        </>
+      )}
+    </Card>
+  );
+}
+
 export function IndicatorsTab() {
   const options = useExplorerOptions();
 
@@ -395,6 +503,7 @@ export function IndicatorsTab() {
       >
         {opts.note}
       </p>
+      <DataStatusCard />
       {opts.available ? (
         <Form opts={opts} />
       ) : (

@@ -98,3 +98,31 @@ no se pasa la serie de BTC.
 - **Tablas que crea o altera:** ninguno
 - **Pruebas que lo importan o citan:** `tests/unit/test_explorer.py`
 <!-- /hechos:app/explorer/confluence.py -->
+
+### `app/explorer/data_status.py`
+
+**Responsabilidad.** El estado de los datos de la v2 para la tarjeta «Datos capturados»: última foto, fotos en 24 h,
+errores y últimos valores del archivo de datos capturados (`MARKET_DATA_DB`), y la última vela de cada marco del
+archivo de historial.
+
+**Funciones y clases clave.**
+- `market_status()` y `history_status()`; `STALE_AFTER_MS` fija cuándo una captura cuenta como atrasada.
+
+**Invariantes — no romper.** Solo lectura: el archivo de datos capturados se abre con `mode=ro` (cambia cada pocos
+minutos, así que no se usa `immutable`) y el de historial con `immutable=1`. No muestra resultados de estrategias.
+
+**Trampas conocidas.** El funding se muestra tal como lo da Bitunix (sin convertir unidades).
+
+
+<!-- hechos:app/explorer/data_status.py -->
+**Hechos derivados del código** (los escribe `scripts/build_dev_docs.py`; no se editan):
+
+- **Referencia pdoc:** [`api/app/explorer/data_status.html`](../api/app/explorer/data_status.html)
+- **Importa (internos):** ninguno
+- **Lo importan:** `app.api.routes.explorer`
+- **Configuración que lee:** ninguno
+- **Tablas que lee:** `fear_greed`, `ohlcv_cache`
+- **Tablas que escribe:** ninguno
+- **Tablas que crea o altera:** ninguno
+- **Pruebas que lo importan o citan:** `tests/unit/test_explorer_data_status.py`
+<!-- /hechos:app/explorer/data_status.py -->

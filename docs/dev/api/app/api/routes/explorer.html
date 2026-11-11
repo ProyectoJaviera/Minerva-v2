@@ -37,6 +37,9 @@
             <li>
                     <a class="function" href="#run">run</a>
             </li>
+            <li>
+                    <a class="function" href="#data_status_route">data_status_route</a>
+            </li>
     </ul>
 
 
@@ -162,6 +165,40 @@ historial.</li>
 
 <blockquote>
   <p>Lee el archivo de historial (solo lectura). No escribe en ninguna base.</p>
+</blockquote>
+</div>
+
+
+                </section>
+                <section id="data_status_route">
+                    <div class="attr function">
+                    <div class="decorator decorator-router.get">@router.get(&#39;/data-status&#39;)</div>
+
+        <span class="def">async def</span>
+        <span class="name">data_status_route</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="n">settings</span><span class="p">:</span> <span class="n"><a href="../../config.html#Settings">app.config.Settings</a></span> <span class="o">=</span> <span class="n">Depends</span><span class="p">(</span><span class="n">dependency</span><span class="o">=&lt;</span><span class="n">function</span> <span class="n">get_settings</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">use_cache</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">scope</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></span><span class="return-annotation">) -> <span class="nb">dict</span>:</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#data_status_route"></a>
+    
+            <div class="docstring"><p><code>GET /api/explorer/data-status</code>: si la captura de datos de la v2 esta al dia.</p>
+
+<h6 id="arguments">Arguments:</h6>
+
+<ul>
+<li><strong>settings:</strong>  configuracion (inyectada).</li>
+</ul>
+
+<h6 id="returns">Returns:</h6>
+
+<blockquote>
+  <p><code>market</code> (<code>data_status.market_status</code>) e <code>history</code> (<code>data_status.history_status</code>).</p>
+</blockquote>
+
+<h6 id="efectos">Efectos:</h6>
+
+<blockquote>
+  <p>Lee los dos archivos en solo lectura, en un hilo aparte.</p>
 </blockquote>
 </div>
 

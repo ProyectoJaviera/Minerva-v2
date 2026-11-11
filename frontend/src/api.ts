@@ -758,3 +758,42 @@ export function useExplorerRun() {
     },
   });
 }
+
+// Estado de la captura de datos de la v2 (tareas MinervaV2*) y del historial local. Solo lectura.
+export interface DataStatusBlock {
+  last_at: string | null;
+  stale: boolean;
+}
+
+export interface DataStatus {
+  market: {
+    available: boolean;
+    path: string;
+    orderbook?: DataStatusBlock & { snapshots_24h: number; symbols_24h: number };
+    funding?: DataStatusBlock & { symbols: number };
+    feargreed?: DataStatusBlock & { day: string | null; value: number | null; classification: string | null };
+    errors_24h?: { count: number; last: { at: string; kind: string; detail: string } | null };
+    symbols?: {
+      symbol: string;
+      at: string;
+      mid: number | null;
+      spread_bps: number | null;
+      imbalance_20: number | null;
+      bid_notional_50: number | null;
+      ask_notional_50: number | null;
+      funding_rate: number | null;
+    }[];
+  };
+  history: DataStatusBlock & {
+    available: boolean;
+    path: string;
+    timeframes?: { timeframe: string; last_candle: string | null; symbols: number }[];
+  };
+}
+
+export function useDataStatus() {
+  return useQuery({
+    queryKey: ["explorer-data-status"],
+    queryFn: () => apiFetch<DataStatus>("/api/explorer/data-status"),
+  });
+}

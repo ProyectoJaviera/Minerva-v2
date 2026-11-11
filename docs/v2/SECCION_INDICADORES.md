@@ -45,6 +45,14 @@ Las señales vienen del mismo código de la exploración y de la ronda 3 (`app/r
 `fvg_signals` de `app/research/round3.py`); la combinación está en `app/explorer/confluence.py`. El calentamiento
 (velas sin señal al inicio) es de 500 velas en 15m, 1h y 4h, 300 en 1D y 50 en 1S.
 
+## Datos capturados
+
+Arriba de la pestaña, la tarjeta **«Datos capturados»** dice si las tareas programadas `MinervaV2*` están al día:
+hace cuánto fue la última foto del libro de órdenes, del funding, del Fear & Greed y la última vela de 1h del
+historial (en ámbar si están atrasadas), los errores de captura de las últimas 24 h y la última foto del libro de cada
+moneda (precio medio, spread, desequilibrio entre compras y ventas en 20 niveles, nocional de 50 niveles por lado y
+funding).
+
 ## Qué muestra
 
 - **% de operaciones ganadoras**, profit factor, número de operaciones (largos y cortos), PnL neto, resultado

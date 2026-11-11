@@ -6,6 +6,7 @@ de resultados. Protegido con `require_auth` a nivel de router.
 
 from __future__ import annotations
 
+import asyncio
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -13,7 +14,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from app.api.deps import get_settings
 from app.api.security import require_auth
 from app.config import Settings
-from app.explorer import confluence, service
+from app.explorer import confluence, data_status, service
 
 router = APIRouter(prefix="/api/explorer", dependencies=[Depends(require_auth)])
 
@@ -121,3 +122,21 @@ async def run(
     except service.HistoryFileMissingError as exc:
         raise HTTPException(status_code=404,
                             detail=_missing_file_detail(settings.explorer_history_db)) from exc
+
+
+@router.get("/data-status")
+async def data_status_route(settings: Settings = Depends(get_settings)) -> dict:
+    """`GET /api/explorer/data-status`: si la captura de datos de la v2 esta al dia.
+
+    Args:
+        settings: configuracion (inyectada).
+
+    Returns:
+        `market` (`data_status.market_status`) e `history` (`data_status.history_status`).
+
+    Efectos:
+        Lee los dos archivos en solo lectura, en un hilo aparte.
+    """
+    market = await asyncio.to_thread(data_status.market_status, settings.market_data_db)
+    history = await asyncio.to_thread(data_status.history_status, settings.explorer_history_db)
+    return {"market": market, "history": history}

@@ -1151,9 +1151,9 @@ almacén de certificados del sistema): con `httpx` a secas falla detrás de la i
 - **Referencia pdoc:** [`api/scripts/record_market_data.html`](../api/scripts/record_market_data.html)
 - **Importa (internos):** `app.config`, `app.core.http`, `app.market.bitunix_rest`, `app.news.parsers`, `scripts.update_history_file`
 - **Lo importan:** ninguno
-- **Configuración que lee:** `BITUNIX_RATE_LIMIT_PER_SEC`, `BITUNIX_REST_BASE_URL`, `DATABASE_PATH`, `EXPLORER_HISTORY_DB`
+- **Configuración que lee:** `BITUNIX_RATE_LIMIT_PER_SEC`, `BITUNIX_REST_BASE_URL`, `DATABASE_PATH`, `EXPLORER_HISTORY_DB`, `MARKET_DATA_DB`
 - **Tablas que lee:** `ohlcv_cache`
 - **Tablas que escribe:** `fear_greed`
 - **Tablas que crea o altera:** `fear_greed`
-- **Pruebas que lo importan o citan:** `tests/unit/test_record_market_data.py`
+- **Pruebas que lo importan o citan:** `tests/unit/test_explorer_data_status.py`, `tests/unit/test_record_market_data.py`
 <!-- /hechos:scripts/record_market_data.py -->

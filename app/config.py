@@ -249,6 +249,9 @@ class Settings(BaseSettings):
     explorer_history_db: str = Field(
         default="./history/history_v2.db", alias="EXPLORER_HISTORY_DB"
     )
+    # v2: archivo SQLite de los datos capturados hacia adelante (libro de ordenes, funding, Fear &
+    # Greed) por `scripts/record_market_data.py`. El dashboard solo lo lee.
+    market_data_db: str = Field(default="./history/market_v2.db", alias="MARKET_DATA_DB")
 
     # --- Claude / Anthropic (usado desde Fase 3.6) ---
     anthropic_api_key: str = Field(default="", alias="ANTHROPIC_API_KEY")

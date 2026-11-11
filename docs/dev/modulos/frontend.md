@@ -241,7 +241,7 @@ las etiquetas de `TABS` y la documentación de uso las contrasta con el código.
 
 - **Importa (de `frontend/src/`):** ninguno
 - **Lo importan:** `frontend/src/AccountTab.tsx`, `frontend/src/App.tsx`, `frontend/src/ArmTab.tsx`, `frontend/src/DashboardView.tsx`, `frontend/src/IndicatorsTab.tsx`, `frontend/src/LoginView.tsx`, `frontend/src/NewsMemoryCard.tsx`, `frontend/src/RiskTab.tsx`, `frontend/src/SummaryTab.tsx`, `frontend/src/UniverseTab.tsx`, `frontend/src/components/Unavailable.tsx`
-- **Rutas HTTP que cita:** `/api/account`, `/api/arm`, `/api/auth/login`, `/api/auth/logout`, `/api/auth/me`, `/api/backtest/verdicts`, `/api/control/${action}`, `/api/control/audit`, `/api/control/info`, `/api/explorer/options`, `/api/explorer/run`, `/api/llm/decisions/recent`, `/api/measurement/status`, `/api/memory/lessons`, `/api/memory/status`, `/api/news/recent`, `/api/news/status`, `/api/risk`, `/api/shadow-trades/recent`, `/api/universe`, `/health`
+- **Rutas HTTP que cita:** `/api/account`, `/api/arm`, `/api/auth/login`, `/api/auth/logout`, `/api/auth/me`, `/api/backtest/verdicts`, `/api/control/${action}`, `/api/control/audit`, `/api/control/info`, `/api/explorer/data-status`, `/api/explorer/options`, `/api/explorer/run`, `/api/llm/decisions/recent`, `/api/measurement/status`, `/api/memory/lessons`, `/api/memory/status`, `/api/news/recent`, `/api/news/status`, `/api/risk`, `/api/shadow-trades/recent`, `/api/universe`, `/health`
 - **Pruebas:** ninguno
 <!-- /hechos:frontend/src/api.ts -->
 
