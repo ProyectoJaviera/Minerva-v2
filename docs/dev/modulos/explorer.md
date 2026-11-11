@@ -81,8 +81,8 @@ con una salida fija en múltiplos del ATR(14).
 cambios de estado (prueba: el Range Filter solo da exactamente `long_rf_flip`/`short_rf_flip`); uno de evento solo
 con ventana 1, en sus señales. El control usa las mismas velas de entrada y la misma salida.
 
-**Trampas conocidas.** El calentamiento depende del marco (`WARMUP_BY_TIMEFRAME`: 100 velas en 1w, donde hay ~230
-desde 2022). Con salidas de trailing no hay TP fijo: el motor aplica su TP de respaldo. `btc` y `rs` votan falso si
+**Trampas conocidas.** El calentamiento depende del marco (`WARMUP_BY_TIMEFRAME`: 50 velas en 1w, donde hay ~200 alineadas
+desde 2023). Con salidas de trailing no hay TP fijo: el motor aplica su TP de respaldo. `btc` y `rs` votan falso si
 no se pasa la serie de BTC.
 
 

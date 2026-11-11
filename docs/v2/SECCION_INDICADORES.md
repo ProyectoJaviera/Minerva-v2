@@ -38,11 +38,11 @@ con TP 3R, SL 2 ATR con TP 1R, y SL 2 o 3 ATR con trailing de la misma distancia
 motor usa su TP de respaldo del 10 %). O una salida **personalizada en %** del precio de entrada: SL
 obligatorio, TP y trailing opcionales (el trailing sigue al mejor precio a esa distancia; sin TP ni trailing
 vale el TP de respaldo). Ojo con el tope de riesgo del motor: a 10x, un SL mayor que 5 % perdería más del 50 % del
-margen y esas entradas se omiten (la pantalla lo avisa).
+margen y esas entradas se omiten (la pantalla lo avisa). Esto pesa en los marcos largos: en 1S casi todos los SL de 2 ATR superan el 5 % (con BTC, ETH y SOL en 1S y WaveTrend, las 72 entradas se omitieron) y en 1D muchos; ahí conviene la salida en %.
 
 Las señales vienen del mismo código de la exploración y de la ronda 3 (`app/research/combos.py` y
 `fvg_signals` de `app/research/round3.py`); la combinación está en `app/explorer/confluence.py`. El calentamiento
-(velas sin señal al inicio) es de 500 velas en 15m, 1h y 4h, 300 en 1D y 100 en 1S.
+(velas sin señal al inicio) es de 500 velas en 15m, 1h y 4h, 300 en 1D y 50 en 1S.
 
 ## Qué muestra
 
@@ -61,7 +61,8 @@ Las señales vienen del mismo código de la exploración y de la ronda 3 (`app/r
 - **15m:** cuatro veces más velas que 1h; con varias monedas la prueba puede tardar minutos.
 - **1h:** unos 7 segundos por moneda. **4h:** unos 2 segundos. Repetir una prueba es instantáneo (caché de las
   últimas 32).
-- **1S:** desde 2022 hay unas 230 velas semanales y 100 se usan de calentamiento: pocas operaciones.
+- **1S:** las velas de precio de marca de Bitunix empiezan en enero de 2023, así que hay unas 200 semanas y 50 se usan de calentamiento; las medias largas (EMA 144, VIDYA, régimen de BTC) casi no alcanzan a calcularse: espera muy pocas operaciones.
+- **15m:** el historial de 15m de Bitunix empieza en junio de 2023.
 
 ## El archivo de historial
 

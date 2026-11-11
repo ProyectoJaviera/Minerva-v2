@@ -87,6 +87,17 @@ function ResultCard({ r, labels }: { r: ExplorerResult; labels: ExplorerOptions 
         {r.params.symbols.join(", ")} · {tf} · {r.params.exit_label} · ventana {r.params.window} · periodo {r.period.start ?? "-"} a{" "}
         {r.period.end ?? "-"} · calculado en {fmtNum(r.elapsed_s, 1)} s{r.cached ? " (repetida: sale de la cache)" : ""}
       </p>
+      {r.skipped_by_risk_cap > 0 && (
+        <p
+          role="alert"
+          className="mb-3 rounded border border-amber-300 bg-amber-50 p-2 text-sm text-amber-900 dark:border-amber-700 dark:bg-amber-900/30 dark:text-amber-200"
+        >
+          {r.skipped_by_risk_cap} entrada{r.skipped_by_risk_cap === 1 ? "" : "s"} omitida
+          {r.skipped_by_risk_cap === 1 ? "" : "s"} porque su SL perdia mas margen del permitido (a{" "}
+          {r.engine.leverage}x, un SL mayor que {labels.max_sl_pct_before_skip} % del precio). Pasa en marcos largos
+          con SL en ATR: en 1D y 1S usa la salida en % con un SL de hasta {labels.max_sl_pct_before_skip} %.
+        </p>
+      )}
       <SummaryGrid s={r.result} />
       {reasons && <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">Cierres: {reasons}</p>}
 

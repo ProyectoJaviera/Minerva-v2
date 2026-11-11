@@ -347,3 +347,20 @@ async def test_run_with_a_pct_exit(history):
     opts = await route.options(settings=_settings(history))
     assert "pct" in {x["id"] for x in opts["exits"]}
     assert opts["max_sl_pct_before_skip"] == 5.0
+
+
+@pytest.mark.asyncio
+async def test_weekly_runs_with_weekly_camarilla(history):
+    out = await _run(history, symbols=["BTCUSDT"], timeframe="1w",
+                     indicators=list(confluence.INDICATORS), min_agree=1)
+    assert out["missing"] == []
+    rng = random.Random(5)
+    price, rows = 100.0, []
+    for i in range(300):
+        c = price * (1 + rng.uniform(-0.08, 0.08))
+        rows.append({"open_time": START_MS + i * 604_800_000, "open": price,
+                     "high": max(price, c) * 1.02, "low": min(price, c) * 0.98, "close": c})
+        price = c
+    feats = confluence.compute_votes(pd.DataFrame(rows), "1w")
+    assert feats["open_time"].tolist() == [r["open_time"] for r in rows]
+    assert feats["cam_r3"].notna().sum() > 250

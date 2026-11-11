@@ -82,7 +82,7 @@ DEFAULT_WINDOW = 5
 MAX_WINDOW = 50
 # Velas sin senal al inicio: lo que necesitan las medias largas (VIDYA usa ATR(200)). En 1w hay
 # pocas velas desde 2022, asi que el calentamiento es menor (las medias largas valen menos ahi).
-WARMUP_BY_TIMEFRAME = {"15m": 500, "1h": 500, "4h": 500, "1d": 300, "1w": 100}
+WARMUP_BY_TIMEFRAME = {"15m": 500, "1h": 500, "4h": 500, "1d": 300, "1w": 50}
 HOURS_BY_TIMEFRAME = {"15m": 0.25, "1h": 1, "4h": 4, "1d": 24, "1w": 168}
 
 _FEATURE_CACHE: dict[tuple, pd.DataFrame] = {}
@@ -170,7 +170,17 @@ def compute_votes(df: pd.DataFrame, interval: str, btc: pd.DataFrame | None = No
            float(df["close"].sum()), None if btc is None else (len(btc), float(btc["close"].sum())))
     if key in _FEATURE_CACHE:
         return _FEATURE_CACHE[key]
-    out = compute_features(df, interval).copy()
+    if interval == "1w":
+        # Los niveles Camarilla exigen velas que dividan un dia. En 1w se calculan como si cada
+        # semana fuera un "dia": los niveles salen del maximo, minimo y cierre de la semana
+        # anterior (Camarilla semanal). Despues se restituye la apertura real.
+        fake = df.copy()
+        fake["open_time"] = (int(df["open_time"].iloc[0])
+                             + np.arange(len(df), dtype="int64") * 86_400_000)
+        out = compute_features(fake, interval).copy()
+        out["open_time"] = df["open_time"].to_numpy(dtype="int64")
+    else:
+        out = compute_features(df, interval).copy()
     atr = out["x_atr14"]
     fvg = fvg_signals(out, atr)
     out["long_fvg"] = fvg["fvg_long"].to_numpy()

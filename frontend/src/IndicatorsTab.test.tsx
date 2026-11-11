@@ -133,3 +133,18 @@ describe("IndicatorsTab: salida en porcentaje", () => {
     expect(q.get("trail_pct")).toBe("0.8");
   });
 });
+
+describe("IndicatorsTab: entradas omitidas por el tope de riesgo", () => {
+  it("avisa cuando el motor omitio entradas por un SL demasiado amplio", async () => {
+    vi.stubGlobal("fetch", mockFetch({
+      "/api/explorer/options": { status: 200, body: OPTIONS },
+      "/api/explorer/run": { status: 200, body: { ...RESULT, skipped_by_risk_cap: 72 } },
+    }));
+    render(withQueryClient(<IndicatorsTab />));
+    await screen.findByText("Probar en 1h");
+    fireEvent.click(screen.getByLabelText(/EMA 144/));
+    fireEvent.click(screen.getByText("Probar en 1h"));
+    expect(await screen.findByText(/72 entradas omitidas/)).toBeInTheDocument();
+    expect(screen.getByRole("alert")).toHaveTextContent("5 % del precio");
+  });
+});
