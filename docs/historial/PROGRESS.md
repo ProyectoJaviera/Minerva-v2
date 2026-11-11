@@ -2389,6 +2389,12 @@ Pedido: el dueño quiere una sección donde elegir indicadores (solos o combinad
 - **Exploratorio:** nada se guarda en la base ni pasa por los criterios de la Fase 2; la pestaña lo advierte (sesgo de selección). Una corrida a la vez, en un hilo aparte con su propia conexión, para no frenar el bucle del bot; caché de las últimas 32 corridas. `FastComboStrategy` lee la fila de la señal de arrays en vez de `df.iloc[-1]` (mismas operaciones, probado operación por operación): con datos reales, una moneda en 1h tarda ~7 s y en 4h ~2 s.
 - **Cambios de comportamiento respecto de la v1.0:** ninguno en la medición, las estrategias, el riesgo ni el esquema. Se agregan una pestaña, dos rutas de solo lectura, el ajuste `EXPLORER_HISTORY_DB` y un montaje de solo lectura de `./history` en `docker-compose.yml` (las pruebas de Docker ahora lo admiten junto a `docs/`).
 
+### Sección «Indicadores»: FVG y filtros de la ronda 3 (2026-11-11)
+
+Pedido: el dueño pidió sumar el FVG como otro indicador. La pestaña ofrece ahora el gatillo `fvg` y los filtros `fund`, `btc` y `rs` de `app/research/round3.py`, reutilizados tal cual. Las combinaciones con alguna pieza de la ronda 3 corren con `Round3Strategy` (salida `base`, entrada a mercado; `FastRound3Strategy` lee la fila de arrays, mismas operaciones probadas una por una); las demás siguen con `ComboStrategy`, sin cambios. Para `btc` y `rs` se carga la serie de BTC del mismo marco desde el archivo de historial. Con datos reales, FVG en BTC 1h tarda ~7 s.
+- **Pendiente para el dueño:** los datos desde el 2026-10-01 ya se usaron en el examen de los finalistas de la ronda 3, así que el corte `RESERVED_FROM` de la pestaña ya no protege nada; se mantiene hasta que el dueño decida quitarlo.
+- **Cambios de comportamiento respecto de la v1.0:** ninguno.
+
 ## v2: exploración de todas las herramientas y combinaciones — ninguna pasa (2026-11-10)
 
 Pedido: el dueño pidió usar todas las herramientas de HeatMap y Frost y combinarlas, con todos los datos desde 2022. **Exploratorio, no preregistrado**; regla de finalistas fijada antes de correr (commit `0a7dad0`). Resultado en `docs/v2/EXPLORACION_V2.md`.
@@ -2421,3 +2427,10 @@ Pedido: el dueño aprobó preregistrar los finalistas y mirarlos una vez en los 
 - **Resultado (2026-10-01 a 2026-11-10):** VIDYA + régimen de BTC, 15 operaciones, PF 0.31 («sin información suficiente»); FVG + EMA 144, 28 operaciones, PF 0.52 («fracaso claro»); Range Filter + EMA 144, 26 operaciones, PF 0.62 («fracaso claro»). Las tres por debajo de su control al azar (1.57, 0.86 y 0.85). Detalle al final de `docs/v2/RONDA3_V2.md`.
 - **Los datos reservados ya están usados:** cualquier ronda futura necesita datos nuevos (paper o historial posterior al 2026-11-10).
 - **Cambios de comportamiento respecto de la v1.0:** ninguno.
+
+## v2: prueba hacia adelante de los finalistas de la ronda 3 (2026-11-10)
+
+Pedido: el dueño pidió dejar igual los finalistas en paper. Decisión: en vez de conectarlos al generador de señales del bot (que no simula la entrada con orden límite y agruparía sus señales), `scripts/v2_forward_test.py` los repite con el motor de backtest sobre el archivo de historial local y cuenta solo las operaciones abiertas desde el 2026-11-10 00:00 UTC; es equivalente a paper porque las reglas quedaron congeladas antes de que existieran esas velas. Solo lectura, sin red. Criterio de lectura fijado en `docs/v2/PAPER_V2_RONDA3.md`: una revisión por finalista al llegar a 60 operaciones o el 2027-05-10; sigue en estudio solo con PF ≥ 1.2 y por encima de su control.
+
+- Probado contra una copia temporal del archivo de historial (0 operaciones: todavía no hay velas posteriores al corte).
+- **Cambios de comportamiento respecto de la v1.0:** ninguno (no toca el bot).

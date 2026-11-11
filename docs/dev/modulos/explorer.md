@@ -36,9 +36,11 @@ con dirección al azar, por moneda, sobre el archivo de historial local, con el 
   (abre con `mode=ro&immutable=1` y no toca el esquema), `available_series()` (series del archivo, con caché por fecha
   de modificación), `run_exploration_on_db()` (combinación + control + desgloses por moneda y año) y
   `run_exploration()` (una corrida a la vez, en un hilo con su propio bucle y conexión, con caché de las últimas 32
-  corridas que se invalida al cambiar el archivo). `FastComboStrategy` es `ComboStrategy` leyendo la fila de la señal
-  de arrays numpy en vez de `df.iloc[-1]`: mismas operaciones (prueba operación por operación), menos de la mitad del
-  tiempo.
+  corridas que se invalida al cambiar el archivo). `build_strategy()` usa `ComboStrategy` salvo que la combinación
+  lleve una pieza de la ronda 3 (`fvg`, `fund`, `btc`, `rs`), que va con `Round3Strategy`; `load_btc_context()`
+  registra la serie de BTC para `btc` y `rs`. `FastComboStrategy` y `FastRound3Strategy` (vía `_FastRowMixin`) leen
+  la fila de la señal de arrays numpy en vez de `df.iloc[-1]`: mismas operaciones (prueba operación por operación),
+  menos de la mitad del tiempo.
 
 **Invariantes — no romper.** Nunca entra al cálculo una vela desde `RESERVED_FROM` (2026-10-01, fijo en el código,
 no configurable). Nada se escribe en el archivo de historial ni en la base del bot; el resultado no se guarda ni pasa
@@ -53,8 +55,8 @@ cuenta, una posición por moneda; es orientativo.
 **Hechos derivados del código** (los escribe `scripts/build_dev_docs.py`; no se editan):
 
 - **Referencia pdoc:** [`api/app/explorer/service.html`](../api/app/explorer/service.html)
-- **Importa (internos):** `app.backtesting.engine`, `app.backtesting.metrics`, `app.candidates.common`, `app.config`, `app.market.ohlcv_history`, `app.persistence.database`, `app.research.combos`
-- **Lo importan:** `app.api.routes.explorer`
+- **Importa (internos):** `app.backtesting.engine`, `app.backtesting.metrics`, `app.candidates.common`, `app.config`, `app.market.ohlcv_history`, `app.persistence.database`, `app.persistence.repositories.ohlcv_repo`, `app.research.combos`, `app.research.round3`
+- **Lo importan:** `app.api.routes.explorer`, `scripts.v2_forward_test`
 - **Configuración que lee:** `BACKTEST_INITIAL_CAPITAL`, `BACKTEST_SLIPPAGE_BPS`, `DEFAULT_MARGIN_USDT`, `LEVERAGE`, `TAKER_FEE_PCT`
 - **Tablas que lee:** `ohlcv_cache`
 - **Tablas que escribe:** ninguno

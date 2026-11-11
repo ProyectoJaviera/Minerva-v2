@@ -33,6 +33,13 @@ Grab. Los filtros (EMA 144, estado del Range Filter, tendencia VIDYA y WaveTrend
 para un largo y el bajista para un corto. La salida es fija: la del preregistro para SFP, Camarilla y Range
 Filter; SL a 2 ATR(14) y TP 2R para el resto.
 
+Además, las piezas de la ronda 3 (`app/research/round3.py`): el gatillo **FVG** (retesteo de un Fair Value Gap
+de 3 velas de al menos 0,25 ATR, vigente hasta 100 velas; SL en el lado lejano del hueco ∓ 0,1 ATR y TP 2R) y los
+filtros **funding** (bajo su mediana de 30 días para un largo, sobre ella para un corto), **régimen de BTC** (cierre
+de BTC sobre o bajo su EMA 200 del mismo marco) y **fuerza relativa** (retorno de 180 velas contra el de BTC). Una
+combinación que usa alguna de estas piezas corre con `Round3Strategy` (salida `base`, entrada a mercado); las
+demás, con `ComboStrategy`, idénticas a la exploración.
+
 ## El archivo de historial
 
 Un archivo SQLite aparte de la base del bot, por defecto `history/history_v2.db` (configurable con

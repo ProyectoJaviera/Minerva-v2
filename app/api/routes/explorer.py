@@ -15,7 +15,7 @@ from app.api.deps import get_settings
 from app.api.security import require_auth
 from app.config import Settings
 from app.explorer import service
-from app.research.combos import FILTERS, NATIVE_EXIT, TRIGGERS
+from app.research.round3 import NATIVE_TRIGGERS
 
 router = APIRouter(prefix="/api/explorer", dependencies=[Depends(require_auth)])
 
@@ -45,8 +45,9 @@ async def options(settings: Settings = Depends(get_settings)) -> dict:
         "max_filters": service.MAX_FILTERS,
         "timeframes": list(service.TIMEFRAMES),
         "triggers": [{"id": t, "label": service.TRIGGER_LABELS.get(t, t),
-                      "exit": "native" if t in NATIVE_EXIT else "atr"} for t in TRIGGERS],
-        "filters": [{"id": f, "label": service.FILTER_LABELS.get(f, f)} for f in FILTERS],
+                      "exit": "native" if t in NATIVE_TRIGGERS else "atr"}
+                     for t in service.TRIGGERS],
+        "filters": [{"id": f, "label": service.FILTER_LABELS.get(f, f)} for f in service.FILTERS],
     }
     try:
         series = await service.available_series(settings.explorer_history_db)

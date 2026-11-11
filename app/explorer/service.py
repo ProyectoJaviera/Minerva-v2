@@ -29,6 +29,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 import aiosqlite
+import pandas as pd
 
 from app.backtesting.engine import RawTrade, run_backtest
 from app.backtesting.metrics import compute_metrics
@@ -36,7 +37,9 @@ from app.candidates.common import BAR_INDEX_COLUMN
 from app.config import Settings
 from app.market.ohlcv_history import MissingHistoricalDataError
 from app.persistence.database import Database
-from app.research.combos import FILTERS, TRIGGERS, ComboStrategy
+from app.persistence.repositories import ohlcv_repo
+from app.research.combos import ComboStrategy
+from app.research.round3 import R3_FILTERS, R3_TRIGGERS, Round3Strategy, set_btc_context
 
 RESERVED_FROM = datetime(2026, 10, 1, tzinfo=UTC)
 RESERVED_FROM_MS = int(RESERVED_FROM.timestamp() * 1000)
@@ -53,13 +56,25 @@ TRIGGER_LABELS = {
     "wt_cross": "Cruce de WaveTrend en zona extrema (+-72)",
     "zone_reject": "Rechazo de una zona de liquidez",
     "grab": "Liquidity Grab de Frost (agotamiento)",
+    "fvg": "FVG: retesteo de un Fair Value Gap de 3 velas",
 }
 FILTER_LABELS = {
     "ema": "Cierre sobre/bajo la EMA 144",
     "rf": "Estado del Range Filter",
     "vidya": "Tendencia de la banda VIDYA",
     "wt": "WaveTrend: wt1 sobre/bajo wt2",
+    "fund": "Funding bajo/sobre su mediana de 30 dias (en contra del lado saturado)",
+    "btc": "Regimen de BTC: cierre sobre/bajo su EMA 200",
+    "rs": "Fuerza relativa contra BTC (retorno de 180 velas)",
 }
+# Gatillos y filtros de la seccion: los de `combos` mas los de la ronda 3 (FVG, funding, regimen
+# de BTC y fuerza relativa). Las combinaciones solo con piezas de `combos` corren con
+# `ComboStrategy` (identicas a la exploracion); las que usan una pieza de la ronda 3, con
+# `Round3Strategy` y su salida `base` (la misma de `combos` para los demas gatillos).
+TRIGGERS = R3_TRIGGERS
+FILTERS = R3_FILTERS
+ROUND3_ONLY = {"fvg", "fund", "btc", "rs"}
+BTC_SYMBOL = "BTCUSDT"
 
 NOTE = (
     "Prueba EXPLORATORIA: no es una ronda preregistrada ni evidencia de la Fase 2, y no se guarda. "
@@ -123,8 +138,8 @@ class _ArrayRow:
         return self._cols[key][self._i]
 
 
-class FastComboStrategy(ComboStrategy):
-    """`ComboStrategy` con la fila de la senal leida de arrays en vez de `df.iloc[-1]`.
+class _FastRowMixin:
+    """Lee la fila de la senal de arrays en vez de `df.iloc[-1]`.
 
     Mismas senales, SL, TP y trailing (`tests/unit/test_explorer.py` lo compara operacion por
     operacion); solo evita construir una `pd.Series` por vela, que era mas de la mitad del tiempo
@@ -135,13 +150,13 @@ class FastComboStrategy(ComboStrategy):
     _cols: dict | None = None
 
     def precompute(self, df):
-        """`ComboStrategy.precompute` y, ademas, guarda sus columnas como arrays numpy.
+        """El `precompute` de la estrategia y, ademas, guarda sus columnas como arrays numpy.
 
         Args:
             df: velas de toda la serie (con `open_time`).
 
         Returns:
-            El mismo DataFrame que `ComboStrategy.precompute`.
+            El mismo DataFrame que el `precompute` de la estrategia.
         """
         out = super().precompute(df)
         self._cols = {c: out[c].to_numpy() for c in out.columns}
@@ -152,6 +167,53 @@ class FastComboStrategy(ComboStrategy):
         if self._cols is None or BAR_INDEX_COLUMN not in df.columns:
             return super()._row(df)
         return _ArrayRow(self._cols, int(df[BAR_INDEX_COLUMN].iat[-1]))
+
+
+class FastComboStrategy(_FastRowMixin, ComboStrategy):
+    """`ComboStrategy` con la fila leida de arrays (mismas operaciones, ver `_FastRowMixin`)."""
+
+
+class FastRound3Strategy(_FastRowMixin, Round3Strategy):
+    """`Round3Strategy` con la fila leida de arrays (mismas operaciones, ver `_FastRowMixin`)."""
+
+
+def build_strategy(trigger: str, filters: tuple[str, ...], *, random_dir: bool = False):
+    """La estrategia de una combinacion: `ComboStrategy` salvo que use una pieza de la ronda 3.
+
+    Args:
+        trigger: gatillo.
+        filters: filtros.
+        random_dir: sortea la direccion (control).
+
+    Returns:
+        `FastComboStrategy` o `FastRound3Strategy` (salida `base`, entrada a mercado).
+    """
+    if trigger in ROUND3_ONLY or set(filters) & ROUND3_ONLY:
+        return FastRound3Strategy(trigger, filters, random_dir=random_dir)
+    return FastComboStrategy(trigger, filters, random_dir=random_dir)
+
+
+async def load_btc_context(db: Database, timeframe: str) -> bool:
+    """Registra la serie de BTC del marco para los filtros `btc` y `rs` de la ronda 3.
+
+    Args:
+        db: el archivo de historial abierto.
+        timeframe: marco.
+
+    Returns:
+        Si habia velas de BTC (sin ellas, `btc` y `rs` quedan siempre en falso).
+
+    Efectos:
+        Lee `ohlcv_cache`. Cambia el contexto de BTC del modulo `round3` (las corridas de la
+        seccion son de a una por vez).
+    """
+    bars = await ohlcv_repo.get_bars(db, BTC_SYMBOL, timeframe, "LAST_PRICE", None,
+                                     RESERVED_FROM_MS - 1)
+    if not bars:
+        return False
+    set_btc_context(timeframe, pd.DataFrame({"open_time": [b.open_time for b in bars],
+                                             "close": [b.close for b in bars]}))
+    return True
 
 
 @dataclass(frozen=True)
@@ -345,8 +407,10 @@ async def run_exploration_on_db(db: Database, req: ExplorerRequest, settings: Se
         Solo lectura del archivo de historial. No escribe en ninguna base.
     """
     started = time.perf_counter()
-    combo = FastComboStrategy(req.trigger, req.filters)
-    control = FastComboStrategy(req.trigger, req.filters, random_dir=True)
+    combo = build_strategy(req.trigger, req.filters)
+    control = build_strategy(req.trigger, req.filters, random_dir=True)
+    if {"btc", "rs"} & set(req.filters):
+        await load_btc_context(db, req.timeframe)
     by_key = {(s["symbol"], s["timeframe"]): s for s in series}
     trades: list[RawTrade] = []
     control_trades: list[RawTrade] = []

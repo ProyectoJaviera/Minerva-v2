@@ -206,3 +206,46 @@ async def test_a_repeated_run_comes_from_the_cache(history):
     second = await route.run(**body, settings=_settings(history))
     assert first["cached"] is False and second["cached"] is True
     assert {**first, "cached": True} == second
+
+
+@pytest.mark.asyncio
+async def test_fvg_and_round3_filters_run_and_are_listed(history):
+    opts = await route.options(settings=_settings(history))
+    assert "fvg" in {t["id"] for t in opts["triggers"]}
+    assert {"fund", "btc", "rs"} <= {f["id"] for f in opts["filters"]}
+    out = await route.run(symbols=["ETHUSDT"], timeframe="1h", trigger="fvg", filters=["btc"],
+                          settings=_settings(history))
+    assert out["params"]["name"] == "r3|fvg|btc|base|market"
+    assert out["result"]["trades"] > 0
+    assert out["control"]["trades"] > 0
+    combo = await route.run(symbols=["ETHUSDT"], timeframe="1h", trigger="sfp", filters=["ema"],
+                            settings=_settings(history))
+    assert combo["params"]["name"] == "combo|sfp|ema|native"
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("trigger,filters,rnd", [
+    ("fvg", (), False), ("fvg", ("ema",), True), ("rf_flip", ("btc",), False),
+    ("sfp", ("rs", "fund"), False),
+])
+async def test_fast_round3_gives_exactly_the_same_trades_as_round3(history, trigger, filters,
+                                                                   rnd):
+    from app.backtesting.engine import run_backtest
+    from app.research.round3 import Round3Strategy
+
+    settings = _settings(history)
+    db = service.ReadOnlyDatabase(history)
+    await db.connect()
+    try:
+        assert await service.load_btc_context(db, "1h")
+        out = []
+        for cls in (Round3Strategy, service.FastRound3Strategy):
+            strat = cls(trigger, filters, random_dir=rnd)
+            trades, skips = await run_backtest(db, strat, strat.name, "ETHUSDT", "1h", START_MS,
+                                               service.RESERVED_FROM_MS - 1, settings)
+            out.append(([(t.side, t.entry_time, t.exit_time, t.entry_price, t.exit_price,
+                          t.close_reason, t.pnl_net_usdt) for t in trades], len(skips)))
+    finally:
+        await db.close()
+    assert out[0] == out[1]
+    assert out[0][0] or trigger != "fvg"
