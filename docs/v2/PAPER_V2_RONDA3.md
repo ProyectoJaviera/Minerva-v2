@@ -3,6 +3,17 @@
 Pedido del dueño (2026-11-10): aunque los tres finalistas perdieron en el [examen con los datos
 reservados](RONDA3_V2.md#examen-con-los-datos-reservados-2026-11-10), dejarlos igual en paper, porque no cuesta nada.
 
+## Estrategias en la prueba
+
+| Estrategia | Desde (00:00 UTC) | Origen |
+|---|---|---|
+| Giro de VIDYA + régimen de BTC, trailing 3 ATR, límite | 2026-11-10 | finalista de la ronda 3 |
+| FVG + EMA 144, trailing 3 ATR, límite | 2026-11-10 | finalista de la ronda 3 |
+| Giro del Range Filter + EMA 144, trailing 3 ATR, límite | 2026-11-10 | finalista de la ronda 3 |
+| Fuerza relativa semanal (top 3 / bottom 3 por retorno de 42 velas de 4h, rebalanceo el lunes 00:00 UTC), SL 2.5 ATR, cierre a la semana, límite (`r4\|mom42\|nada\|t42_s25\|limit`) | 2026-11-11 | la más cercana de la [ronda 4](RONDA4_V2.md); agregada a pedido del dueño el 2026-11-11 sin cambiar nada |
+
+Cada una se compara con su propio control (mismo gatillo, dirección al azar).
+
 ## Cómo funciona
 
 `scripts/v2_forward_test.py` corre las tres combinaciones congeladas en

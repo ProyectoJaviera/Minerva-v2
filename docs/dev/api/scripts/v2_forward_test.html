@@ -50,7 +50,13 @@
                     <a class="variable" href="#SYMBOLS">SYMBOLS</a>
             </li>
             <li>
-                    <a class="variable" href="#FINALISTS">FINALISTS</a>
+                    <a class="variable" href="#R3_START">R3_START</a>
+            </li>
+            <li>
+                    <a class="variable" href="#R4_START">R4_START</a>
+            </li>
+            <li>
+                    <a class="function" href="#tracked">tracked</a>
             </li>
             <li>
                     <a class="function" href="#summarize">summarize</a>
@@ -78,17 +84,18 @@
                     <h1 class="modulename">
 <a href="./../scripts.html">scripts</a><wbr>.v2_forward_test    </h1>
 
-                        <div class="docstring"><p>Prueba hacia adelante (paper por repeticion) de los finalistas de la ronda 3 de la v2.</p>
+                        <div class="docstring"><p>Prueba hacia adelante (paper por repeticion) de las estrategias en estudio de la v2.</p>
 
-<p>Las tres combinaciones de <code>docs/v2/PREREGISTRO_V2_RONDA3.md</code> y sus controles al azar quedaron
-congelados el 2026-11-10. Este script las corre con el motor de backtest sobre el archivo de
-historial local y cuenta solo las operaciones ABIERTAS desde el <strong>2026-11-10 00:00 UTC</strong>: velas que
-no existian cuando se fijaron las reglas. Como el motor es determinista y causal, eso equivale a
-haberlas operado en paper desde ese dia (incluida la entrada con orden limite, que el bot en vivo
-no simula), sin tener que dejar un proceso corriendo.</p>
+<p>Las tres combinaciones de <code>docs/v2/PREREGISTRO_V2_RONDA3.md</code> (congeladas el 2026-11-10) y la
+fuerza relativa semanal de la ronda 4 (<code>r4|mom42|nada|t42_s25|limit</code>, congelada el 2026-11-11, a
+pedido del dueno), cada una con su control al azar. Este script las corre con el motor de backtest
+sobre el archivo de historial local y cuenta solo las operaciones ABIERTAS desde su fecha de
+congelamiento (00:00 UTC): velas que no existian cuando se fijaron las reglas. Como el motor es
+determinista y causal, eso equivale a haberlas operado en paper desde ese dia (incluida la entrada
+con orden limite, que el bot en vivo no simula), sin tener que dejar un proceso corriendo.</p>
 
 <p>Criterio de lectura (fijado en <code>docs/v2/PAPER_V2_RONDA3.md</code> antes de la primera corrida): se
-evalua cada finalista cuando junte 60 operaciones o el 2027-05-10, lo que ocurra primero.</p>
+evalua cada estrategia cuando junte 60 operaciones o el 2027-05-10, lo que ocurra primero.</p>
 
 <p>Solo lectura: abre el archivo de historial (<code>EXPLORER_HISTORY_DB</code>, por defecto
 <code>./history/history_v2.db</code>) en modo inmutable; sin red. Para tener velas nuevas hay que actualizar
@@ -188,16 +195,49 @@ python scripts/v2_forward_test.py [--path history/history_v2.db] [--trades]
     
 
                 </section>
-                <section id="FINALISTS">
+                <section id="R3_START">
                     <div class="attr variable">
-            <span class="name">FINALISTS</span><span class="annotation">: tuple[tuple[str, tuple[str, ...]], ...]</span>        =
-<span class="default_value">((&#39;vidya_flip&#39;, (&#39;btc&#39;,)), (&#39;fvg&#39;, (&#39;ema&#39;,)), (&#39;rf_flip&#39;, (&#39;ema&#39;,)))</span>
+            <span class="name">R3_START</span>        =
+<span class="default_value">datetime.datetime(2026, 11, 10, 0, 0, tzinfo=datetime.timezone.utc)</span>
 
         
     </div>
-    <a class="headerlink" href="#FINALISTS"></a>
+    <a class="headerlink" href="#R3_START"></a>
     
     
+
+                </section>
+                <section id="R4_START">
+                    <div class="attr variable">
+            <span class="name">R4_START</span>        =
+<span class="default_value">datetime.datetime(2026, 11, 11, 0, 0, tzinfo=datetime.timezone.utc)</span>
+
+        
+    </div>
+    <a class="headerlink" href="#R4_START"></a>
+    
+    
+
+                </section>
+                <section id="tracked">
+                    <div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">tracked</span><span class="signature pdoc-code multiline">(<span class="return-annotation">) -> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n"><a href="../app/strategies/base.html#BaseStrategy">app.strategies.base.BaseStrategy</a></span><span class="p">,</span> <span class="n"><a href="../app/strategies/base.html#BaseStrategy">app.strategies.base.BaseStrategy</a></span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">]]</span>:</span></span>
+
+        
+    </div>
+    <a class="headerlink" href="#tracked"></a>
+    
+            <div class="docstring"><p>Las estrategias en estudio: <code>(estrategia, control al azar, inicio de la prueba)</code>.</p>
+
+<h6 id="returns">Returns:</h6>
+
+<blockquote>
+  <p>Las tres finalistas de la ronda 3 y la fuerza relativa semanal de la ronda 4.</p>
+</blockquote>
+</div>
+
 
                 </section>
                 <section id="summarize">
@@ -216,7 +256,7 @@ python scripts/v2_forward_test.py [--path history/history_v2.db] [--trades]
 
 <ul>
 <li><strong>name:</strong>  nombre de la combinacion.</li>
-<li><strong>trades:</strong>  operaciones abiertas desde <code><a href="#FORWARD_START">FORWARD_START</a></code>.</li>
+<li><strong>trades:</strong>  operaciones abiertas desde el inicio de su prueba.</li>
 </ul>
 
 <h6 id="returns">Returns:</h6>

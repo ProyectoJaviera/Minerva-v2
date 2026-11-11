@@ -2460,3 +2460,8 @@ Corrida de `scripts/v2_round4.py` (63 min, 324 variantes en 4h). Resultado en `d
 - **Cambios de comportamiento respecto de la v1.0:** ninguno.
 - **15m y 1S con datos reales (2026-11-11):** el historial de 15m de Bitunix empieza en 2023-06 y el precio de marca semanal en 2023-01 (el motor alinea LAST y MARK, así que en 1S quedan ~200 semanas). El calentamiento de 1S baja de 100 a 50 velas. Los niveles Camarilla en 1S se calculan tratando cada semana como un «día» (Camarilla semanal), porque la función de niveles exige velas que dividan un día. Con BTC 15m y Range Filter + EMA 144: 2527 operaciones en ~20 s.
 - **Hallazgo con datos reales:** en 1S, y en buena parte de 1D, el SL de 2 ATR supera el 5 % del precio y el motor omite la entrada por el tope de riesgo (a 10x perdería más del 50 % del margen): BTC/ETH/SOL 1S con WaveTrend, 0 operaciones y 72 omitidas; con SL 4 % y TP 8 %, 70 operaciones. La tarjeta del resultado ahora avisa cuando hay entradas omitidas y sugiere la salida en %.
+
+## v2: la fuerza relativa semanal se suma a la prueba hacia adelante (2026-11-11)
+
+Pedido del dueño: sumar la más cercana de la ronda 4 a la prueba hacia adelante. `scripts/v2_forward_test.py` sigue ahora también `r4|mom42|nada|t42_s25|limit` y su control al azar, contando operaciones desde el 2026-11-11 00:00 UTC, con el mismo criterio de revisión (60 operaciones o el 2027-05-10; sigue en estudio solo con PF ≥ 1.2 y sobre su control). Reglas sin cambios respecto de la ronda 4. Probado sobre una copia del archivo de historial.
+- **Cambios de comportamiento respecto de la v1.0:** ninguno.

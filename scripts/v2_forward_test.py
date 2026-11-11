@@ -1,14 +1,15 @@
-"""Prueba hacia adelante (paper por repeticion) de los finalistas de la ronda 3 de la v2.
+"""Prueba hacia adelante (paper por repeticion) de las estrategias en estudio de la v2.
 
-Las tres combinaciones de `docs/v2/PREREGISTRO_V2_RONDA3.md` y sus controles al azar quedaron
-congelados el 2026-11-10. Este script las corre con el motor de backtest sobre el archivo de
-historial local y cuenta solo las operaciones ABIERTAS desde el **2026-11-10 00:00 UTC**: velas que
-no existian cuando se fijaron las reglas. Como el motor es determinista y causal, eso equivale a
-haberlas operado en paper desde ese dia (incluida la entrada con orden limite, que el bot en vivo
-no simula), sin tener que dejar un proceso corriendo.
+Las tres combinaciones de `docs/v2/PREREGISTRO_V2_RONDA3.md` (congeladas el 2026-11-10) y la
+fuerza relativa semanal de la ronda 4 (`r4|mom42|nada|t42_s25|limit`, congelada el 2026-11-11, a
+pedido del dueno), cada una con su control al azar. Este script las corre con el motor de backtest
+sobre el archivo de historial local y cuenta solo las operaciones ABIERTAS desde su fecha de
+congelamiento (00:00 UTC): velas que no existian cuando se fijaron las reglas. Como el motor es
+determinista y causal, eso equivale a haberlas operado en paper desde ese dia (incluida la entrada
+con orden limite, que el bot en vivo no simula), sin tener que dejar un proceso corriendo.
 
 Criterio de lectura (fijado en `docs/v2/PAPER_V2_RONDA3.md` antes de la primera corrida): se
-evalua cada finalista cuando junte 60 operaciones o el 2027-05-10, lo que ocurra primero.
+evalua cada estrategia cuando junte 60 operaciones o el 2027-05-10, lo que ocurra primero.
 
 Solo lectura: abre el archivo de historial (`EXPLORER_HISTORY_DB`, por defecto
 `./history/history_v2.db`) en modo inmutable; sin red. Para tener velas nuevas hay que actualizar
@@ -37,9 +38,11 @@ from app.explorer.service import ReadOnlyDatabase  # noqa: E402
 from app.market.ohlcv_history import MissingHistoricalDataError  # noqa: E402
 from app.persistence.repositories import ohlcv_repo  # noqa: E402
 from app.research.round3 import Round3Strategy, set_btc_context  # noqa: E402
+from app.research.round4 import Round4Strategy, set_universe_context  # noqa: E402
+from app.strategies.base import BaseStrategy  # noqa: E402
 
 START_MS = int(datetime(2022, 1, 1, tzinfo=UTC).timestamp() * 1000)
-FORWARD_START = datetime(2026, 11, 10, tzinfo=UTC)
+FORWARD_START = datetime(2026, 11, 10, tzinfo=UTC)  # la mas antigua de las fechas de inicio
 REVIEW_TRADES = 60
 REVIEW_DATE = datetime(2027, 5, 10, tzinfo=UTC)
 TIMEFRAME = "4h"
@@ -47,9 +50,30 @@ STEP_MS = 4 * 3_600_000
 # Universo congelado el 2026-11-10 (el de la Fase 2 y de la ronda 3).
 SYMBOLS = ("BNBUSDT", "BTCUSDT", "DOGEUSDT", "ETHUSDT", "HYPEUSDT", "SOLUSDT", "TRXUSDT",
            "XMRUSDT", "XRPUSDT", "ZECUSDT")
-FINALISTS: tuple[tuple[str, tuple[str, ...]], ...] = (
-    ("vidya_flip", ("btc",)), ("fvg", ("ema",)), ("rf_flip", ("ema",)),
-)
+R3_START = datetime(2026, 11, 10, tzinfo=UTC)
+R4_START = datetime(2026, 11, 11, tzinfo=UTC)
+
+
+def tracked() -> list[tuple[BaseStrategy, BaseStrategy, datetime]]:
+    """Las estrategias en estudio: `(estrategia, control al azar, inicio de la prueba)`.
+
+    Returns:
+        Las tres finalistas de la ronda 3 y la fuerza relativa semanal de la ronda 4.
+    """
+    out: list[tuple[BaseStrategy, BaseStrategy, datetime]] = []
+    for trigger, filters in (("vidya_flip", ("btc",)), ("fvg", ("ema",)), ("rf_flip", ("ema",))):
+        out.append((
+            Round3Strategy(trigger, filters, exit_name="s3_trail3", entry_mode="limit"),
+            Round3Strategy(trigger, (), exit_name="s3_trail3", entry_mode="limit",
+                           random_dir=True),
+            R3_START,
+        ))
+    out.append((
+        Round4Strategy("mom42", (), exit_name="t42_s25", entry_mode="limit"),
+        Round4Strategy("mom42", (), exit_name="t42_s25", entry_mode="limit", random_dir=True),
+        R4_START,
+    ))
+    return out
 
 
 def summarize(name: str, trades: list[RawTrade]) -> str:
@@ -57,7 +81,7 @@ def summarize(name: str, trades: list[RawTrade]) -> str:
 
     Args:
         name: nombre de la combinacion.
-        trades: operaciones abiertas desde `FORWARD_START`.
+        trades: operaciones abiertas desde el inicio de su prueba.
 
     Returns:
         Operaciones, PF neto, PnL neto y porcentaje de ganadoras.
@@ -119,6 +143,14 @@ async def main() -> None:
         set_btc_context(TIMEFRAME, pd.DataFrame(
             {"open_time": [b.open_time for b in btc], "close": [b.close for b in btc]}))
         ends = {s: await last_closed_ms(db, s) for s in SYMBOLS}
+        closes = {}
+        for symbol, end_ms in ends.items():
+            if end_ms is None:
+                continue
+            bars = await ohlcv_repo.get_bars(db, symbol, TIMEFRAME, "LAST_PRICE", START_MS, end_ms)
+            closes[symbol] = pd.DataFrame({"open_time": [b.open_time for b in bars],
+                                           "close": [b.close for b in bars]})
+        set_universe_context(TIMEFRAME, closes)
         last = datetime.fromtimestamp(btc_end / 1000, tz=UTC)
         days = max(0.0, (last - FORWARD_START).total_seconds() / 86_400)
         print(f"Prueba hacia adelante desde {FORWARD_START:%Y-%m-%d} UTC; datos hasta "
@@ -127,12 +159,9 @@ async def main() -> None:
         if stale:
             print(f"AVISO: simbolos con datos atrasados o ausentes: {stale}")
         print(f"Revision: al llegar a {REVIEW_TRADES} operaciones o el {REVIEW_DATE:%Y-%m-%d}\n")
-        for trigger, filters in FINALISTS:
-            for strategy in (
-                Round3Strategy(trigger, filters, exit_name="s3_trail3", entry_mode="limit"),
-                Round3Strategy(trigger, (), exit_name="s3_trail3", entry_mode="limit",
-                               random_dir=True),
-            ):
+        for main_strategy, control, start in tracked():
+            print(f"[desde {start:%Y-%m-%d}]")
+            for strategy in (main_strategy, control):
                 forward: list[RawTrade] = []
                 for symbol, end_ms in ends.items():
                     if end_ms is None:
@@ -143,9 +172,9 @@ async def main() -> None:
                     except MissingHistoricalDataError as exc:
                         print(f"  {symbol}: sin datos completos ({exc})")
                         continue
-                    forward += [t for t in trades if t.entry_time >= FORWARD_START]
+                    forward += [t for t in trades if t.entry_time >= start]
                 print(summarize(strategy.name, forward))
-                if not strategy.random_dir:
+                if strategy is main_strategy:
                     still_open = sum(t.close_reason == "END_OF_DATA" for t in forward)
                     ready = len(forward) >= REVIEW_TRADES or last >= REVIEW_DATE
                     print(f"    aun abiertas: {still_open}; revision "

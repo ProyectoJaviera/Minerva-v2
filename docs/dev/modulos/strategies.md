@@ -90,7 +90,7 @@ backtest recalculaba cada indicador desde cero en cada vela.
 
 - **Referencia pdoc:** [`api/app/strategies/base.html`](../api/app/strategies/base.html)
 - **Importa (internos):** ninguno
-- **Lo importan:** 24 módulos (backtesting 2, candidates 4, explorer 1, research 3, scripts 4, strategies 7, trading 3)
+- **Lo importan:** 25 módulos (backtesting 2, candidates 4, explorer 1, research 3, scripts 5, strategies 7, trading 3)
 - **Configuración que lee:** ninguno
 - **Tablas que lee:** ninguno
 - **Tablas que escribe:** ninguno

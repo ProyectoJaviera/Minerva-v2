@@ -126,7 +126,7 @@ la serie no está en el contexto, no hay señales de fuerza relativa.
 
 - **Referencia pdoc:** [`api/app/research/round4.html`](../api/app/research/round4.html)
 - **Importa (internos):** `app.candidates.common`, `app.indicators._pine`, `app.research.combos`, `app.research.round3`, `app.strategies.base`
-- **Lo importan:** `scripts.v2_round4`
+- **Lo importan:** `scripts.v2_forward_test`, `scripts.v2_round4`
 - **Configuración que lee:** ninguno
 - **Tablas que lee:** ninguno
 - **Tablas que escribe:** ninguno
